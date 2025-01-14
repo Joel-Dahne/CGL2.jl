@@ -10,9 +10,13 @@
     @test Arblib.overlaps(res[1], y * CGL2.abspow(x[0], y - 1) * x[1])
     @test Arblib.overlaps(
         res[2],
-        y * ((y - 1) * CGL2.abspow(x[0], y - 2) * x[1]^2 + CGL2.abspow(x[0], y - 1) * 2x[2]) /
+        y *
+        ((y - 1) * CGL2.abspow(x[0], y - 2) * x[1]^2 + CGL2.abspow(x[0], y - 1) * 2x[2]) /
         2,
     )
 
-    @test Arblib.overlaps(CGL2.abspow(x, y), CGL2.abspow(x, add_error(y + 1e-13, Mag(1e-13))))
+    @test Arblib.overlaps(
+        CGL2.abspow(x, y),
+        CGL2.abspow(x, add_error(y + 1e-13, Mag(1e-13))),
+    )
 end

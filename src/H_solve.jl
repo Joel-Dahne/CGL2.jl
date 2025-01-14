@@ -1,5 +1,10 @@
 function H_approximate(
-    μ::T, γ::Complex{T}, κ::T, ϵ::T, ξ₁::T, λ::CGLParams{T};
+    μ::T,
+    γ::Complex{T},
+    κ::T,
+    ϵ::T,
+    ξ₁::T,
+    λ::CGLParams{T};
     return_convergence::Union{Val{false},Val{true}} = Val{false}(),
     verbose = false,
 ) where {T}

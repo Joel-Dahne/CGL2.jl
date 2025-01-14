@@ -20,12 +20,12 @@ function linearization_eigenvalues_FEM(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 128
     A = zeros(n, n) # TODO: Should be sparse
     A[1, 1] = -2H2
     A[1, 2] = 2H2
-    A[n, n - 1] = H2 - H1 / ξs[n]
+    A[n, n-1] = H2 - H1 / ξs[n]
     A[n, n] = -2H2
     for k = 2:n-1
-        A[k, k + 1] = H2 + H1 / ξs[k]
+        A[k, k+1] = H2 + H1 / ξs[k]
         A[k, k] = -2H2
-        A[k, k - 1] = H2 - H1 / ξs[k]
+        A[k, k-1] = H2 - H1 / ξs[k]
     end
     A = (im + ϵ) * A # Adjust the coefficient of A
 
@@ -33,10 +33,10 @@ function linearization_eigenvalues_FEM(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 128
 
     B = zeros(n, n) # TODO: Should be sparse
     B[1, 2] = ξs[1] * H1 / 2
-    B[n, n - 1] = -ξs[n] * H1 / 2
+    B[n, n-1] = -ξs[n] * H1 / 2
     for k = 2:n-1
-        B[k, k + 1] = ξs[k] * H1 / 2
-        B[k, k - 1] = -ξs[k] * H1 / 2
+        B[k, k+1] = ξs[k] * H1 / 2
+        B[k, k-1] = -ξs[k] * H1 / 2
     end
     B = κ * B # Adjust the coefficient of B
 
@@ -86,12 +86,12 @@ function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 1
     A = zeros(ComplexF64, n, n) # TODO: Could be sparse
     A[1, 1] = -2H2
     A[1, 2] = 2H2
-    A[n, n - 1] = H2 - (λ.d - 1) * H1 / 2ξs[n]
+    A[n, n-1] = H2 - (λ.d - 1) * H1 / 2ξs[n]
     A[n, n] = -2H2
     for k = 2:n-1
-        A[k, k + 1] = H2 + (λ.d - 1) * H1 / 2ξs[k]
+        A[k, k+1] = H2 + (λ.d - 1) * H1 / 2ξs[k]
         A[k, k] = -2H2
-        A[k, k - 1] = H2 - (λ.d - 1) * H1 / 2ξs[k]
+        A[k, k-1] = H2 - (λ.d - 1) * H1 / 2ξs[k]
     end
     A .*= (1 - im * ϵ) # Adjust the coefficient of A
 
@@ -99,10 +99,10 @@ function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 1
 
     B = zeros(ComplexF64, n, n) # TODO: Could be sparse
     B[1, 2] = ξs[1] * H1 / 2
-    B[n, n - 1] = -ξs[n] * H1 / 2
+    B[n, n-1] = -ξs[n] * H1 / 2
     for k = 2:n-1
-        B[k, k + 1] = ξs[k] * H1 / 2
-        B[k, k - 1] = -ξs[k] * H1 / 2
+        B[k, k+1] = ξs[k] * H1 / 2
+        B[k, k-1] = -ξs[k] * H1 / 2
     end
     B .*= -im * κ
 
@@ -112,8 +112,12 @@ function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 1
     C1 = zeros(ComplexF64, n, n) # TODO: Could be sparse
     C2 = zeros(ComplexF64, n, n) # TODO: Could be sparse
     for k = 1:n
-        C1[k, k] = -im * κ / λ.σ + λ.ω + (1 + im * λ.δ) * (λ.σ + 1) * (Q_hats[k] * conj(Q_hats[k]))^λ.σ
-        C2[k, k] = (1 + im * λ.δ) * λ.σ * Q_hats[k]^2 * (Q_hats[k] * conj(Q_hats[k]))^(λ.σ - 1)
+        C1[k, k] =
+            -im * κ / λ.σ +
+            λ.ω +
+            (1 + im * λ.δ) * (λ.σ + 1) * (Q_hats[k] * conj(Q_hats[k]))^λ.σ
+        C2[k, k] =
+            (1 + im * λ.δ) * λ.σ * Q_hats[k]^2 * (Q_hats[k] * conj(Q_hats[k]))^(λ.σ - 1)
     end
 
     L1 = A + B + C1
