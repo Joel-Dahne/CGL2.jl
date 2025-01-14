@@ -67,3 +67,39 @@ function Q_hat_zero_float(
         Arb(extrema(getindex.(us, 4))),
     )
 end
+
+"""
+    Q_hat_zero_float_curve(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+
+Similar to [`Q_hat_zero_float`](@ref) but returns the whole
+solution object given by the ODE solver, instead of just the value at
+the final point.
+"""
+function Q_hat_zero_float_curve(
+    ν_real,
+    ν_imag,
+    κ,
+    ϵ,
+    ξ₁,
+    λ::CGLParams;
+    tol::Float64 = 1e-11,
+    saveat = [],
+)
+    prob = ODEProblem{false}(
+        cgl_hat_equation_real,
+        SVector(ν_real, ν_imag, 0, 0),
+        (zero(ξ₁), ξ₁),
+        (κ, ϵ, λ),
+    )
+
+    sol = solve(
+        prob,
+        AutoVern7(Rodas5P()),
+        abstol = tol,
+        reltol = tol,
+        verbose = false;
+        saveat,
+    )
+
+    return sol
+end

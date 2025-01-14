@@ -77,4 +77,6 @@ include("Q_hat_zero/Q_hat_float.jl")
 include("H.jl")
 include("H_solve.jl")
 
+include("linearization/eigenvalues.jl")
+
 end # module CGL2
