@@ -1,0 +1,69 @@
+"""
+    Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+
+Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
+vector with four real values, the first two are the real and imaginary
+values at `ξ₁` and the second two are their derivatives.
+
+The solution is computed using [`ODEProblem`](@ref). The computations
+are always done in `Float64`. However, for `Arb` input with wide
+intervals for `ν`, `κ` and/or `ϵ` it computes it at the corners of the
+box they form. This means you still get something that resembles an
+enclosure.
+"""
+function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    prob = ODEProblem{false}(
+        cgl_hat_equation_real,
+        SVector(ν_real, ν_imag, 0, 0),
+        (zero(ξ₁), ξ₁),
+        (κ, ϵ, λ),
+    )
+
+    # Used to exit early in extreme cases. Sometimes the
+    # refine_approximation methods en up in a bad region and the
+    # solutions are highly oscillating, which makes the solver
+    # extremely slow. For that reason we exit early in case the norm
+    # of the solution grows to large.
+    unstable_check = (dt, u, p, t) -> any(isnan, u) || norm(u) > 100
+
+    sol = solve(
+        prob,
+        AutoVern7(Rodas5P()),
+        abstol = tol,
+        reltol = tol,
+        save_everystep = false,
+        verbose = false;
+        unstable_check,
+    )
+
+    return sol.u[end]
+end
+
+function Q_hat_zero_float(
+    ν_real::Arb,
+    ν_imag::Arb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb};
+    tol::Float64 = 1e-11,
+)
+    ξ₁ = Float64(ξ₁)
+    λ = CGLParams{Float64}(λ)
+
+    ν_reals = iswide(ν_real) ? collect(Float64.(getinterval(ν_real))) : [Float64(ν_real)]
+    ν_imags = iswide(ν_imag) ? collect(Float64.(getinterval(ν_imag))) : [Float64(ν_imag)]
+    κs = iswide(κ) ? collect(Float64.(getinterval(κ))) : [Float64(κ)]
+    ϵs = iswide(ϵ) ? collect(Float64.(getinterval(ϵ))) : [Float64(ϵ)]
+
+    us = map(Iterators.product(ν_reals, ν_imags, κs, ϵs)) do (ν_real, ν_imag, κ, ϵ)
+        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ; tol)
+    end
+
+    return SVector(
+        Arb(extrema(getindex.(us, 1))),
+        Arb(extrema(getindex.(us, 2))),
+        Arb(extrema(getindex.(us, 3))),
+        Arb(extrema(getindex.(us, 4))),
+    )
+end

@@ -70,4 +70,11 @@ include("orchestration/run_branch_existence.jl")
 include("orchestration/run_branch_continuation.jl")
 include("orchestration/run_branch_critical_points.jl")
 
+include("Q_hat_zero/equation.jl")
+include("Q_hat_zero/Q_hat.jl")
+include("Q_hat_zero/Q_hat_float.jl")
+
+include("H.jl")
+include("H_solve.jl")
+
 end # module CGL2
