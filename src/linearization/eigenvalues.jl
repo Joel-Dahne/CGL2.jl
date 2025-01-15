@@ -70,6 +70,8 @@ Compute the eigenvalues of the linearized equation.
 Using other form of equation.
 """
 function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 128)
+    (; d, ω, σ, δ) = λ
+
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
 
@@ -83,41 +85,40 @@ function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 1
 
     # A represents the term (1 - im * ϵ) * (q'' + (d - 1) / ξ * q')
 
-    A = zeros(ComplexF64, n, n) # TODO: Could be sparse
-    A[1, 1] = -2H2
-    A[1, 2] = 2H2
-    A[n, n-1] = H2 - (λ.d - 1) * H1 / 2ξs[n]
-    A[n, n] = -2H2
-    for k = 2:n-1
-        A[k, k+1] = H2 + (λ.d - 1) * H1 / 2ξs[k]
+    A = SparseArrays.spzeros(ComplexF64, n, n)
+    for k = 1:n
+        if k > 1
+            A[k, k-1] = H2 - (d - 1) / ξs[k] * H1 / 2
+        end
         A[k, k] = -2H2
-        A[k, k-1] = H2 - (λ.d - 1) * H1 / 2ξs[k]
+        if k < n
+            A[k, k+1] = H2 + (d - 1) / ξs[k] * H1 / 2
+        end
     end
     A .*= (1 - im * ϵ) # Adjust the coefficient of A
 
     # B represents the term -im * κ * ξ * q'
 
-    B = zeros(ComplexF64, n, n) # TODO: Could be sparse
-    B[1, 2] = ξs[1] * H1 / 2
-    B[n, n-1] = -ξs[n] * H1 / 2
+    B = SparseArrays.spzeros(ComplexF64, n, n)
     for k = 2:n-1
-        B[k, k+1] = ξs[k] * H1 / 2
-        B[k, k-1] = -ξs[k] * H1 / 2
+        if k > 1
+            B[k, k-1] = -ξs[k] * H1 / 2
+        end
+        if k < n
+            B[k, k+1] = ξs[k] * H1 / 2
+        end
     end
     B .*= -im * κ
 
     # C1 represents the terms with q
     # C2 represents the term with conj(q)
 
-    C1 = zeros(ComplexF64, n, n) # TODO: Could be sparse
-    C2 = zeros(ComplexF64, n, n) # TODO: Could be sparse
+    C1 = SparseArrays.spzeros(ComplexF64, n, n)
+    C2 = SparseArrays.spzeros(ComplexF64, n, n)
     for k = 1:n
         C1[k, k] =
-            -im * κ / λ.σ +
-            λ.ω +
-            (1 + im * λ.δ) * (λ.σ + 1) * (Q_hats[k] * conj(Q_hats[k]))^λ.σ
-        C2[k, k] =
-            (1 + im * λ.δ) * λ.σ * Q_hats[k]^2 * (Q_hats[k] * conj(Q_hats[k]))^(λ.σ - 1)
+            -im * κ / σ + ω + (1 + im * δ) * (σ + 1) * (Q_hats[k] * conj(Q_hats[k]))^σ
+        C2[k, k] = (1 + im * δ) * σ * (Q_hats[k] * conj(Q_hats[k]))^(σ - 1) * Q_hats[k]^2
     end
 
     L1 = A + B + C1
@@ -125,5 +126,6 @@ function linearization_eigenvalues_FEM_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 1
     M = [real(L1 + L2) imag(-L1 + L2); imag(L1 + L2) real(L1 - L2)]
 
     # Compute eigenvalues
-    return eigvals(M)
+    # IMPROVE: Use sparse methods to compute
+    return eigvals(Matrix(M))
 end

@@ -19,6 +19,7 @@ import IntervalArithmetic
 import IntervalArithmetic:
     BareInterval, Interval, bareinterval, interval, inf, sup, isempty_interval, nai
 import ProgressLogging: @progress, @withprogress, @logprogress
+import SparseArrays
 
 include("CGLBranch/CGLBranch.jl")
 
