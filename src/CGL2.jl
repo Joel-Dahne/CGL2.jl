@@ -75,6 +75,11 @@ include("Q_hat_zero/equation.jl")
 include("Q_hat_zero/Q_hat.jl")
 include("Q_hat_zero/Q_hat_float.jl")
 
+include("Q_hat_infinity/functions.jl")
+include("Q_hat_infinity/function_bounds.jl")
+include("Q_hat_infinity/check_existence.jl")
+include("Q_hat_infinity/Q_hat.jl")
+
 include("H.jl")
 include("H_solve.jl")
 

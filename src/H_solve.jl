@@ -8,9 +8,15 @@ function H_approximate(
     return_convergence::Union{Val{false},Val{true}} = Val{false}(),
     verbose = false,
 ) where {T}
-    F(ν, (μ, γ, κ, ϵ, ξ₁, λ)) = H(ν[1], ν[2], μ, γ, κ, ϵ, ξ₁, λ)
+    # Coefficient for leading term in asymptotic expansion
+    c10_hat = let
+        a, b, c = CGL2._abc(κ, ϵ, λ)
+        γ * c^-a / (-c)^-a
+    end
 
-    prob = NonlinearProblem{false}(F, SVector(μ, zero(μ)), (μ, γ, κ, ϵ, ξ₁, λ))
+    F(x, (c10_hat, κ, ϵ, ξ₁, λ)) = H_2(x..., c10_hat, κ, ϵ, ξ₁, λ)
+
+    prob = NonlinearProblem{false}(F, SVector(μ, 0, 0, 0), (c10_hat, κ, ϵ, ξ₁, λ))
     sol = try
         solve(
             prob,
@@ -24,9 +30,9 @@ function H_approximate(
         verbose && @warn "Encountered" e ϵ
 
         if return_convergence isa Val{false}
-            return _complex(μ, zero(μ))
+            return _complex(μ, zero(μ)), _complex(zero(μ), zero(μ))
         else
-            return false, _complex(μ, zero(μ))
+            return false, _complex(μ, zero(μ)), _complex(zero(μ), zero(μ))
         end
     end
 
@@ -37,8 +43,8 @@ function H_approximate(
     end
 
     if return_convergence isa Val{false}
-        return _complex(sol.u...)
+        return _complex(sol.u[1:2]...), _complex(sol.u[3:4]...)
     else
-        return converged, _complex(sol.u...)
+        return converged, _complex(sol.u[1:2]...), _complex(sol.u[3:4]...)
     end
 end
