@@ -20,6 +20,8 @@ import IntervalArithmetic:
     BareInterval, Interval, bareinterval, interval, inf, sup, isempty_interval, nai
 import ProgressLogging: @progress, @withprogress, @logprogress
 import SparseArrays
+import BlockArrays
+import Arpack
 
 include("CGLBranch/CGLBranch.jl")
 
@@ -83,6 +85,7 @@ include("Q_hat_infinity/Q_hat.jl")
 include("H.jl")
 include("H_solve.jl")
 
+include("linearization/linearization.jl")
 include("linearization/eigenvalues.jl")
 
 end # module CGL2

@@ -14,9 +14,9 @@ function H_approximate(
         γ * c^-a / (-c)^-a
     end
 
-    F(x, (c10_hat, κ, ϵ, ξ₁, λ)) = H_2(x..., c10_hat, κ, ϵ, ξ₁, λ)
+    F(x, (c10_hat, κ, ϵ, ξ₁, λ)) = H(x..., c10_hat, κ, ϵ, ξ₁, λ)
 
-    prob = NonlinearProblem{false}(F, SVector(μ, 0, 0, 0), (c10_hat, κ, ϵ, ξ₁, λ))
+    prob = NonlinearProblem{false}(F, SVector(μ, 0.1, 0.1, 0.1), (c10_hat, κ, ϵ, ξ₁, λ))
     sol = try
         solve(
             prob,
@@ -30,21 +30,26 @@ function H_approximate(
         verbose && @warn "Encountered" e ϵ
 
         if return_convergence isa Val{false}
-            return _complex(μ, zero(μ)), _complex(zero(μ), zero(μ))
+            return _complex(zero(μ), zero(μ)), _complex(zero(μ), zero(μ))
         else
             return false, _complex(μ, zero(μ)), _complex(zero(μ), zero(μ))
         end
     end
 
-    converged = norm(sol.resid) < 1e-1
-
-    if verbose && !converged
+    if verbose && !(norm(sol.resid) < 1e-1)
         @warn "Very low precision when refining approximation" ϵ sol.resid
     end
 
-    if return_convergence isa Val{false}
-        return _complex(sol.u[1:2]...), _complex(sol.u[3:4]...)
+    converged = NonlinearSolve.SciMLBase.successful_retcode(sol)
+
+    ν, c20_hat = if converged
+        _complex(sol.u[1:2]...), _complex(sol.u[3:4]...)
     else
-        return converged, _complex(sol.u[1:2]...), _complex(sol.u[3:4]...)
+        _complex(zero(μ), zero(μ)), _complex(zero(μ), zero(μ))
+    end
+    if return_convergence isa Val{false}
+        return ν, c20_hat
+    else
+        return converged, ν, c20_hat
     end
 end

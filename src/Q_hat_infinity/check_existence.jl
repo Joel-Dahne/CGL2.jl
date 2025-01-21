@@ -1,10 +1,4 @@
-function _C_T_hat_1(
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    v::Arb,
-    λ::CGLParams{Arb},
-)
+function _C_T_hat_1(κ::Arb, ϵ::Arb, ξ₁::Arb, v::Arb, λ::CGLParams{Arb})
     (; d, σ) = λ
     @assert (2σ + 1) * v < 2 + 2 / σ - d
     @assert 2 / d < σ

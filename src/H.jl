@@ -22,7 +22,8 @@ function H(
     λ::CGLParams{T},
 ) where {T}
     Q_hat_0, Q_hat_0_dξ = Q_hat_zero(_complex(ν_real, ν_imag), κ, ϵ, ξ₁, λ)
-    Q_hat_inf, Q_hat_inf_dξ = Q_hat_infinity(c10_hat, _complex(c20_hat_real, c20_hat_imag), κ, ϵ, ξ₁, λ)
+    Q_hat_inf, Q_hat_inf_dξ =
+        Q_hat_infinity(c10_hat, _complex(c20_hat_real, c20_hat_imag), κ, ϵ, ξ₁, λ)
 
     H1 = Q_hat_0 - Q_hat_inf
     H2 = Q_hat_0_dξ - Q_hat_inf_dξ
