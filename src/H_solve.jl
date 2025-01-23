@@ -15,8 +15,8 @@ function H_approximate(
     end
 
     F(x, (c10_hat, κ, ϵ, ξ₁, λ)) = H(x..., c10_hat, κ, ϵ, ξ₁, λ)
-
-    prob = NonlinearProblem{false}(F, SVector(μ, 0.1, 0.1, 0.1), (c10_hat, κ, ϵ, ξ₁, λ))
+    x₀ = SVector(0.0, 0.0, 0.0, 0.0) # IMPROVE: Pick this in a smarter way
+    prob = NonlinearProblem{false}(F, x₀, (c10_hat, κ, ϵ, ξ₁, λ))
     sol = try
         solve(
             prob,
