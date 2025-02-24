@@ -25,10 +25,6 @@ function linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     # A represents the term (1 - im * ϵ) * (q'' + (d - 1) / ξ * q')
 
     A = SparseArrays.spzeros(ComplexF64, n, n)
-    #A[1, 1] = -2H2
-    #A[1, 2] = 2H2
-    #A[n, n-1] = H2 - H1 / ξs[n]
-    #A[n, n] = -2H2
     for k = 1:n
         if k > 1
             A[k, k-1] = H2 - (d - 1) / ξs[k] * H1 / 2
@@ -38,6 +34,7 @@ function linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
             A[k, k+1] = H2 + (d - 1) / ξs[k] * H1 / 2
         end
     end
+    A[1, 1] = -H2 - (d - 1) / ξs[1] * H1 / 2 # Set top left coefficient separately
     A .*= (im + ϵ) # Adjust the coefficient of A
 
     # B represents the term -im * κ * ξ * q'
@@ -51,6 +48,7 @@ function linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
             B[k, k+1] = ξs[k] * H1 / 2
         end
     end
+    B[1, 1] = -ξs[1] * H1 / 2 # Set top left coefficient separately
     B .*= κ # Adjust the coefficient of B
 
     # C1 represents the "holomorphic part" of the linearization together
@@ -64,13 +62,13 @@ function linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
         C1[k, k] = κ / σ + im * ω + (im - δ) * (σ + 1) * (Qs[k] * conj(Qs[k]))^σ
         C2[k, k] = (im - δ) * σ * Qs[k]^2 * (Qs[k] * conj(Qs[k]))^(σ - 1)
     end
-
     L1 = A + B + C1
+
     L2 = C2
     M = [real(L1 + L2) imag(-L1 + L2); imag(L1 + L2) real(L1 - L2)]
 
     # Compute eigenvalues
-    return Arpack.eigs(M, which = :SM; nev)[1]
+    return Arpack.eigs(M, which = :SM; nev)
 end
 
 """
@@ -115,8 +113,9 @@ function linearization_eigenvalues_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
         (im - δ) * σ * (Q * conj(Q))^(σ - 1) * Q^2
     end
 
-    D1 = 1 / 2h * Tridiagonal(fill(-1.0, n - 1), fill(0.0, n), fill(1.0, n - 1))
-    D2 = 1 / h^2 * Tridiagonal(fill(1.0, n - 1), fill(-2.0, n), fill(1.0, n - 1))
+    D1 = 1 / 2h * Tridiagonal(fill(-1.0, n - 1), [-1.0; fill(0.0, n - 1)], fill(1.0, n - 1))
+    D2 =
+        1 / h^2 * Tridiagonal(fill(1.0, n - 1), [-1.0; fill(-2.0, n - 1)], fill(1.0, n - 1))
 
     An = Diagonal(As)
     Bn = Diagonal(Bs)
@@ -133,7 +132,7 @@ function linearization_eigenvalues_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     ]
 
     # Compute eigenvalues
-    return Arpack.eigs(M, which = :SM; nev)[1]
+    return Arpack.eigs(M, which = :SM; nev)
 end
 
 """
@@ -203,7 +202,7 @@ function linearization_eigenvalues_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     M = [real(L1 + L2) imag(-L1 + L2); imag(L1 + L2) real(L1 - L2)]
 
     # Compute eigenvalues
-    return Arpack.eigs(M, which = :SM; nev)[1]
+    return Arpack.eigs(M, which = :SM; nev)
 end
 
 """
@@ -265,7 +264,7 @@ function linearization_eigenvalues_4(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     ]
 
     # Compute eigenvalues
-    return Arpack.eigs(M, which = :SM; nev)[1]
+    return Arpack.eigs(M, which = :SM; nev)
 end
 
 """
@@ -279,12 +278,22 @@ derivative, which seems to be the "correct" one.
 The implementation uses a formulation of the second order real system
 given in terms of block matrices.
 """
-function linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10)
+function linearization_eigenvalues_real_1(
+    ν,
+    κ,
+    ϵ,
+    ξ₁,
+    λ::CGLParams;
+    n = 2048,
+    nev = 10,
+    return_L = false,
+)
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
+    Qs = fill(SVector(0.0, 0.0, 0.0, 0.0), length(ξs))
 
     h = step(ξs)
 
@@ -302,12 +311,12 @@ function linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
 
     J_Ns = map(Qs, ξs) do Q, ξ
         a, b, _, _ = Q
-        N₁_a = (a^2 + b^2)^(σ - 1) * ((1 + 2σ) * a^2 - 2δ * σ * a * b + b^2)
-        N₁_b = -(a^2 + b^2)^(σ - 1) * (δ * a^2 - 2σ * a * b + δ * (1 + 2σ) * b^2)
-        N₂_a = (a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
-        N₂_b = (a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
+        N₁_a = -(a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
+        N₁_b = -(a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
+        N₂_a = (a^2 + b^2)^(σ - 1) * ((1 + 2σ) * a^2 - 2δ * σ * a * b + b^2)
+        N₂_b = -(a^2 + b^2)^(σ - 1) * (δ * a^2 - 2σ * a * b + δ * (1 + 2σ) * b^2)
 
-        @SMatrix[-N₂_a -N₂_b; N₁_a N₁_b]
+        @SMatrix[N₁_a N₁_b; N₂_a N₂_b]
     end
 
     D1 =
@@ -329,9 +338,11 @@ function linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     J_Nn = Diagonal(J_Ns)
 
     L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)))
-
+    if return_L
+        return L, Arpack.eigs(L, which = :SM; nev)...
+    end
     # Compute eigenvalues
-    return Arpack.eigs(L, which = :SM; nev)[1]
+    return Arpack.eigs(L, which = :SM; nev)
 end
 
 """
@@ -397,17 +408,16 @@ function linearization_eigenvalues_real_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)))
 
     # Compute eigenvalues
-    return Arpack.eigs(L, which = :SM; nev)[1]
+    return Arpack.eigs(L, which = :SM; nev)
 end
-
 
 """
     linearization_eigenvalues_real_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10)
 
 Compute the eigenvalues of the linearized equation.
 
-This uses the normalization with `1 - ϵ` in front of the second
-derivative, which seems to be the "wrong" one to use.
+This uses the normalization with `im + ϵ` in front of the second
+derivative, which seems to be the "correct" one.
 
 The implementation uses a formulation of the first order real system
 given in terms of block matrices.
@@ -431,5 +441,39 @@ function linearization_eigenvalues_real_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     L = SparseArrays.sparse(Matrix(BlockArrays.mortar(Tridiagonal(dl, -Bs, du))))
 
     # Compute eigenvalues
-    return Arpack.eigs(L, which = :SM; nev)[1]
+    return Arpack.eigs(L, which = :SM; nev)
+end
+
+
+"""
+    linearization_eigenvalues_real_4(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10)
+
+Compute the eigenvalues of the linearized equation.
+
+This uses the normalization with `1 - ϵ` in front of the second
+derivative, which seems to be the "wrong" one to use.
+
+The implementation uses a formulation of the first order real system
+given in terms of block matrices.
+"""
+function linearization_eigenvalues_real_4(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10)
+    (; d, ω, σ, δ) = λ
+
+    # Grid we discretize the linear operator on
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
+
+    h = step(ξs)
+
+    Bs = map(Qs, ξs) do Q, ξ
+        linearization_real_matrix(Q, κ, ϵ, ξ, λ)
+    end
+
+    dl = 1 / 2h * fill(-SMatrix{4,4}(I), n - 1)
+    du = 1 / 2h * fill(SMatrix{4,4}(I), n - 1)
+
+    L = SparseArrays.sparse(Matrix(BlockArrays.mortar(Tridiagonal(dl, -Bs, du))))
+
+    # Compute eigenvalues
+    return Arpack.eigs(L, which = :SM; nev)
 end
