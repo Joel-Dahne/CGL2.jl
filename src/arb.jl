@@ -26,6 +26,27 @@ indeterminate(::Type{Complex{T}}) where {T<:AbstractFloat} =
     convert(Complex{T}, complex(NaN, NaN))
 indeterminate(x) = indeterminate(typeof(x))
 
+# Experimental: Make it so that operations on Arb and Complex give
+# Acb. This should probably be in Arblib, but it is not.
+
+Base.:+(z::Complex, x::Arblib.ArbOrRef) = x + Acb(z)
+Base.:+(x::Arblib.ArbOrRef, z::Complex) = x + Acb(z)
+Base.:-(z::Complex, x::Arblib.ArbOrRef) = Acb(z) - x
+Base.:-(x::Arblib.ArbOrRef, z::Complex) = x - Acb(z)
+Base.:*(z::Complex, x::Arblib.ArbOrRef) = x * Acb(z)
+Base.:*(x::Arblib.ArbOrRef, z::Complex) = x * Acb(z)
+Base.:/(z::Complex, x::Arblib.ArbOrRef) = Acb(z) / x
+Base.:/(x::Arblib.ArbOrRef, z::Complex) = x / Acb(z)
+# Handle ambiguities
+Base.:+(z::Complex{Bool}, x::Arblib.ArbOrRef) = x + Acb(z)
+Base.:+(x::Arblib.ArbOrRef, z::Complex{Bool}) = x + Acb(z)
+Base.:-(z::Complex{Bool}, x::Arblib.ArbOrRef) = Acb(z) - x
+Base.:-(x::Arblib.ArbOrRef, z::Complex{Bool}) = x - Acb(z)
+Base.:*(z::Complex{Bool}, x::Arblib.ArbOrRef) = x * Acb(z)
+Base.:*(x::Arblib.ArbOrRef, z::Complex{Bool}) = x * Acb(z)
+Base.:/(z::Complex{Bool}, x::Arblib.ArbOrRef) = Acb(z) / x
+Base.:/(x::Arblib.ArbOrRef, z::Complex{Bool}) = x / Acb(z)
+
 """
     iswide(x; cutoff = 10)
 

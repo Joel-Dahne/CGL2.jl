@@ -27,4 +27,6 @@ using FiniteDifferences
     include("refine_approximation.jl")
     include("G.jl")
     include("G_solve.jl")
+
+    include("Y_infinity/parameters.jl")
 end
