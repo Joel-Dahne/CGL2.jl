@@ -12,10 +12,10 @@
     lambdaF64 = ComplexF64(lambda)
     λF64 = CGLParams{Float64}(λ)
 
-    A = SMatrix{2,2}(ϵ, -1, 1, ϵ)
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
     B₁ = SMatrix{2,2}(κ, 0, 0, κ)
     B₂ = (λ.d - 1) * A
-    C = SMatrix{2,2}(κ / λ.σ, -λ.ω, λ.ω, κ / λ.σ)
+    C = SMatrix{2,2}(κ / λ.σ, λ.ω, -λ.ω, κ / λ.σ)
     λI = SMatrix{2,2}(lambda, 0, 0, lambda)
 
     # Function for computing derivative using finite differences.
@@ -37,10 +37,10 @@
         #@test Arblib.overlaps(Y_3(ξ, ArbSeries((κ, 1)), ϵ, λ)[1], Y_3_dκ(ξ, κ, ϵ, λ))
 
         @test real(Y_3_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
+              fdm(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
 
         @test imag(Y_3_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
+              fdm(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
 
         @test real(Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
@@ -73,13 +73,13 @@
             A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
             (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
             (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-9
+        ) < 1e-14
         let ξ = 2ξ
             @test norm(
                 A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-11
+            ) < 1e-15
         end
     end
 
@@ -94,10 +94,10 @@
         #@test Arblib.overlaps(Y_4(ξ, ArbSeries((κ, 1)), ϵ, λ)[1], Y_4_dκ(ξ, κ, ϵ, λ))
 
         @test real(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
+              fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
 
         @test imag(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
+              fdm(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
 
         @test real(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
@@ -130,13 +130,13 @@
             A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
             (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
             (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-7
+        ) < 1e-12
         let ξ = 2ξ
             @test norm(
                 A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-9
+            ) < 1e-15
         end
     end
 

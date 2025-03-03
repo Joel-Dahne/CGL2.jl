@@ -19,23 +19,23 @@ real_s2(lambda, κ, λ::CGLParams) = 1 / λ.σ - real(lambda) / κ
 
 A021(T) =
     if T == Arb
-        SVector{2,Acb}(1, im)
-    else
-        SVector{2,Complex{T}}(1, im)
-    end
-A022(T) =
-    if T == Arb
         SVector{2,Acb}(1, -im)
     else
         SVector{2,Complex{T}}(1, -im)
+    end
+A022(T) =
+    if T == Arb
+        SVector{2,Acb}(1, im)
+    else
+        SVector{2,Complex{T}}(1, im)
     end
 
 function _As_2(N, lambda, κ, ϵ, λ::CGLParams{T}; s, A0) where {T}
     (; ω, σ, d) = λ
 
-    A = SMatrix{2,2}(ϵ, -1, 1, ϵ)
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
     B₁ = SMatrix{2,2}(κ, 0, 0, κ)
-    C = SMatrix{2,2}(κ / σ, -ω, ω, κ / σ)
+    C = SMatrix{2,2}(κ / σ, ω, -ω, κ / σ)
     λI = SMatrix{2,2}(lambda, 0, 0, lambda)
 
     As = [A0, zero(A0)]

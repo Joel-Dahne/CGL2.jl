@@ -42,10 +42,6 @@ function cgl_linearization_equation_real(Y, Q_hat, lambda, κ, ϵ, ξ, λ::CGLPa
 
     dY₁ = Y₂
     dY₂ = A_inv * (-(C + J_N - lambda * I) * Y₁ - B * Y₂)
-    if ξ == 50
-        @show J_N
-        display(vcat(dY₁, dY₂))
-    end
     return vcat(dY₁, dY₂)
 end
 
