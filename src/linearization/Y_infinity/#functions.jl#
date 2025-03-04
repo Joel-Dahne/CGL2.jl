@@ -1,9 +1,0 @@
-function Y_3(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    s = s21(lambda, κ, λ)
-
-N = 0
-ns = 0:2:N
-    As = [A021(T)]
-
-    sum(ns, As) do n,
-end

@@ -23,8 +23,92 @@
     fdm2 = central_fdm(5, 2)
     fdm3 = central_fdm(5, 3)
 
+    Y_1, Y_1_dξ, Y_1_dξ_dξ = CGL2.Y_1, CGL2.Y_1_dξ, CGL2.Y_1_dξ_dξ
+    Y_2, Y_2_dξ, Y_2_dξ_dξ = CGL2.Y_2, CGL2.Y_2_dξ, CGL2.Y_2_dξ_dξ
     Y_3, Y_3_dξ, Y_3_dξ_dξ = CGL2.Y_3, CGL2.Y_3_dξ, CGL2.Y_3_dξ_dξ
     Y_4, Y_4_dξ, Y_4_dξ_dξ = CGL2.Y_4, CGL2.Y_4_dξ, CGL2.Y_4_dξ_dξ
+
+    @testset "Y1" begin
+        @test all(
+            Arblib.overlaps.(
+                getindex.(Y_1(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ), 1),
+                Y_1_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+        @test all(
+            Arblib.overlaps.(
+                2getindex.(Y_1(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ), 2),
+                Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test real(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+
+        @test imag(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+
+        @test real(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm2(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+
+        @test imag(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm2(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+
+        # Test that is solves equation, at least approximately
+
+        @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+            A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+            (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
+            (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ),
+        ) < 1e-13
+        let ξ = 2ξ
+            @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+                A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ),
+            ) < 1e-15
+        end
+    end
+
+    @testset "Y2" begin
+        @test all(
+            Arblib.overlaps.(
+                getindex.(Y_2(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ), 1),
+                Y_2_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+        @test all(
+            Arblib.overlaps.(
+                2getindex.(Y_2(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ), 2),
+                Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test real(Y_2_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm(ξ -> real(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+
+        @test imag(Y_2_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm(ξ -> imag(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+
+        @test real(Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm2(ξ -> real(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+
+        @test imag(Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
+              fdm2(ξ -> imag(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+
+        @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+            A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+            (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
+            (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ),
+        ) < 1e-14
+        let ξ = 2ξ
+            @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+                A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ),
+            ) < 1e-19
+        end
+    end
 
     @testset "Y3" begin
         @test all(
@@ -33,8 +117,12 @@
                 Y_3_dξ(ξ, lambda, κ, ϵ, λ),
             ),
         )
-
-        #@test Arblib.overlaps(Y_3(ξ, ArbSeries((κ, 1)), ϵ, λ)[1], Y_3_dκ(ξ, κ, ϵ, λ))
+        @test all(
+            Arblib.overlaps.(
+                2getindex.(Y_3(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ), 2),
+                Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
 
         @test real(Y_3_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
@@ -47,26 +135,6 @@
 
         @test imag(Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
-
-        #@test Y_3_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm(ξ -> Y_3_dξ_dξ(ξ, κF64, ϵF64, λF64), ξF64) rtol =
-        #    1e-12
-        #@test Y_3_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm2(ξ -> Y_3_dξ(ξ, κF64, ϵF64, λF64), ξF64) rtol =
-        #    1e-8
-        #@test Y_3_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm3(ξ -> Y_3(ξ, κF64, ϵF64, λF64), ξF64) rtol = 1e-6
-
-        #@test Y_3_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_3(ξF64, κ, ϵF64, λF64), κF64) rtol = 1e-12
-
-        #@test Y_3_dξ_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_3_dξ(ξF64, κ, ϵF64, λF64), κF64) rtol = 1e-12
-
-        #@test Y_3_dξ_dξ_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_3_dξ_dξ(ξF64, κ, ϵF64, λF64), κF64) rtol =
-        #    1e-12
-
-        #@test Y_3_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_3(ξF64, κF64, ϵ, λF64), ϵF64) rtol = 1e-12
-
-        #@test Y_3_dξ_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_3_dξ(ξF64, κF64, ϵ, λF64), ϵF64) rtol = 1e-12
-
-        #@test Y_3_dξ_dξ_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_3_dξ_dξ(ξF64, κF64, ϵ, λF64), ϵF64) rtol =
-        #    1e-12
 
         # Test that is solves equation, at least approximately
         @test norm(
@@ -90,8 +158,12 @@
                 Y_4_dξ(ξ, lambda, κ, ϵ, λ),
             ),
         )
-
-        #@test Arblib.overlaps(Y_4(ξ, ArbSeries((κ, 1)), ϵ, λ)[1], Y_4_dκ(ξ, κ, ϵ, λ))
+        @test all(
+            Arblib.overlaps.(
+                2getindex.(Y_4(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ), 2),
+                Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
 
         @test real(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
@@ -104,26 +176,6 @@
 
         @test imag(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
-
-        #@test Y_4_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm(ξ -> Y_4_dξ_dξ(ξ, κF64, ϵF64, λF64), ξF64) rtol =
-        #    1e-12
-        #@test Y_4_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm2(ξ -> Y_4_dξ(ξ, κF64, ϵF64, λF64), ξF64) rtol =
-        #    1e-8
-        #@test Y_4_dξ_dξ_dξ(ξ, κ, ϵ, λ) ≈ fdm4(ξ -> Y_4(ξ, κF64, ϵF64, λF64), ξF64) rtol = 1e-6
-
-        #@test Y_4_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_4(ξF64, κ, ϵF64, λF64), κF64) rtol = 1e-12
-
-        #@test Y_4_dξ_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_4_dξ(ξF64, κ, ϵF64, λF64), κF64) rtol = 1e-12
-
-        #@test Y_4_dξ_dξ_dκ(ξ, κ, ϵ, λ) ≈ fdm(κ -> Y_4_dξ_dξ(ξF64, κ, ϵF64, λF64), κF64) rtol =
-        #    1e-12
-
-        #@test Y_4_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_4(ξF64, κF64, ϵ, λF64), ϵF64) rtol = 1e-12
-
-        #@test Y_4_dξ_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_4_dξ(ξF64, κF64, ϵ, λF64), ϵF64) rtol = 1e-12
-
-        #@test Y_4_dξ_dξ_dϵ(ξ, κ, ϵ, λ) ≈ fdm(ϵ -> Y_4_dξ_dξ(ξF64, κF64, ϵ, λF64), ϵF64) rtol =
-        #    1e-12
 
         # Test that is solves equation, at least approximately
         @test norm(
