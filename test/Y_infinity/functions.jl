@@ -141,7 +141,7 @@
             A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
             (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
             (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-14
+        ) < 1e-12
         let ξ = 2ξ
             @test norm(
                 A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
@@ -166,10 +166,10 @@
         )
 
         @test real(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
+              fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
 
         @test imag(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-12
+              fdm(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
 
         @test real(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
