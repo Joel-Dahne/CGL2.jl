@@ -11,6 +11,16 @@ function coeff_matrices(lambda, κ, ϵ, λ::CGLParams)
     return (; A, B₁, B₂, C, λI)
 end
 
+function J_N_coeff_matrices(λ::CGLParams)
+    (; σ, δ) = λ
+
+    M1 = SMatrix{2,2}(δ * (1 + 2σ), -(1 + 2σ), 1, δ)
+    M2 = SMatrix{2,2}(1, δ, δ, -1)
+    M3 = SMatrix{2,2}(δ, -1, 1 + 2σ, δ * (1 + 2σ))
+
+    return (; M1, M2, M3)
+end
+
 # Parameters for asymptotic expansion of linear equation
 
 A01(T) = SVector{2,ifelse(T == Arb, Acb, Complex{T})}(1, im)

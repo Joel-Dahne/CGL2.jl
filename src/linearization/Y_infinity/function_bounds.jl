@@ -33,12 +33,14 @@ function C_J_N(C_ab::Arb, lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLPara
     # TODO: opnorm is most likely not rigorous. We probably want to
     # compute explicit values for them.
     p = 2
+    (; M1, M2, M3) = J_N_coeff_matrices(λ)
+
     return 2^(σ - 1) *
            C_ab^(σ + 1) *
            (
-               opnorm(@SMatrix(Float64[δ*(1+2σ) 1; -(1 + 2σ) δ]), p) +
-               2σ * opnorm(@SMatrix(Float64[1 δ; δ -1]), p) +
-               opnorm(@SMatrix(Float64[δ (1+2σ); -1 δ*(1+2σ)]), p)
+               opnorm(Float64.(M1), p) +
+               2σ * opnorm(Float64.(M2), p) +
+               opnorm(Float64.(M3), p)
            )
 end
 

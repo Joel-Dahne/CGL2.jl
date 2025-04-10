@@ -192,4 +192,40 @@
         end
     end
 
+    @testset "K1 and K2" begin
+        # K1 and K2 are suppose to give solutions to the linear system
+        # Ψ * v = [[0, 0]; A \ F].
+
+        Y12 = hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ))
+        Y12_dξ = hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+        Y34 = hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ))
+        Y34_dξ = hcat(Y_3_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+        Ψ = [Y12 Y34; Y12_dξ Y34_dξ]
+        F = eltype(Ψ)[0.1, 0.25]
+
+        K1, K2 = CGL2.K_1_2(Y12, Y12_dξ, Y34, Y34_dξ, A)
+
+        v12 = -K1 * F
+        v34 = -K2 * F
+        v = [v12; v34]
+
+        @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; A \ F]))
+    end
+
+    @testset "JN" begin
+        # The precise value for a and b should not play any role in
+        # the correctness, we just compute some approximation here.
+        νF64 = 1.9261384880241954 + 3.0638598354170337im
+        a, b =
+            Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, λF64)[1:2])
+
+        # Compute Jacobian by going through ArbSeries
+        N = (a, b) -> (a^2 + b^2)^λ.σ * SVector(-λ.δ * a - b, a - λ.δ * b)
+        N_a = getindex.(N(ArbSeries((a, 1)), b), 1)
+        N_b = getindex.(N(a, ArbSeries((b, 1))), 1)
+        JN_direct = [N_a N_b]
+
+        @test all(Arblib.overlaps.(JN_direct, CGL2.J_N(Acb(a, b), λ)))
+    end
 end
