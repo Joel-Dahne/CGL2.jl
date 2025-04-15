@@ -337,11 +337,13 @@ function linearization_eigenvalues_real_1(
     J_Nn = Diagonal(J_Ns)
 
     L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)))
+
+    v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
     if return_L
-        return L, Arpack.eigs(L, which = :SM; nev)...
+        return L, Arpack.eigs(L, which = :SM; nev, v0)...
     end
     # Compute eigenvalues
-    return Arpack.eigs(L, which = :SM; nev)
+    return Arpack.eigs(L, which = :SM; nev, v0)
 end
 
 """
