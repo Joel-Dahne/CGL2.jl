@@ -3,16 +3,13 @@
     cgl_linearization_equation_real(Q, (Q_hat, lambda, κ, ϵ, λ), ξ)
 
 Evaluate the right hand side of the forward ODE when written as a four
-dimensional real system. It is evaluated at the point
-```
-Q = [a, b, α, β]
-```
-and time `ξ`.
+dimensional complex system. It is evaluated at the point `Y` and time
+`ξ`.
 
 For `λ.d != 1` there is a removable singularity at `ξ = 0`. To return
-a finite value we in this case required that `α = β = 0`.
+a finite value we in this case required that `Y[3] = Y[4] = 0`.
 """
-function cgl_linearization_equation_real(Y, Q_hat, lambda, κ, ϵ, ξ, λ::CGLParams)
+function cgl_linearization_equation_real(Y, lambda, κ, ϵ, ξ, Q_hat, λ::CGLParams)
     (; d, ω, σ, δ) = λ
 
     A_inv = @SMatrix[ϵ 1; -1 ϵ] / (1 + ϵ^2)
@@ -46,5 +43,5 @@ function cgl_linearization_equation_real(Y, Q_hat, lambda, κ, ϵ, ξ, λ::CGLPa
 end
 
 # For use with ODEProblem
-cgl_linearization_equation_real(u, (Q_hat, lambda, κ, ϵ, λ), ξ) =
-    cgl_linearization_equation_real(u, Q_hat, lambda, κ, ϵ, ξ, λ)
+cgl_linearization_equation_real(u, (lambda, κ, ϵ, Q_hat, λ), ξ) =
+    cgl_linearization_equation_real(u, lambda, κ, ϵ, ξ, Q_hat, λ)

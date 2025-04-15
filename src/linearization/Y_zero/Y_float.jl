@@ -2,21 +2,18 @@
     Y_zero_float(Q_hat, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
-vector with four real values, the first two are the real and imaginary
-values at `ξ₁` and the second two are their derivatives.
+vector with four complex values, the first two are the values at `ξ₁`
+and the second two are their derivatives.
 
 The solution is computed using [`ODEProblem`](@ref). The computations
-are always done in `Float64`. However, for `Arb` input with wide
-intervals for `ν`, `κ` and/or `ϵ` it computes it at the corners of the
-box they form. This means you still get something that resembles an
-enclosure.
+are always done in `ComplexF64`.
 """
-function Y_zero_float(Y₀, Q_hat, lambda, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+function Y_zero_float(x, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
     prob = ODEProblem{false}(
         cgl_linearization_equation_real,
-        SVector{4,ComplexF64}(Y₀[1].Y₀[2], 0, 0),
+        SVector{4,ComplexF64}(x, 1, 0, 0),
         (zero(ξ₁), ξ₁),
-        (Q_hat, lambda, κ, ϵ, λ),
+        (lambda, κ, ϵ, Q_hat, λ),
     )
 
     # Used to exit early in extreme cases. Sometimes the
@@ -28,7 +25,7 @@ function Y_zero_float(Y₀, Q_hat, lambda, κ, ϵ, ξ₁, λ::CGLParams; tol::Fl
 
     sol = solve(
         prob,
-        AutoVern7(Rodas5P()),
+        Vern7(),
         abstol = tol,
         reltol = tol,
         save_everystep = false,
@@ -47,13 +44,14 @@ solution object given by the ODE solver, instead of just the value at
 the final point.
 """
 function Y_zero_float_curve(
-    Y₀,
-    Q_hat,
+    x,
     lambda,
     κ,
     ϵ,
     ξ₁,
+    Q_hat,
     λ::CGLParams;
+    y = one(x),
     Y₀_deriv = SVector{2,ComplexF64}(0, 0),
     ξ₀ = zero(ξ₁),
     tol::Float64 = 1e-11,
@@ -61,9 +59,9 @@ function Y_zero_float_curve(
 )
     prob = ODEProblem{false}(
         cgl_linearization_equation_real,
-        SVector{4,ComplexF64}(Y₀[1], Y₀[2], Y₀_deriv[1], Y₀_deriv[2]),
+        SVector{4,ComplexF64}(x, y, Y₀_deriv[1], Y₀_deriv[2]),
         (ξ₀, ξ₁),
-        (Q_hat, lambda, κ, ϵ, λ),
+        (lambda, κ, ϵ, Q_hat, λ),
     )
 
     sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)

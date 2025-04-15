@@ -1,18 +1,15 @@
-function H_approximate(
-    lambda_approx::Complex{T},
+function G_hat_approximate(
+    γ₁::Complex{T},
     κ::T,
     ϵ::T,
     ξ₁::T,
-    Q_hat,
-    Q_hat_ξ₁::Complex{T},
     λ::CGLParams{T};
     return_convergence::Union{Val{false},Val{true}} = Val{false}(),
     verbose = false,
 ) where {T}
-    F((x, c1, c2, lambda), (κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ)) =
-        H(x, SVector(c1, c2), lambda, κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ)
-    x₀ = SVector{4,Complex{T}}(0, 0, 0, lambda_approx) # IMPROVE: Pick this in a smarter way
-    prob = NonlinearProblem{false}(F, x₀, (κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ))
+    F((ν, γ₂), (γ₁, κ, ϵ, ξ₁, λ)) = G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    x₀ = SVector(zero(γ₁), zero(γ₁)) # IMPROVE: Pick this in a smarter way
+    prob = NonlinearProblem{false}(F, x₀, (γ₁, κ, ϵ, ξ₁, λ))
     sol = try
         solve(
             prob,
@@ -26,9 +23,9 @@ function H_approximate(
         verbose && @warn "Encountered" e ϵ
 
         if return_convergence isa Val{false}
-            return _complex(zero(μ), zero(μ)), _complex(zero(μ), zero(μ))
+            return zero(γ₁), zero(γ₁)
         else
-            return false, _complex(μ, zero(μ)), _complex(zero(μ), zero(μ))
+            return false, zero(γ₁), zero(γ₁)
         end
     end
 
@@ -38,14 +35,14 @@ function H_approximate(
 
     converged = NonlinearSolve.SciMLBase.successful_retcode(sol)
 
-    x, c, lambda = if converged
-        sol[1], SVector(sol[2], sol[3]), sol[4]
+    ν, γ₂ = if converged
+        sol[1], sol[2]
     else
-        zero(Complex{T}), SVector(zero(Complex{T}), zero(Complex{T})), zero(Complex{T})
+        zero(γ₁), zero(γ₁)
     end
     if return_convergence isa Val{false}
-        return x, c, lambda
+        return ν, γ₂
     else
-        return converged, x, c, lambda
+        return converged, ν, γ₂
     end
 end

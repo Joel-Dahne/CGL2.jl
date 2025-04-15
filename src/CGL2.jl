@@ -53,6 +53,7 @@ include("Q_infinity/I.jl")
 include("Q_infinity/check_existence.jl")
 include("Q_infinity/Q.jl")
 include("Q_infinity/verify_monotonicity.jl")
+include("Q_infinity/p_Q.jl")
 
 include("refine_approximation.jl")
 include("G.jl")
@@ -81,9 +82,10 @@ include("Q_hat_infinity/functions.jl")
 include("Q_hat_infinity/function_bounds.jl")
 include("Q_hat_infinity/check_existence.jl")
 include("Q_hat_infinity/Q_hat.jl")
+include("Q_hat_infinity/p_Q_hat.jl")
 
-include("H.jl")
-include("H_solve.jl")
+include("G_hat.jl")
+include("G_hat_solve.jl")
 
 include("linearization/linearization.jl")
 include("linearization/eigenvalues.jl")
@@ -102,5 +104,10 @@ include("linearization/Y_infinity/norm_bounds.jl")
 include("linearization/Y_infinity/check_existence.jl")
 include("linearization/Y_infinity/Y.jl")
 #include("linearization/Y_infinity/verify_monotonicity.jl")
+
+include("H.jl")
+include("H_solve.jl")
+
+include("branch_eigenvalue/branch_approximation.jl")
 
 end # module CGL2
