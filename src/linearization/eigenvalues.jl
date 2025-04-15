@@ -293,7 +293,6 @@ function linearization_eigenvalues_real_1(
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
-    Qs = fill(SVector(0.0, 0.0, 0.0, 0.0), length(ξs))
 
     h = step(ξs)
 
