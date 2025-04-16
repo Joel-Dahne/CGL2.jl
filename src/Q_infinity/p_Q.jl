@@ -3,6 +3,9 @@ function p_Q(γ, κ, ϵ, ξ₁, λ::CGLParams{T}) where {T}
     pQ = c^-a * γ
 
     if T == Arb # Only add error bounds if we are working with an Arb
+        v = Arb("0.1")
+        (; σ) = λ
+
         CU = CGL2.UBounds(a, b, c, ξ₁)
         C = CGL2.FunctionBounds(κ, ϵ, ξ₁, λ, CU)
         norms = CGL2.NormBounds(γ, κ, ϵ, ξ₁, v, λ, C)
