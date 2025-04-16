@@ -13,7 +13,7 @@ function linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
@@ -86,7 +86,7 @@ function linearization_eigenvalues_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
@@ -149,7 +149,7 @@ function linearization_eigenvalues_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
@@ -219,7 +219,7 @@ function linearization_eigenvalues_4(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048,
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
@@ -291,7 +291,7 @@ function linearization_eigenvalues_real_1(
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
 
     h = step(ξs)
@@ -361,7 +361,7 @@ function linearization_eigenvalues_real_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
 
     h = step(ξs)
@@ -427,7 +427,7 @@ function linearization_eigenvalues_real_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
 
     h = step(ξs)
@@ -461,7 +461,7 @@ function linearization_eigenvalues_real_4(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 
     (; d, ω, σ, δ) = λ
 
     # Grid we discretize the linear operator on
-    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:end-1]
+    ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
     Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
 
     h = step(ξs)
