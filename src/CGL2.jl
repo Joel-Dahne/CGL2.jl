@@ -108,6 +108,8 @@ include("linearization/Y_infinity/Y.jl")
 include("H.jl")
 include("H_solve.jl")
 
+include("eigenvalue_solve.jl")
+
 include("branch_eigenvalue/branch_eigenvalue_approximation.jl")
 include("branch_eigenvalue/branch_eigenvalue_points.jl")
 
