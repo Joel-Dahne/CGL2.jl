@@ -208,8 +208,10 @@ int main()
   // Read flags for if to output Jacobian and for if the Jacobian
   // should be with respect to epsilon instead of kappa.
   int output_jacobian;
+  int jacobian_kappa;
   int jacobian_epsilon;
   cin >> output_jacobian;
+  cin >> jacobian_kappa;
   cin >> jacobian_epsilon;
 
   // Read tolerance to use
@@ -258,20 +260,21 @@ int main()
 
       IMatrix m = (IMatrix)(s);
 
-      if (jacobian_epsilon) {
-          for (int i = 0; i < 4; i++)
-              // Only print derivatives of u[1], ..., u[4]
-              for (int j = 0; j < 4; j++)
-                  cout << m[j][i] << endl;
+      for (int i = 0; i < 4; i++)
+          // Only print derivatives of u[1], ..., u[4]
+          for (int j = 0; j < 4; j++)
+              cout << m[j][i] << endl;
 
-          // Derivative w.r.t. epsilon
+      // Derivative w.r.t. kappa
+      if (jacobian_kappa) {
+          for (int j = 0; j < 4; j++)
+              cout << m[j][4] << endl;
+      }
+
+      // Derivative w.r.t. epsilon
+      if (jacobian_epsilon) {
           for (int j = 0; j < 4; j++)
               cout << m[j][5] << endl;
-      } else {
-          for (int i = 0; i < 5; i++)
-              // Only print derivatives of u[1], ..., u[4]
-              for (int j = 0; j < 4; j++)
-                  cout << m[j][i] << endl;
       }
     } else {
       // Define a doubleton representation of the initial value

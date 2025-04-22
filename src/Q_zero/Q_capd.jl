@@ -20,6 +20,11 @@ If `output_jacobian = Val{true}()` it also computes the Jacobian
 w.r.t. `Q_ξ₀` and `κ`. Unless `jacobian_epsilon` is also true, then
 it outputs it w.r.t. `Q_ξ₀` and `ϵ`.
 
+If `output_jacobian_only_init = Val{true}()` it computes the Jacobian
+w.r.t. `Q_ξ₀`. This option is intended to be used for
+`Q_hat_zero_jacobian_capd` and is not compatible with `output_jacobian
+= Val{true}()`
+
 - **IMPROVE:** For thin values of `κ` and `ϵ` the performance could be
   improved when computing `Q`. For thin values of `ϵ` it could be
   improved also when computing the Jacobian.
@@ -33,6 +38,7 @@ function _Q_zero_capd(
     λ::CGLParams{BareInterval{Float64}};
     output_jacobian::Union{Val{false},Val{true}} = Val{false}(),
     jacobian_epsilon::Bool = false,
+    output_jacobian_only_init::Union{Val{false},Val{true}} = Val{false}(),
     tol::Float64 = 1e-11,
 )
     # Build the input to the CAPD program
@@ -49,7 +55,18 @@ function _Q_zero_capd(
         input_ξspan *= "[$(inf(x)), $(sup(x))]\n"
     end
     input_output_jacobian = ifelse(output_jacobian isa Val{true}, "1\n", "0\n")
-    input_jacobian_epsilon = ifelse(jacobian_epsilon, "1\n", "0\n")
+    if output_jacobian_only_init isa Val{true}
+        @assert output_jacobian isa Val{false}
+        @assert !jacobian_epsilon
+        input_output_jacobian = "1\n"
+        input_jacobian_kappa = "0\n"
+        input_jacobian_epsilon = "0\n"
+    else
+        input_output_jacobian = ifelse(output_jacobian isa Val{true}, "1\n", "0\n")
+        input_jacobian_kappa = ifelse(jacobian_epsilon, "0\n", "1\n")
+        input_jacobian_epsilon = ifelse(jacobian_epsilon, "1\n", "0\n")
+    end
+
     input_tol = "$tol\n"
 
     input = join([
@@ -57,6 +74,7 @@ function _Q_zero_capd(
         input_params,
         input_ξspan,
         input_output_jacobian,
+        input_jacobian_kappa,
         input_jacobian_epsilon,
         input_tol,
     ])
@@ -77,7 +95,13 @@ function _Q_zero_capd(
     end
 
     if contains(output, "Exception")
-        n = output_jacobian isa Val{false} ? 4 : 20
+        n = if output_jacobian isa Val{true}
+            20
+        elseif output_jacobian_only_init isa Val{true}
+            16
+        else
+            4
+        end
         Q = fill(IntervalArithmetic.emptyinterval(BareInterval{Float64}), n)
     else
         Q = parse.(
@@ -86,10 +110,12 @@ function _Q_zero_capd(
         )::Vector{BareInterval{Float64}}
     end
 
-    if output_jacobian isa Val{false}
-        return SVector{4,BareInterval{Float64}}(Q)
-    else
+    if output_jacobian isa Val{true}
         return SMatrix{4,5,BareInterval{Float64}}(Q)
+    elseif output_jacobian_only_init isa Val{true}
+        return SMatrix{4,4,BareInterval{Float64}}(Q)
+    else
+        return SVector{4,BareInterval{Float64}}(Q)
     end
 end
 

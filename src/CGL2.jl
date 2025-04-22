@@ -77,6 +77,8 @@ include("orchestration/run_branch_critical_points.jl")
 include("Q_hat_zero/equation.jl")
 include("Q_hat_zero/Q_hat.jl")
 include("Q_hat_zero/Q_hat_float.jl")
+include("Q_hat_zero/Q_hat_taylor.jl")
+include("Q_hat_zero/Q_hat_capd.jl")
 
 include("Q_hat_infinity/functions.jl")
 include("Q_hat_infinity/function_bounds.jl")

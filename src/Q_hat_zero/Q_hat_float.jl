@@ -69,6 +69,26 @@ function Q_hat_zero_float(
 end
 
 """
+    Q_hat_zero_jacobian_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+
+This function computes the Jacobian of [`Q_hat_zero_float`](@ref) w.r.t.
+the parameters `ν_real` and `ν_imag`.
+"""
+function Q_hat_zero_jacobian_float(
+    ν_real,
+    ν_imag,
+    κ,
+    ϵ,
+    ξ₁,
+    λ::CGLParams;
+    tol::Float64 = 1e-11,
+)
+    return ForwardDiff.jacobian(SVector(ν_real, ν_imag)) do (ν_real, ν_imag)
+        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ; tol)
+    end
+end
+
+"""
     Q_hat_zero_float_curve(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
 
 Similar to [`Q_hat_zero_float`](@ref) but returns the whole
