@@ -4,14 +4,16 @@
 Perform one internval Newton iteration for the function `f` on the
 input `x`. The function `df` should compute the Jacobian of `f`.
 """
-function newton_step(f, df, x; verbose = false)
-    mid = midpoint.(Arb, x)
+function newton_step(f, df, x::AbstractVector{T}; verbose = false) where {T<:Union{Arb,Acb}}
+    TMatrix = T == Arb ? ArbMatrix : AcbMatrix
 
-    y = ArbMatrix(f(mid))
+    mid = midpoint.(T, x)
+
+    y = TMatrix(f(mid))
 
     isfinite(y) || return indeterminate.(x)
 
-    J = ArbMatrix(df(x))
+    J = TMatrix(df(x))
     J_div_y = similar(y)
 
     success = !iszero(Arblib.solve!(J_div_y, J, y))
@@ -181,14 +183,11 @@ more information in the end.
 function verify_root_from_approximation(
     f,
     df,
-    root::Union{Vector{Arb},SVector{<:Any,Arb}};
+    root::Union{Vector{T},SVector{<:Any,T}};
     expansion_rate = 0.05,
     max_iterations = 10,
     verbose::Bool = false,
-)
-    original_root = root
-    root = deepcopy(root)
-
+) where {T<:Union{Arb,Acb}}
     verbose && @info "Original approximation" root
 
     if any(!isfinite, root)
@@ -213,7 +212,12 @@ function verify_root_from_approximation(
 
         verbose && @info "Iteration $i" new_root
 
-        root = add_error.(new_root, expansion_rate * radius.(new_root))
+        root = if T == Arb
+            add_error.(new_root, expansion_rate * radius.(new_root))
+        else
+            rad = map(z -> max(radius.(reim(z))...), new_root)
+            add_error.(new_root, expansion_rate * rad)
+        end
     end
 
     verbose && @warn "Reached maximum number of iterations"
