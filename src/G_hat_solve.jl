@@ -46,3 +46,45 @@ function G_hat_approximate(
         return converged, ν, γ₂
     end
 end
+
+function G_hat_solve(
+    ν::Acf,
+    γ₁::Acb,
+    γ₂::Acf,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb};
+    return_uniqueness::Union{Val{false},Val{true}} = Val{false}(),
+    try_expand_uniqueness = return_uniqueness isa Val{true},
+    expansion_rate = 0.05,
+    max_iterations = 10,
+    verbose = false,
+    extra_verbose = false,
+)
+    # TODO: Implement these functions
+    G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+    root, root_uniqueness = verify_root_from_approximation(
+        G_hat_x,
+        dG_hat_x,
+        SVector{2,Acb}(ν, γ₂);
+        expansion_rate,
+        max_iterations,
+        verbose,
+    )
+
+    if try_expand_uniqueness
+        verbose && @info "Expanding region for uniqueness"
+        # TODO: Extend this to Acb
+        root_uniqueness =
+            expand_uniqueness(G_hat_x, dG_hat_x, root_uniqueness; verbose, extra_verbose)
+    end
+
+    if return_uniqueness isa Val{true}
+        return root, root_uniqueness
+    else
+        return root
+    end
+end
