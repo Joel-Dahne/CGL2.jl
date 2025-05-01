@@ -62,7 +62,6 @@ function G_hat_solve(
     verbose = false,
     extra_verbose = false,
 )
-    # TODO: Implement these functions
     G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
     dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 

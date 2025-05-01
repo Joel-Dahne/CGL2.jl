@@ -64,21 +64,12 @@ function eigenvalue_solve(
     ###
     verbose && @info "Solving for x and λ"
 
-    Q_hat_F64 = CGL2.Q_hat_zero_float_curve(real(νF64), imag(νF64), κF64, ϵF64, ξ₁F64, λF64)
-    Q_hat_ξ₁_F64 = complex(Q_hat_F64(ξ₁F64)[1:2]...)
+    xF64, cF64, lambdaF64 =
+        CGL2.H_approximate(lambdaF64_approx, νF64, κF64, ϵF64, ξ₁F64, λF64)
 
-    xF64, cF64, lambdaF64 = CGL2.H_approximate(
-        lambdaF64_approx,
-        κF64,
-        ϵF64,
-        ξ₁F64,
-        Q_hat_F64,
-        Q_hat_ξ₁_F64,
-        λF64,
-    )
+    x, c1, c2, lambda = CGL2.H_solve(Acf(xF64), Acf.(cF64), Acf(lambdaF64), ν, κ, ϵ, ξ₁, λ)
 
-    # TODO: Implement rigorous version
-    x, c, lambda = Acb(xF64), Acb.(cF64), Acb(lambdaF64)
+    c = SVector(c1, c2)
 
     @assert ComplexF64(x) ≈ xF64
     @assert ComplexF64.(c) ≈ cF64
