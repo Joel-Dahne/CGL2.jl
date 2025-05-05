@@ -94,6 +94,8 @@ include("linearization/eigenvalues.jl")
 
 include("Y_zero/Y.jl")
 include("Y_zero/Y_float.jl")
+include("Y_zero/Y_taylor.jl")
+include("Y_zero/Y_capd.jl")
 include("Y_zero/equation.jl")
 
 include("Y_infinity/parameters.jl")

@@ -3,6 +3,8 @@
 Arblib.Arb(x::Union{Interval,BareInterval}) =
     isempty_interval(x) ? indeterminate(Arb) : Arb((inf(x), sup(x)))
 
+Arblib.Acb(z::Complex{<:Interval}) = Acb(Arb(real(z)), Arb(imag(z)))
+
 IntervalArithmetic.bareinterval(::Type{T}, x::Arb) where {T} =
     isnan(x) ? nai(T).bareinterval : bareinterval(T, getinterval(BigFloat, x)...)
 
@@ -19,3 +21,6 @@ IntervalArithmetic.interval((x, y)::NTuple{2,Arb}) = interval(Float64, (x, y))
 
 Base.convert(::Type{Arb}, x::BareInterval) = Arb(x)
 Base.convert(::Type{BareInterval{T}}, x::Arb) where {T} = bareinterval(T, x)
+
+Base.convert(::Type{Complex{Interval{T}}}, z::Acb) where {T} =
+    complex(interval(T, real(z)), interval(T, imag(z)))

@@ -28,5 +28,9 @@ using FiniteDifferences
     include("G.jl")
     include("G_solve.jl")
 
+    include("Q_hat_zero/Q_hat_zero.jl")
+
+    include("Y_zero/Y.jl")
+
     include("Y_infinity/parameters.jl")
 end
