@@ -69,23 +69,14 @@ function cgl_linearization_equation_real(
 
     # Compute the matrices M1 and M2 following same approach as in CAPD
     begin
-        N1_a_real = real(N₁_a)
-        N1_a_imag = imag(N₁_a)
-        N1_b_real = real(N₁_b)
-        N1_b_imag = imag(N₁_b)
-        N2_a_real = real(N₂_a)
-        N2_a_imag = imag(N₂_a)
-        N2_b_real = real(N₂_b)
-        N2_b_imag = imag(N₂_b)
-
-        M1_11_real = (-ϵ * (κ / σ + N1_a_real - lambda_real) - N2_a_real - ω) / (1 + ϵ^2)
-        M1_11_imag = (-ϵ * (N1_a_imag - lambda_imag) - N2_a_imag) / (1 + ϵ^2)
-        M1_12_real = (-κ / σ - ϵ * (N1_b_real - ω) - N2_b_real + lambda_real) / (1 + ϵ^2)
-        M1_12_imag = (-ϵ * N1_b_imag - N2_b_imag + lambda_imag) / (1 + ϵ^2)
-        M1_21_real = (κ / σ - ϵ * (N2_a_real + ω) + N1_a_real - lambda_real) / (1 + ϵ^2)
-        M1_21_imag = (ϵ * N2_a_imag + N1_a_imag - lambda_imag) / (1 + ϵ^2)
-        M1_22_real = (-ϵ * (κ / σ + N2_b_real - lambda_real) + N1_b_real - ω) / (1 + ϵ^2)
-        M1_22_imag = (-ϵ * (N2_b_imag - lambda_imag) - N1_b_imag) / (1 + ϵ^2)
+        M1_11_real = (-ϵ * (κ / σ + N₁_a - lambda_real) - N₂_a - ω) / (1 + ϵ^2)
+        M1_11_imag = ϵ * lambda_imag / (1 + ϵ^2)
+        M1_12_real = (-κ / σ - ϵ * (N₁_b - ω) - N₂_b + lambda_real) / (1 + ϵ^2)
+        M1_12_imag = lambda_imag / (1 + ϵ^2)
+        M1_21_real = (κ / σ - ϵ * (N₂_a + ω) + N₁_a - lambda_real) / (1 + ϵ^2)
+        M1_21_imag = -lambda_imag / (1 + ϵ^2)
+        M1_22_real = (-ϵ * (κ / σ + N₂_b - lambda_real) + N₁_b - ω) / (1 + ϵ^2)
+        M1_22_imag = ϵ * lambda_imag / (1 + ϵ^2)
 
         M2_11 = κ / (1 + ϵ^2) * (-ϵ) * ξ - (d - 1) / ξ
         M2_12 = κ / (1 + ϵ^2) * (-1) * ξ
@@ -175,6 +166,33 @@ end
 cgl_linearization_equation_real(u, (lambda_real, lambda_imag, κ, ϵ, Q_hat, λ), ξ) =
     cgl_linearization_equation_real(u, lambda_real, lambda_imag, κ, ϵ, ξ, Q_hat, λ)
 
+function _cgl_linearization_equation_taylor_J_N_taylor(
+    ν::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₀::Arb,
+    λ::CGLParams{Arb};
+    degree::Integer = 5,
+)
+    (; d, ω, σ, δ) = λ
+
+    a, b = cgl_equation_real_taylor(
+        SVector{2,NTuple{2,Arb}}((real(ν), 0), (imag(ν), 0)),
+        -κ,
+        ϵ,
+        zero(ξ₀),
+        CGLParams(λ, ω = -λ.ω);
+        degree,
+    )
+
+    N₁_a = -(a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
+    N₁_b = -(a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
+    N₂_a = (a^2 + b^2)^(σ - 1) * ((1 + 2σ) * a^2 - 2δ * σ * a * b + b^2)
+    N₂_b = -(a^2 + b^2)^(σ - 1) * (δ * a^2 - 2σ * a * b + δ * (1 + 2σ) * b^2)
+
+    return @SMatrix[N₁_a N₁_b; N₂_a N₂_b]
+end
+
 function cgl_linearization_equation_taylor(
     Y_ξ₀::SVector{2,NTuple{2,Acb}},
     lambda::Acb,
@@ -198,16 +216,21 @@ function cgl_linearization_equation_taylor(
     B₁ = SMatrix{2,2}(κ, 0, 0, κ)
     B₂ = (d - 1) * A
     C = SMatrix{2,2}(κ / σ, ω, -ω, κ / σ)
+    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, λ; degree)
 
     for n = 0:2:(degree-2)
         if iszero(ξ₀)
+            v = J_N * SVector(AcbSeries(Y1, degree = n + 1), AcbSeries(Y2, degree = n + 1))
+
+            inv_rhs = @SMatrix[ϵ 1; -1 ϵ] / ((n + 2) * (n + d) * (1 + ϵ^2))
             M =
                 @SMatrix[
                     (ϵ * (n * κ + κ / σ - lambda) + ω) (n * κ + κ / σ - lambda - ϵ * ω);
                     (-n * κ - κ / σ + lambda + ϵ * ω) (ϵ * (n * κ + κ / σ - lambda) + ω)
                 ] / ((n + 2) * (n + d) * (1 + ϵ^2))
 
-            Y1[n+2], Y2[n+2] = -M * SVector(Y1[n], Y2[n])
+            Y1[n+2], Y2[n+2] =
+                -M * SVector(Y1[n], Y2[n]) - inv_rhs * SVector(v[1][n], v[2][n])
         else
             error("case ξ₀ != 0 not implemented")
         end
@@ -243,9 +266,14 @@ function cgl_linearization_equation_dλ_taylor(
     B₁ = SMatrix{2,2}(κ, 0, 0, κ)
     B₂ = (d - 1) * A
     C = SMatrix{2,2}(κ / σ, ω, -ω, κ / σ)
+    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, λ; degree)
 
     for n = 0:2:(degree-2)
         if iszero(ξ₀)
+            v_dλ =
+                J_N *
+                SVector(AcbSeries(Y1_dλ, degree = n + 1), AcbSeries(Y2_dλ, degree = n + 1))
+
             inv_rhs = @SMatrix[ϵ 1; -1 ϵ] / ((n + 2) * (n + d) * (1 + ϵ^2))
             M =
                 @SMatrix[
@@ -254,7 +282,8 @@ function cgl_linearization_equation_dλ_taylor(
                 ] / ((n + 2) * (n + d) * (1 + ϵ^2))
 
             Y1_dλ[n+2], Y2_dλ[n+2] =
-                -M * SVector(Y1_dλ[n], Y2_dλ[n]) + inv_rhs * SVector(Y1[n], Y2[n])
+                -M * SVector(Y1_dλ[n], Y2_dλ[n]) +
+                inv_rhs * (SVector(Y1[n], Y2[n]) - SVector(v_dλ[1][n], v_dλ[2][n]))
         else
             error("case ξ₀ != 0 not implemented")
         end

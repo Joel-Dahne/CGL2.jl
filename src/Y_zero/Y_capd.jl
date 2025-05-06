@@ -22,9 +22,9 @@ If `output_jacobian = Val{true}()` it also computes the Jacobian
 w.r.t. `Y_ξ₀` and `lambda`.
 """
 function _Y_zero_capd(
+    Q_hat_ξ₀::SVector{4,Interval{Float64}},
     Y_ξ₀::SVector{4,Complex{Interval{Float64}}},
     lambda::Complex{Interval{Float64}},
-    ν::Complex{Interval{Float64}},
     κ::Interval{Float64},
     ϵ::Interval{Float64},
     ξ₀::Interval{Float64},
@@ -34,6 +34,10 @@ function _Y_zero_capd(
     tol::Float64 = 1e-11,
 )
     # Build the input to the CAPD program
+    input_Q_hat_ξ₀ = ""
+    for x in Q_hat_ξ₀
+        input_Q_hat_ξ₀ *= "[$(inf(x)), $(sup(x))]\n"
+    end
     input_Y_ξ₀ = ""
     input_Y_ξ₀ *= "[$(inf(real(Y_ξ₀[1]))), $(sup(real(Y_ξ₀[1])))]\n"
     input_Y_ξ₀ *= "[$(inf(real(Y_ξ₀[2]))), $(sup(real(Y_ξ₀[2])))]\n"
@@ -44,11 +48,7 @@ function _Y_zero_capd(
     input_Y_ξ₀ *= "[$(inf(imag(Y_ξ₀[3]))), $(sup(imag(Y_ξ₀[3])))]\n"
     input_Y_ξ₀ *= "[$(inf(imag(Y_ξ₀[4]))), $(sup(imag(Y_ξ₀[4])))]\n"
     input_params = "$(λ.d)\n"
-    for z in [lambda, ν]
-        x, y = reim(z)
-        input_params *= "[$(inf(x)), $(sup(x))]\n[$(inf(y)), $(sup(y))]\n"
-    end
-    for x in [κ, ϵ, λ.ω, λ.σ, λ.δ]
+    for x in [real(lambda), imag(lambda), κ, ϵ, λ.ω, λ.σ, λ.δ]
         input_params *= "[$(inf(x)), $(sup(x))]\n"
     end
     input_ξspan = ""
@@ -58,7 +58,7 @@ function _Y_zero_capd(
     input_output_jacobian = ifelse(output_jacobian isa Val{true}, "1\n", "0\n")
     input_tol = "$tol\n"
 
-    input = join([input_Y_ξ₀, input_params, input_ξspan, input_output_jacobian, input_tol])
+    input = join([input_Q_hat_ξ₀, input_Y_ξ₀, input_params, input_ξspan, input_output_jacobian, input_tol])
 
     # IMPROVE: Write directly to stdout of cmd instead of using echo
     program = pkgdir(@__MODULE__, "capd", "build", "Y")
@@ -184,6 +184,24 @@ function Y_zero_capd(
 )
     S = Interval{Float64}
 
+    Q_hat_ξ₀ = if !iszero(ξ₀) && !iszero(ν)
+        @assert 0 < ξ₀ < ξ₁
+        # Integrate system on [0, ξ₀] using Taylor expansion at zero
+        Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
+        if !all(isfinite, Q_hat_ξ₀)
+            iterations = 0
+            while !all(isfinite, Q_hat_ξ₀) && iterations < 5
+                iterations += 1
+                ξ₀ /= 2
+                Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
+            end
+            iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
+        end
+        convert(SVector{4,S}, Q_hat_ξ₀)
+    else
+        SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
+    end
+
     Y_ξ₀ = if !iszero(ξ₀)
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
@@ -206,9 +224,9 @@ function Y_zero_capd(
     # We use the fact that the equation is identical to the one for Q,
     # except for the change in sign for κ and ω.
     Y = _Y_zero_capd(
+        Q_hat_ξ₀,
         Y_ξ₀,
         convert(Complex{S}, lambda),
-        convert(Complex{S}, ν),
         convert(S, κ),
         convert(S, ϵ),
         convert(S, ξ₀),
@@ -267,6 +285,24 @@ function Y_zero_jacobian_capd(
 )
     S = Interval{Float64}
 
+    Q_hat_ξ₀ = if !iszero(ξ₀)
+        @assert 0 < ξ₀ < ξ₁
+        # Integrate system on [0, ξ₀] using Taylor expansion at zero
+        Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
+        if !all(isfinite, Q_hat_ξ₀)
+            iterations = 0
+            while !all(isfinite, Q_hat_ξ₀) && iterations < 5
+                iterations += 1
+                ξ₀ /= 2
+                Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
+            end
+            iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
+        end
+        convert(SVector{4,S}, Q_hat_ξ₀)
+    else
+        SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
+    end
+
     Y_ξ₀, J_ξ₀ = let
         if !iszero(ξ₀)
             #@assert 0 < ξ₀ < ξ₁
@@ -309,9 +345,9 @@ function Y_zero_jacobian_capd(
     # We use the fact that the equation is identical to the one for Q,
     # except for the change in sign for κ and ω.
     J_ξ₀_ξ₁ = _Y_zero_capd(
+        Q_hat_ξ₀,
         Y_ξ₀,
         convert(Complex{S}, lambda),
-        convert(Complex{S}, ν),
         convert(S, κ),
         convert(S, ϵ),
         convert(S, ξ₀),
