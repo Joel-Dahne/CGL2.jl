@@ -58,7 +58,14 @@ function _Y_zero_capd(
     input_output_jacobian = ifelse(output_jacobian isa Val{true}, "1\n", "0\n")
     input_tol = "$tol\n"
 
-    input = join([input_Q_hat_ξ₀, input_Y_ξ₀, input_params, input_ξspan, input_output_jacobian, input_tol])
+    input = join([
+        input_Q_hat_ξ₀,
+        input_Y_ξ₀,
+        input_params,
+        input_ξspan,
+        input_output_jacobian,
+        input_tol,
+    ])
 
     # IMPROVE: Write directly to stdout of cmd instead of using echo
     program = pkgdir(@__MODULE__, "capd", "build", "Y")
@@ -184,39 +191,24 @@ function Y_zero_capd(
 )
     S = Interval{Float64}
 
-    Q_hat_ξ₀ = if !iszero(ξ₀) && !iszero(ν)
+    Q_hat_ξ₀, Y_ξ₀ = if !iszero(ξ₀) && !iszero(ν)
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
         Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-        if !all(isfinite, Q_hat_ξ₀)
+        Y_ξ₀ = Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+        if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀))
             iterations = 0
-            while !all(isfinite, Q_hat_ξ₀) && iterations < 5
+            while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀)) && iterations < 5
                 iterations += 1
                 ξ₀ /= 2
                 Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-            end
-            iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
-        end
-        convert(SVector{4,S}, Q_hat_ξ₀)
-    else
-        SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
-    end
-
-    Y_ξ₀ = if !iszero(ξ₀)
-        @assert 0 < ξ₀ < ξ₁
-        # Integrate system on [0, ξ₀] using Taylor expansion at zero
-        Y_ξ₀ = Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
-        if !all(isfinite, Y_ξ₀)
-            iterations = 0
-            while !all(isfinite, Y_ξ₀) && iterations < 5
-                iterations += 1
-                ξ₀ /= 2
                 Y_ξ₀ = Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
-        convert(SVector{4,Complex{S}}, Y_ξ₀)
+        convert(SVector{4,S}, Q_hat_ξ₀), convert(SVector{4,Complex{S}}, Y_ξ₀)
     else
+        SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0)),
         SVector{4,Complex{S}}(x, interval(1.0), interval(0.0), interval(0.0))
     end
 
@@ -285,42 +277,30 @@ function Y_zero_jacobian_capd(
 )
     S = Interval{Float64}
 
-    Q_hat_ξ₀ = if !iszero(ξ₀)
-        @assert 0 < ξ₀ < ξ₁
-        # Integrate system on [0, ξ₀] using Taylor expansion at zero
-        Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-        if !all(isfinite, Q_hat_ξ₀)
-            iterations = 0
-            while !all(isfinite, Q_hat_ξ₀) && iterations < 5
-                iterations += 1
-                ξ₀ /= 2
-                Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-            end
-            iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
-        end
-        convert(SVector{4,S}, Q_hat_ξ₀)
-    else
-        SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
-    end
-
-    Y_ξ₀, J_ξ₀ = let
+    Q_hat_ξ₀, Y_ξ₀, J_ξ₀ = let
         if !iszero(ξ₀)
-            #@assert 0 < ξ₀ < ξ₁
+            @assert 0 < ξ₀ < ξ₁
             # Integrate system on [0, ξ₀] using Taylor expansion at zero
+            Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
             Y_ξ₀, J_ξ₀ = Y_zero_jacobian_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
-            if !all(isfinite, Y_ξ₀)
+            if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀) && all(isfinite, J_ξ₀))
                 iterations = 0
-                while !all(isfinite, Y_ξ₀) && iterations < 5
+                while !(
+                    all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀) && all(isfinite, J_ξ₀)
+                ) && iterations < 5
                     iterations += 1
                     ξ₀ /= 2
+                    Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
                     Y_ξ₀, J_ξ₀ =
                         Y_zero_jacobian_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
                 end
                 iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
             end
+            Q_hat_ξ₀ = convert(SVector{4,S}, Q_hat_ξ₀)
             Y_ξ₀ = convert(SVector{4,Complex{S}}, Y_ξ₀)
             J_ξ₀ = convert(SMatrix{4,2,Complex{S}}, J_ξ₀)
         else
+            Q_hat_ξ₀ = SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
             Y_ξ₀ = SVector{4,Complex{S}}(x, interval(1.0), interval(0.0), interval(0.0))
             # Empty integration so the only non-zero derivative is the
             # one of Q_ξ₀[1] w.r.t. μ, which is 1.
@@ -338,7 +318,7 @@ function Y_zero_jacobian_capd(
 
         # J_ξ₀ now contains derivatives of Q_ξ₀. We want to add a row
         # [0, 1] for the derivative of lambda.
-        Y_ξ₀, vcat(J_ξ₀, SMatrix{1,2,Complex{S}}(interval(0.0), interval(1.0)))
+        Q_hat_ξ₀, Y_ξ₀, vcat(J_ξ₀, SMatrix{1,2,Complex{S}}(interval(0.0), interval(1.0)))
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.

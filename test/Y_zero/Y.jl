@@ -17,10 +17,11 @@
 
     res = CGL2.Y_zero(x, lambda, ν, κ, ϵ, ξ₁, λ)
 
-    # Larger interval and lower degree for Taylor expansion
-    # TODO: Need remainder terms!
+    # Test with different settings for Taylor expansion
     res2 = CGL2.Y_zero_capd(x, lambda, ν, κ, ϵ, Arb(1e-1), ξ₁, λ, degree = 5)
-    @test all(Arblib.overlaps.(res, res2)) broken = true
+    res3 = CGL2.Y_zero_capd(x, lambda, ν, κ, ϵ, Arb(1e-3), ξ₁, λ)
+    @test all(Arblib.overlaps.(res, res2))
+    @test all(Arblib.overlaps.(res, res3))
 
     # Compare with Float64 version
     resF64 = CGL2.Y_zero(xF64, lambdaF64, νF64, κF64, ϵF64, ξ₁F64, λF64)
@@ -28,10 +29,11 @@
 
     res_J = CGL2.Y_zero_jacobian(x, lambda, ν, κ, ϵ, ξ₁, λ)
 
-    # Larger interval and lower degree for Taylor expansion
-    # TODO: Need remainder terms!
+    # Test with different settings for Taylor expansion
     res2_J = CGL2.Y_zero_jacobian_capd(x, lambda, ν, κ, ϵ, Arb(1e-1), ξ₁, λ, degree = 5)
-    @test all(Arblib.overlaps.(res_J, res2_J)) broken = true
+    res3_J = CGL2.Y_zero_jacobian_capd(x, lambda, ν, κ, ϵ, Arb(1e-3), ξ₁, λ)
+    @test all(Arblib.overlaps.(res_J, res2_J))
+    @test all(Arblib.overlaps.(res_J, res3_J))
 
     # Compare with Float64 version
     resF64_J = CGL2.Y_zero_jacobian(xF64, lambdaF64, νF64, κF64, ϵF64, ξ₁F64, λF64)
