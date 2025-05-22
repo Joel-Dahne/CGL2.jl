@@ -45,7 +45,7 @@ function branch_eigenvalue_approximation(
         ###
         x, c, lambda = H_approximate(lambda_approx, ν, κ, ϵ, ξ₁, λ)
 
-        @assert isapprox(norm(H(x, c, lambda, ν, κ, ϵ, ξ₁, λ)), 0, atol = 1e-9)
+        @assert isapprox(norm(H(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)), 0, atol = 1e-9)
         @assert isapprox(lambda, lambda_approx, rtol = 1e-3)
 
         (x, c, lambda)

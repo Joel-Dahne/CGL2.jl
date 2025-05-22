@@ -9,12 +9,11 @@ function H_approximate(
     verbose = false,
 ) where {T}
     Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ)
-    Q_hat_ξ₁ = complex(Q_hat(ξ₁)[1:2]...)
 
-    F((x, c1, c2, lambda), (κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ)) =
-        H(x, SVector(c1, c2), lambda, κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ)
+    F((x, c1, c2, lambda), (κ, ϵ, ξ₁, Q_hat, λ)) =
+        H_precomputed(x, SVector(c1, c2), lambda, κ, ϵ, ξ₁, Q_hat, λ)
     x₀ = SVector{4,Complex{T}}(0, 0, 0, lambda_approx) # IMPROVE: Pick this in a smarter way
-    prob = NonlinearProblem{false}(F, x₀, (κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ))
+    prob = NonlinearProblem{false}(F, x₀, (κ, ϵ, ξ₁, Q_hat, λ))
     sol = try
         solve(
             prob,
@@ -57,6 +56,8 @@ function H_solve(
     c::SVector{2,Acf},
     lambda::Acf,
     ν::Acb,
+    γ₁::Acb,
+    γ₂::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -68,9 +69,10 @@ function H_solve(
     verbose = false,
     extra_verbose = false,
 ) where {T}
-    # TODO: Implement these methods
-    H_x = ((x, c1, c2, lambda),) -> H(x, SVector(c1, c2), lambda, ν, κ, ϵ, ξ₁, λ)
-    dH_x = ((x, c1, c2, lambda),) -> H_jacobian(x, SVector(c1, c2), lambda, ν, κ, ϵ, ξ₁, λ)
+    H_x = ((x, c1, c2, lambda),) -> H(x, SVector(c1, c2), lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    dH_x =
+        ((x, c1, c2, lambda),) ->
+            H_jacobian(x, SVector(c1, c2), lambda, γ₁, γ₂, ν, κ, ϵ, ξ₁, λ)
 
     root, root_uniqueness = verify_root_from_approximation(
         H_x,

@@ -1,5 +1,5 @@
 """
-H(x, c, ν, κ, ϵ, ξ₁, λ::CGLParams)
+H(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
 
 Compute
 ```
@@ -11,55 +11,75 @@ vectors, the first is the value of `H` at `ξ₁` and the second is the
 derivative.
 """
 function H(
-    x::Acb,
-    c::SVector{2,Acb},
-    lambda::Acb,
-    ν::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    λ::CGLParams{Arb},
-)
-    Y_0 = Y_zero(x, lambda, ν, κ, ϵ, ξ₁, λ)
-    Y_inf = Y_infinity(c, lambda, ν, κ, ϵ, ξ₁, λ)
-
-    return Y_0 - Y_inf
-end
-
-function H(
-    x::Complex{T},
-    c::SVector{2,Complex{T}},
-    lambda::Complex{T},
-    ν::Complex{T},
+    x::Union{Complex{T},Acb},
+    c::SVector{2,<:Union{Complex{T},Acb}},
+    lambda::Union{Complex{T},Acb},
+    ν::Union{Complex{T},Acb},
+    γ₁::Union{Complex{T},Acb},
+    γ₂::Union{Complex{T},Acb},
     κ::T,
     ϵ::T,
     ξ₁::T,
     λ::CGLParams{T},
 ) where {T}
-    Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ)
-    Q_hat_ξ₁ = complex(Q_hat(ξ₁)[1:2]...)
+    Y_0 = Y_zero(x, lambda, ν, κ, ϵ, ξ₁, λ)
+    Y_inf = Y_infinity(c, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-    return H(x, c, lambda, κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ)
+    return Y_0 - Y_inf
 end
 
 """
-H(x, c, κ, ϵ, ξ₁, Q_hat, Q_hat_ξ₁, λ::CGLParams)
+H_precomputed(x, c, ν, γ₁, γ₂, κ, ϵ, ξ₁, Q_hat, λ::CGLParams)
 
-Version of `H` which uses precomputed values for `Q_hat` and `Q_hat_ξ₁`.
+Same as [`H`](@ref), but instead of taking `ν`, `γ₁` and `γ₂` as
+arguments it take a precomputed `ODESolution` representing the forward
+solution `Q_hat`.
 """
-function H(
+function H_precomputed(
     x::Complex{T},
     c::SVector{2,Complex{T}},
     lambda::Complex{T},
     κ::T,
     ϵ::T,
     ξ₁::T,
-    Q_hat,
-    Q_hat_ξ₁::Complex{T},
+    Q_hat::ODESolution{T},
     λ::CGLParams{T},
 ) where {T}
     Y_0 = Y_zero(x, lambda, κ, ϵ, ξ₁, Q_hat, λ)
-    Y_inf = Y_infinity(c, lambda, κ, ϵ, ξ₁, Q_hat_ξ₁, λ)
+    Y_inf = Y_infinity(c, lambda, κ, ϵ, ξ₁, complex(Q_hat(ξ₁)[1:2]...), λ)
 
     return Y_0 - Y_inf
+end
+
+"""
+H_jacobian(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+
+This function computes the Jacobian of [`H`](@ref) w.r.t. the
+parameters `x`, `c` and `lambda`.
+"""
+function H_jacobian(
+    x::Union{Complex{T},Acb},
+    c::SVector{2,<:Union{Complex{T},Acb}},
+    lambda::Union{Complex{T},Acb},
+    ν::Union{Complex{T},Acb},
+    γ₁::Union{Complex{T},Acb},
+    γ₂::Union{Complex{T},Acb},
+    κ::T,
+    ϵ::T,
+    ξ₁::T,
+    λ::CGLParams{T},
+) where {T}
+    Y_0_J = Y_zero_jacobian(x, lambda, ν, κ, ϵ, ξ₁, λ)
+    Y_inf_J = Y_infinity_jacobian(c, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+    return SMatrix{4,4}(
+        # Derivative with respect to x
+        Y_0_J[:, 1]...,
+        # Derivative with respect to c₁
+        -Y_inf_J[:, 1]...,
+        # Derivative with respect to c₂
+        -Y_inf_J[:, 2]...,
+        # Derivative with respect to lambda
+        Y_0_J[:, 2] - Y_inf_J[:, 3]...,
+    )
 end

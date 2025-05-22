@@ -67,7 +67,8 @@ function eigenvalue_solve(
     xF64, cF64, lambdaF64 =
         CGL2.H_approximate(lambdaF64_approx, νF64, κF64, ϵF64, ξ₁F64, λF64)
 
-    x, c1, c2, lambda = CGL2.H_solve(Acf(xF64), Acf.(cF64), Acf(lambdaF64), ν, κ, ϵ, ξ₁, λ)
+    x, c1, c2, lambda =
+        CGL2.H_solve(Acf(xF64), Acf.(cF64), Acf(lambdaF64), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
     c = SVector(c1, c2)
 

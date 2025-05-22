@@ -6,13 +6,16 @@ struct FunctionBounds_Y
     K_2::Arb
 
     function FunctionBounds_Y(
-        C_ab::Arb,
         lambda::Acb,
+        γ₁::Acb,
+        γ₂::Acb,
         κ::Arb,
         ϵ::Arb,
         ξ₁::Arb,
         λ::CGLParams{Arb},
     )
+        C_ab = Arb(1) # FIXME
+
         C = new(
             C_J_N(C_ab, lambda, κ, ϵ, ξ₁, λ),
             C_Y_12(lambda, κ, ϵ, ξ₁, λ),
