@@ -50,7 +50,7 @@ function linearization_real_matrix(Q₀, κ, ϵ, ξ, λ::CGLParams)
             (ϵ*N₁_a+N₂_a) (ϵ*N₁_b+N₂_b) 0 0
         ]
 
-    B = A + J_N
+    M = A + J_N
 
-    return B
+    return M
 end
