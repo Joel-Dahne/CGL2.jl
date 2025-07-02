@@ -12,11 +12,7 @@
     lambdaF64 = ComplexF64(lambda)
     λF64 = CGLParams{Float64}(λ)
 
-    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
-    B₁ = SMatrix{2,2}(κ, 0, 0, κ)
-    B₂ = (λ.d - 1) * A
-    C = SMatrix{2,2}(κ / λ.σ, λ.ω, -λ.ω, κ / λ.σ)
-    λI = SMatrix{2,2}(lambda, 0, 0, lambda)
+    (; A, B₁, B₂, C, λI) = CGL2.coeff_matrices(lambda, κ, ϵ, λ)
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
@@ -43,10 +39,10 @@
         )
 
         @test real(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+              fdm(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-10
 
         @test imag(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+              fdm(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-10
 
         @test real(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
@@ -54,19 +50,39 @@
         @test imag(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
 
-        # Test that is solves equation, at least approximately
-
-        @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
-            A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
-            (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
-            (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-13
-        let ξ = 2ξ
-            @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+        # Test that is solves equation
+        @test all(
+            Arblib.contains_zero.(
                 A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-15
+            ),
+        )
+        # Check that the (normalized) error is small
+        @test maximum(
+            abs,
+            exp(-CGL2.a1(κ, ϵ) * ξ^2) * (
+                A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ)
+            ),
+        ) < 1e-16
+        let ξ = 2ξ
+            @test all(
+                Arblib.contains_zero.(
+                    A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ),
+                ),
+            )
+            @test maximum(
+                abs,
+                exp(-CGL2.a1(κ, ϵ) * ξ^2) * (
+                    A * Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_1_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_1(ξ, lambda, κ, ϵ, λ)
+                ),
+            ) < 1e-22
         end
     end
 
@@ -96,17 +112,39 @@
         @test imag(Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
 
-        @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
-            A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
-            (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
-            (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-14
-        let ξ = 2ξ
-            @test exp(-CGL2.real_a2(κ, ϵ) * ξ^2) * norm(
+        # Test that is solves equation
+        @test all(
+            Arblib.contains_zero.(
                 A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-19
+            ),
+        )
+        # Check that the (normalized) error is small
+        @test maximum(
+            abs,
+            exp(-CGL2.a2(κ, ϵ) * ξ^2) * (
+                A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ)
+            ),
+        ) < 1e-16
+        let ξ = 2ξ
+            @test all(
+                Arblib.contains_zero.(
+                    A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ),
+                ),
+            )
+            @test maximum(
+                abs,
+                exp(-CGL2.a2(κ, ϵ) * ξ^2) * (
+                    A * Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_2_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_2(ξ, lambda, κ, ϵ, λ)
+                ),
+            ) < 1e-22
         end
     end
 
@@ -136,18 +174,35 @@
         @test imag(Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
 
-        # Test that is solves equation, at least approximately
-        @test norm(
-            A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
-            (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
-            (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-12
-        let ξ = 2ξ
-            @test norm(
+        # Test that is solves equation
+        @test all(
+            Arblib.contains_zero.(
                 A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-15
+            ),
+        )
+        # Check that the (normalized) error is small
+        @test maximum(
+            abs,
+            A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+            (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
+            (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
+        ) < 1e-16
+        let ξ = 2ξ
+            @test all(
+                Arblib.contains_zero.(
+                    A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
+                ),
+            )
+            @test maximum(
+                abs,
+                A * Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_3_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
+            ) < 1e-22
         end
     end
 
@@ -177,18 +232,35 @@
         @test imag(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
               fdm2(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
 
-        # Test that is solves equation, at least approximately
-        @test norm(
-            A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
-            (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
-            (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
-        ) < 1e-12
-        let ξ = 2ξ
-            @test norm(
+        # Test that is solves equation
+        @test all(
+            Arblib.contains_zero.(
                 A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
                 (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
                 (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
-            ) < 1e-15
+            ),
+        )
+        # Check that the (normalized) error is small
+        @test maximum(
+            abs,
+            A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+            (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
+            (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
+        ) < 1e-16
+        let ξ = 2ξ
+            @test all(
+                Arblib.contains_zero.(
+                    A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
+                    (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
+                ),
+            )
+            @test maximum(
+                abs,
+                A * Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) +
+                (B₁ * ξ + B₂ / ξ) * Y_4_dξ(ξ, lambda, κ, ϵ, λ) +
+                (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
+            ) < 1e-22
         end
     end
 

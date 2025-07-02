@@ -98,6 +98,8 @@ include("Y_zero/Y_taylor.jl")
 include("Y_zero/Y_capd.jl")
 include("Y_zero/equation.jl")
 
+include("Y_infinity/Y_linear_parameters.jl")
+include("Y_infinity/Y_linear.jl")
 include("Y_infinity/parameters.jl")
 include("Y_infinity/functions.jl")
 include("Y_infinity/function_bounds.jl")

@@ -1,0 +1,245 @@
+function _Y_k(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k)
+    N = length(c₂ₙₖs)
+    ns = 0:(N-1)
+
+    S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+        c₂ₙₖ * ξ^(-2n - sₖ)
+    end
+
+    if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
+        S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
+    end
+
+    if iszero(aₖ)
+        return S * Aₖ
+    else
+        return exp(aₖ * ξ^2) * S * Aₖ
+    end
+end
+
+function _Y_k_dξ(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k, C_R_Y_k_dξ)
+    N = length(c₂ₙₖs)
+    ns = 0:(N-1)
+
+    # Derivative of sum w.r.t ξ
+    S_dξ = -sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+        (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1 - sₖ)
+    end
+
+    if S_dξ isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
+        S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1 - sₖ)))
+    end
+
+    if iszero(aₖ)
+        return S_dξ * Aₖ
+    else
+        S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+            c₂ₙₖ * ξ^(-2n - sₖ)
+        end
+
+        if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
+            S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
+        end
+
+        return exp(aₖ * ξ^2) * (2aₖ * ξ * S + S_dξ) * Aₖ
+    end
+end
+
+function _Y_k_dξ_dξ(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k, C_R_Y_k_dξ, C_R_Y_k_dξ_dξ)
+    N = length(c₂ₙₖs)
+    ns = 0:(N-1)
+
+    S_dξ_dξ = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+        (2n + sₖ) * (2n + 1 + sₖ) * c₂ₙₖ * ξ^(-2n - 2 - sₖ)
+    end
+
+    if S_dξ_dξ isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
+        S_dξ_dξ = add_error(S_dξ_dξ, C_R_Y_k_dξ_dξ * abs(ξ^(-2N - 2 - sₖ)))
+    end
+
+    if iszero(aₖ)
+        return S_dξ_dξ * Aₖ
+    else
+        S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+            c₂ₙₖ * ξ^(-2n - sₖ)
+        end
+        S_dξ = -sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
+            (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1 - sₖ)
+        end
+
+        if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
+            S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
+            S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1 - sₖ)))
+        end
+
+        return exp(aₖ * ξ^2) * (((2aₖ * ξ)^2 + 2aₖ) * S + 4aₖ * ξ * S_dξ + S_dξ_dξ) * Aₖ
+    end
+end
+
+function Y_1(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₁ = A1(T)
+    s₁ = s1(lambda, κ, λ)
+    a₁ = a1(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns1(N - 1, s₁, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_1(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+
+    return _Y_k(ξ, A₁, s₁, a₁, c2ns, C_R_Y_k)
+end
+
+function Y_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₁ = A1(T)
+    s₁ = s1(lambda, κ, λ)
+    a₁ = a1(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns1(N - 1, s₁, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_1(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_1_dξ(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ(ξ, A₁, s₁, a₁, c2ns, C_R_Y_k, C_R_Y_k_dξ)
+end
+
+function Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₁ = A1(T)
+    s₁ = s1(lambda, κ, λ)
+    a₁ = a1(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns1(N - 1, s₁, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_1(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_1_dξ(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ_dξ = T == Arb ? C_R_Y_1_dξ_dξ(N, ξ, s₁, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ_dξ(ξ, A₁, s₁, a₁, c2ns, C_R_Y_k, C_R_Y_k_dξ, C_R_Y_k_dξ_dξ)
+end
+
+function Y_2(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₂ = A2(T)
+    s₂ = s2(lambda, κ, λ)
+    a₂ = a2(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns2(N - 1, s₂, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_2(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+
+    return _Y_k(ξ, A₂, s₂, a₂, c2ns, C_R_Y_k)
+end
+
+function Y_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₂ = A2(T)
+    s₂ = s2(lambda, κ, λ)
+    a₂ = a2(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns2(N - 1, s₂, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_2(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_2_dξ(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ(ξ, A₂, s₂, a₂, c2ns, C_R_Y_k, C_R_Y_k_dξ)
+end
+
+function Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₂ = A2(T)
+    s₂ = s2(lambda, κ, λ)
+    a₂ = a2(κ, ϵ)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns2(N - 1, s₂, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_2(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_2_dξ(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ_dξ = T == Arb ? C_R_Y_2_dξ_dξ(N, ξ, s₂, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ_dξ(ξ, A₂, s₂, a₂, c2ns, C_R_Y_k, C_R_Y_k_dξ, C_R_Y_k_dξ_dξ)
+end
+
+function Y_3(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₃ = A3(T)
+    s₃ = s3(lambda, κ, λ)
+    a₃ = zero(s₃)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns3(N - 1, s₃, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_3(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+
+    return _Y_k(ξ, A₃, s₃, a₃, c2ns, C_R_Y_k)
+end
+
+function Y_3_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₃ = A3(T)
+    s₃ = s3(lambda, κ, λ)
+    a₃ = zero(s₃)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns3(N - 1, s₃, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_3(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_3_dξ(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ(ξ, A₃, s₃, a₃, c2ns, C_R_Y_k, C_R_Y_k_dξ)
+end
+
+function Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₃ = A3(T)
+    s₃ = s3(lambda, κ, λ)
+    a₃ = zero(s₃)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns3(N - 1, s₃, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_3(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_3_dξ(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ_dξ = T == Arb ? C_R_Y_3_dξ_dξ(N, ξ, s₃, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ_dξ(ξ, A₃, s₃, a₃, c2ns, C_R_Y_k, C_R_Y_k_dξ, C_R_Y_k_dξ_dξ)
+end
+
+function Y_4(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₄ = A4(T)
+    s₄ = s4(lambda, κ, λ)
+    a₄ = zero(s₄)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns4(N - 1, s₄, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_4(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+
+    return _Y_k(ξ, A₄, s₄, a₄, c2ns, C_R_Y_k)
+end
+
+function Y_4_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₄ = A4(T)
+    s₄ = s4(lambda, κ, λ)
+    a₄ = zero(s₄)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns4(N - 1, s₄, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_4(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_4_dξ(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ(ξ, A₄, s₄, a₄, c2ns, C_R_Y_k, C_R_Y_k_dξ)
+end
+
+function Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    A₄ = A4(T)
+    s₄ = s4(lambda, κ, λ)
+    a₄ = zero(s₄)
+
+    N = 10 # TODO: Choose N
+    c2ns = c2ns4(N - 1, s₄, κ, ϵ, λ)
+
+    C_R_Y_k = T == Arb ? C_R_Y_4(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ = T == Arb ? C_R_Y_4_dξ(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+    C_R_Y_k_dξ_dξ = T == Arb ? C_R_Y_4_dξ_dξ(N, ξ, s₄, κ, ϵ, λ) : zero(T)
+
+    return _Y_k_dξ_dξ(ξ, A₄, s₄, a₄, c2ns, C_R_Y_k, C_R_Y_k_dξ, C_R_Y_k_dξ_dξ)
+end
