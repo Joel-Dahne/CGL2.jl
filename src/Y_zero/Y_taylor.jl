@@ -265,7 +265,7 @@ function _Y_zero_taylor_remainder_dλ(
 end
 
 """
-    Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ::CGLParams; degree = 20)
+    Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ::CGLParams; degree = 20)
 
 Compute the solution to the ODE on the interval ``[0, ξ₀]``. Returns a
 vector with four complex values, the first two are the values at `ξ₀`
@@ -276,7 +276,7 @@ only works well for small values of `ξ₀` and is intended to be used
 for handling the removable singularity at `ξ = 0`.
 """
 function Y_zero_taylor(
-    x::Acb,
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -287,7 +287,7 @@ function Y_zero_taylor(
 )
     # Compute expansion
     Y1, Y2 = cgl_linearization_equation_taylor(
-        SVector{2,NTuple{2,Acb}}((x, 0), (1, 0)),
+        SVector{2,NTuple{2,Acb}}((Y₀[1], 0), (Y₀[2], 0)),
         lambda,
         ν,
         κ,
@@ -312,14 +312,14 @@ function Y_zero_taylor(
 end
 
 """
-    Y_zero_jacobian_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ::CGLParams; degree = 20)
+    Y_zero_derivative_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ::CGLParams; degree = 20)
 
-This function computes the Jacobian of [`Y_zero_taylor`](@ref) w.r.t.
-the parameters `x` and `lambda`. It also returns the result of
+This function computes the derivative of [`Y_zero_taylor`](@ref)
+w.r.t. the parameter `lambda`. It also returns the result of
 [`Y_zero_taylor`](@ref).
 """
-function Y_zero_jacobian_taylor(
-    x::Acb,
+function Y_zero_derivative_taylor(
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -330,21 +330,7 @@ function Y_zero_jacobian_taylor(
 )
     # Compute expansion
     Y1, Y2 = cgl_linearization_equation_taylor(
-        SVector{2,NTuple{2,Acb}}((x, 0), (1, 0)),
-        lambda,
-        ν,
-        κ,
-        ϵ,
-        zero(ξ₀),
-        λ;
-        degree,
-    )
-
-    # Compute expansion of derivative w.r.t. x
-    # Note that this uses exactly the same equation as for Y1 and Y2,
-    # just different initial conditions.
-    Y1_dx, Y2_dx = cgl_linearization_equation_taylor(
-        SVector{2,NTuple{2,Acb}}((1, 0), (0, 0)),
+        SVector{2,NTuple{2,Acb}}((Y₀[1], 0), (Y₀[2], 0)),
         lambda,
         ν,
         κ,
@@ -370,17 +356,11 @@ function Y_zero_jacobian_taylor(
 
     remainder, remainder_derivative =
         _Y_zero_taylor_remainder(Y1, Y2, lambda, ν, κ, ϵ, ξ₀, λ)
-    # Since Y1_dx and Y2_dx satisfy the same equation as Y1 and Y2 the
-    # remainder is also computed in the same way.
-    remainder_dx, remainder_derivative_dx =
-        _Y_zero_taylor_remainder(Y1_dx, Y2_dx, lambda, ν, κ, ϵ, ξ₀, λ)
     remainder_dλ, remainder_derivative_dλ =
         _Y_zero_taylor_remainder_dλ(Y1, Y2, Y1_dλ, Y2_dλ, lambda, ν, κ, ϵ, ξ₀, λ)
 
     Y10, Y11 = Arblib.evaluate2(Y1, ξ₀)
     Y20, Y21 = Arblib.evaluate2(Y2, ξ₀)
-    Y10_dx, Y11_dx = Arblib.evaluate2(Y1_dx, ξ₀)
-    Y20_dx, Y21_dx = Arblib.evaluate2(Y2_dx, ξ₀)
     Y10_dλ, Y11_dλ = Arblib.evaluate2(Y1_dλ, ξ₀)
     Y20_dλ, Y21_dλ = Arblib.evaluate2(Y2_dλ, ξ₀)
 
@@ -388,10 +368,6 @@ function Y_zero_jacobian_taylor(
     Y11 += remainder_derivative
     Y20 += remainder
     Y21 += remainder_derivative
-    Y10_dx += remainder_dx
-    Y11_dx += remainder_derivative_dx
-    Y20_dx += remainder_dx
-    Y21_dx += remainder_derivative_dx
     Y10_dλ += remainder_dλ
     Y11_dλ += remainder_derivative_dλ
     Y20_dλ += remainder_dλ
@@ -399,7 +375,7 @@ function Y_zero_jacobian_taylor(
 
     Y = SVector(Y10, Y20, Y11, Y21)
 
-    J = SMatrix{4,2}(Y10_dx, Y20_dx, Y11_dx, Y21_dx, Y10_dλ, Y20_dλ, Y11_dλ, Y21_dλ)
+    J = SVector(Y10_dλ, Y20_dλ, Y11_dλ, Y21_dλ)
 
     return Y, J
 end

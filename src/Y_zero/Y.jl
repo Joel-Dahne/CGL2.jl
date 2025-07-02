@@ -1,13 +1,14 @@
 """
-    Y_zero(x, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
-    Y_zero(x, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero(Y₀, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
 
-Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
-vector with two complex values, where the first is the value at `ξ₁`
-and the second is the derivative.
+Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
+initial values given by `Y₀`. Returns a vector with four complex
+values, where the first two are the values at `ξ₁` and the last two
+are the derivatives.
 """
 function Y_zero(
-    x::Acb,
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -16,11 +17,11 @@ function Y_zero(
     λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 ) where {Arb}
-    return Y_zero_capd(x, lambda, ν, κ, ϵ, ξ₁, λ; tol)
+    return Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ; tol)
 end
 
 function Y_zero(
-    x::ComplexF64,
+    Y₀::SVector{2,ComplexF64},
     lambda::ComplexF64,
     ν::ComplexF64,
     κ::Float64,
@@ -31,11 +32,11 @@ function Y_zero(
 )
     Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ)
 
-    return Y_zero(x, lambda, κ, ϵ, ξ₁, Q_hat, λ)
+    return Y_zero(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ)
 end
 
 function Y_zero(
-    x::ComplexF64,
+    Y₀::SVector{2,ComplexF64},
     lambda::ComplexF64,
     κ::Float64,
     ϵ::Float64,
@@ -44,18 +45,18 @@ function Y_zero(
     λ::CGLParams{Float64};
     tol::Float64 = 1e-11,
 )
-    return Y_zero_float(x, lambda, κ, ϵ, ξ₁, Q_hat, λ; tol)
+    return Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ; tol)
 end
 
 """
-    Y_zero_jacobian(x, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
-    Y_zero_jacobian(x, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero_derivative(Y₀, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero_derivative(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
 
-This function computes the Jacobian of [`Y_zero`](@ref) w.r.t. the
-parameters `x` and `lambda`.
+This function computes the derivative of [`Y_zero`](@ref) w.r.t. the
+parameter `lambda`.
 """
-function Y_zero_jacobian(
-    x::Acb,
+function Y_zero_derivative(
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -64,11 +65,11 @@ function Y_zero_jacobian(
     λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 ) where {Arb}
-    return Y_zero_jacobian_capd(x, lambda, ν, κ, ϵ, ξ₁, λ; tol)
+    return Y_zero_derivative_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ; tol)
 end
 
-function Y_zero_jacobian(
-    x::ComplexF64,
+function Y_zero_derivative(
+    Y₀::SVector{2,ComplexF64},
     lambda::ComplexF64,
     ν::ComplexF64,
     κ::Float64,
@@ -79,11 +80,11 @@ function Y_zero_jacobian(
 )
     Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ)
 
-    return Y_zero_jacobian(x, lambda, κ, ϵ, ξ₁, Q_hat, λ)
+    return Y_zero_derivative(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ)
 end
 
-function Y_zero_jacobian(
-    x::ComplexF64,
+function Y_zero_derivative(
+    Y₀::SVector{2,ComplexF64},
     lambda::ComplexF64,
     κ::Float64,
     ϵ::Float64,
@@ -92,5 +93,5 @@ function Y_zero_jacobian(
     λ::CGLParams{Float64};
     tol::Float64 = 1e-11,
 )
-    return Y_zero_jacobian_float(x, lambda, κ, ϵ, ξ₁, Q_hat, λ; tol)
+    return Y_zero_derivative_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ; tol)
 end

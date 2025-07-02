@@ -1,5 +1,6 @@
 """
     _Y_zero_capd(
+        Q_hat_ξ₀::SVector{4,Interval{Float64}},
         Y_ξ₀::SVector{4,Complex{Interval{Float64}}},
         lambda::Complex{Interval{Float64}},
         ν::Complex{Interval{Float64}},
@@ -82,8 +83,6 @@ function _Y_zero_capd(
         "Exception"
     end
 
-    #println(output)
-
     if contains(output, "Exception")
         n = if output_jacobian isa Val{true}
             80
@@ -136,12 +135,13 @@ function _Y_zero_capd(
 end
 
 """
-    Y_zero_capd(x, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
-    Y_zero_capd(x, lambda, ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
+    Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
+    Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
 
-Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
-vector with four complex values, the first two are the values at `ξ₁`
-and the second two are their derivatives.
+Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
+initial values given by `Y₀`. Returns a vector with four complex
+values, where the first two are the values at `ξ₁` and the last two
+are the derivatives.
 
 The solution is computed using the rigorous CAPD integrator.
 
@@ -155,7 +155,7 @@ tries with half that value. If it fails again it tries to halve it
 once more, iterating like this for a maximum of a few times.
 """
 Y_zero_capd(
-    x::Acb,
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -165,7 +165,7 @@ Y_zero_capd(
     tol::Float64 = 1e-11,
     degree = 20,
 ) = Y_zero_capd(
-    x,
+    Y₀,
     lambda,
     ν,
     κ,
@@ -178,7 +178,7 @@ Y_zero_capd(
 )
 
 function Y_zero_capd(
-    x::Acb,
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -195,26 +195,24 @@ function Y_zero_capd(
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
         Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-        Y_ξ₀ = Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+        Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
         if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀))
             iterations = 0
             while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀)) && iterations < 5
                 iterations += 1
                 ξ₀ /= 2
                 Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-                Y_ξ₀ = Y_zero_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+                Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
         convert(SVector{4,S}, Q_hat_ξ₀), convert(SVector{4,Complex{S}}, Y_ξ₀)
     else
         SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0)),
-        SVector{4,Complex{S}}(x, interval(1.0), interval(0.0), interval(0.0))
+        SVector{4,Complex{S}}(interval(Y₀[1]), interval(Y₀[2]), interval(0.0), interval(0.0))
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
-    # We use the fact that the equation is identical to the one for Q,
-    # except for the change in sign for κ and ω.
     Y = _Y_zero_capd(
         Q_hat_ξ₀,
         Y_ξ₀,
@@ -231,17 +229,17 @@ function Y_zero_capd(
 end
 
 """
-    Y_zero_jacobian_capd(x, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
-    Y_zero_jacobian_capd(x, lambda, ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
+    Y_zero_derivative_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
+    Y_zero_derivative_capd(Y₀, lambda, ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11, degree = 20)
 
-This function computes the Jacobian of [`Y_zero_capd`](@ref) w.r.t.
-the parameters `x` and `lambda`.
+This function computes the derivative of [`Y_zero_capd`](@ref) w.r.t.
+the parameter `lambda`.
 
 Similar to [`Q_zero_capd`](@ref) the solution is computed using the
 rigorous CAPD integrator.
 """
-Y_zero_jacobian_capd(
-    x::Acb,
+Y_zero_derivative_capd(
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -250,8 +248,8 @@ Y_zero_jacobian_capd(
     λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
     degree = 20,
-) = Y_zero_jacobian_capd(
-    x,
+) = Y_zero_derivative_capd(
+    Y₀,
     lambda,
     ν,
     κ,
@@ -263,8 +261,8 @@ Y_zero_jacobian_capd(
     degree,
 )
 
-function Y_zero_jacobian_capd(
-    x::Acb,
+function Y_zero_derivative_capd(
+    Y₀::SVector{2,Acb},
     lambda::Acb,
     ν::Acb,
     κ::Arb,
@@ -282,7 +280,7 @@ function Y_zero_jacobian_capd(
             @assert 0 < ξ₀ < ξ₁
             # Integrate system on [0, ξ₀] using Taylor expansion at zero
             Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-            Y_ξ₀, J_ξ₀ = Y_zero_jacobian_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+            Y_ξ₀, J_ξ₀ = Y_zero_derivative_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
             if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀) && all(isfinite, J_ξ₀))
                 iterations = 0
                 while !(
@@ -292,23 +290,18 @@ function Y_zero_jacobian_capd(
                     ξ₀ /= 2
                     Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
                     Y_ξ₀, J_ξ₀ =
-                        Y_zero_jacobian_taylor(x, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+                        Y_zero_derivative_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
                 end
                 iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
             end
             Q_hat_ξ₀ = convert(SVector{4,S}, Q_hat_ξ₀)
             Y_ξ₀ = convert(SVector{4,Complex{S}}, Y_ξ₀)
-            J_ξ₀ = convert(SMatrix{4,2,Complex{S}}, J_ξ₀)
+            J_ξ₀ = convert(SMatrix{4,1,Complex{S}}, J_ξ₀)
         else
             Q_hat_ξ₀ = SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0))
             Y_ξ₀ = SVector{4,Complex{S}}(x, interval(1.0), interval(0.0), interval(0.0))
-            # Empty integration so the only non-zero derivative is the
-            # one of Q_ξ₀[1] w.r.t. μ, which is 1.
-            J_ξ₀ = SMatrix{4,2,Complex{S}}(
-                interval(1.0),
-                interval(0.0),
-                interval(0.0),
-                interval(0.0),
+            # Empty integration so the derivatives are all zero.
+            J_ξ₀ = SMatrix{4,1,Complex{S}}(
                 interval(0.0),
                 interval(0.0),
                 interval(0.0),
@@ -317,13 +310,11 @@ function Y_zero_jacobian_capd(
         end
 
         # J_ξ₀ now contains derivatives of Q_ξ₀. We want to add a row
-        # [0, 1] for the derivative of lambda.
-        Q_hat_ξ₀, Y_ξ₀, vcat(J_ξ₀, SMatrix{1,2,Complex{S}}(interval(0.0), interval(1.0)))
+        # with 1 for the derivative of lambda.
+        Q_hat_ξ₀, Y_ξ₀, vcat(J_ξ₀, interval(1.0))
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
-    # We use the fact that the equation is identical to the one for Q,
-    # except for the change in sign for κ and ω.
     J_ξ₀_ξ₁ = _Y_zero_capd(
         Q_hat_ξ₀,
         Y_ξ₀,
@@ -341,5 +332,5 @@ function Y_zero_jacobian_capd(
     # on [0, ξ₀] and the one on [ξ₀, ξ₁].
     J = J_ξ₀_ξ₁ * J_ξ₀
 
-    return Acb.(J)
+    return SVector{4,Acb}(J)
 end
