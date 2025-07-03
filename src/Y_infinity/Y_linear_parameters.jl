@@ -6,10 +6,18 @@ A4(T) = SVector{2,ifelse(T == Arb, Acb, Complex{T})}(1, -im)
 a1(κ, ϵ) = -κ * (ϵ + im) / 2(1 + ϵ^2)
 a2(κ, ϵ) = -κ * (ϵ - im) / 2(1 + ϵ^2)
 
+# Real part of a₁ and a₂
+real_a12(κ, ϵ) = -κ * ϵ / 2(1 + ϵ^2)
+
 s1(lambda, κ, λ::CGLParams) = -1 / λ.σ + λ.d + lambda / κ + λ.ω / κ * im
 s2(lambda, κ, λ::CGLParams) = -1 / λ.σ + λ.d + lambda / κ - λ.ω / κ * im
 s3(lambda, κ, λ::CGLParams) = 1 / λ.σ - lambda / κ - λ.ω / κ * im
 s4(lambda, κ, λ::CGLParams) = 1 / λ.σ - lambda / κ + λ.ω / κ * im
+
+# Real part of s₁ and s₂
+real_s12(lambda, κ, λ::CGLParams) = -1 / λ.σ + λ.d + real(lambda) / κ
+# Real part of s₃ and s₄
+real_s34(lambda, κ, λ::CGLParams) = 1 / λ.σ - real(lambda) / κ
 
 function _c2ns(N::Int, sgn1::Int, sgn2::Int, s, κ, ϵ, λ::CGLParams{T}) where {T}
     (; d) = λ

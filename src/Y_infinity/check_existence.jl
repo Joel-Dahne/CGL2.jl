@@ -7,16 +7,16 @@ function C_T_Y(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    real_a₂ = real_a2(κ, ϵ)
-    real_s₂ = real_s2(lambda, κ, λ)
+    real_a = real_a12(κ, ϵ)
+    real_s = real_s34(lambda, κ, λ)
 
     @assert v > 0
-    @assert real_a₂ < 0
-    @assert real_s₂ > 0
-    @assert v + real_s₂ - 2 < 0
+    @assert real_a < 0
+    @assert real_s > 0
+    @assert v + real_s - 2 < 0
 
     return C.Y_12 * C.K_1 * C.J_N / abs(v - 2) +
-           C.Y_34 * C.K_2 * C.J_N / abs(v + real_a₂ - 2)
+           C.Y_34 * C.K_2 * C.J_N / abs(v + real_a - 2)
 end
 
 """

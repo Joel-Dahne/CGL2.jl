@@ -22,8 +22,8 @@ function Y_infinity(
     norms = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C)
 
     # Compute zeroth order bounds
-    Y = add_error.(zero.(c), norms.Y * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY = add_error.(zero.(c), norms.Y_dξ * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y = add_error.(zero.(c), norms.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    dY = add_error.(zero.(c), norms.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     for _ = 1:3
         # TODO
