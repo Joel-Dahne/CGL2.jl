@@ -209,7 +209,12 @@ function Y_zero_capd(
         convert(SVector{4,S}, Q_hat_ξ₀), convert(SVector{4,Complex{S}}, Y_ξ₀)
     else
         SVector{4,S}(real(ν), imag(ν), interval(0.0), interval(0.0)),
-        SVector{4,Complex{S}}(interval(Y₀[1]), interval(Y₀[2]), interval(0.0), interval(0.0))
+        SVector{4,Complex{S}}(
+            interval(Y₀[1]),
+            interval(Y₀[2]),
+            interval(0.0),
+            interval(0.0),
+        )
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
