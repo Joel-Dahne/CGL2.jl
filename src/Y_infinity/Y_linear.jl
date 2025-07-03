@@ -3,17 +3,17 @@ function _Y_k(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k)
     ns = 0:(N-1)
 
     S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-        c₂ₙₖ * ξ^(-2n - sₖ)
+        c₂ₙₖ * ξ^(-2n)
     end
 
     if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
-        S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
+        S = add_error(S, C_R_Y_k * abs(ξ^(-2N)))
     end
 
     if iszero(aₖ)
-        return S * Aₖ
+        return ξ^(-sₖ) * S * Aₖ
     else
-        return exp(aₖ * ξ^2) * S * Aₖ
+        return exp(aₖ * ξ^2) * ξ^(-sₖ) * S * Aₖ
     end
 end
 
@@ -23,25 +23,25 @@ function _Y_k_dξ(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k, C_R_Y_k_dξ)
 
     # Derivative of sum w.r.t ξ
     S_dξ = -sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-        (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1 - sₖ)
+        (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1)
     end
 
     if S_dξ isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
-        S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1 - sₖ)))
+        S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1)))
     end
 
     if iszero(aₖ)
-        return S_dξ * Aₖ
+        return ξ^(-sₖ) * S_dξ * Aₖ
     else
         S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-            c₂ₙₖ * ξ^(-2n - sₖ)
+            c₂ₙₖ * ξ^(-2n)
         end
 
         if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
-            S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
+            S = add_error(S, C_R_Y_k * abs(ξ^(-2N)))
         end
 
-        return exp(aₖ * ξ^2) * (2aₖ * ξ * S + S_dξ) * Aₖ
+        return exp(aₖ * ξ^2) * ξ^(-sₖ) * (2aₖ * ξ * S + S_dξ) * Aₖ
     end
 end
 
@@ -50,29 +50,32 @@ function _Y_k_dξ_dξ(ξ, Aₖ, sₖ, aₖ, c₂ₙₖs, C_R_Y_k, C_R_Y_k_dξ, C
     ns = 0:(N-1)
 
     S_dξ_dξ = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-        (2n + sₖ) * (2n + 1 + sₖ) * c₂ₙₖ * ξ^(-2n - 2 - sₖ)
+        (2n + sₖ) * (2n + 1 + sₖ) * c₂ₙₖ * ξ^(-2n - 2)
     end
 
     if S_dξ_dξ isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
-        S_dξ_dξ = add_error(S_dξ_dξ, C_R_Y_k_dξ_dξ * abs(ξ^(-2N - 2 - sₖ)))
+        S_dξ_dξ = add_error(S_dξ_dξ, C_R_Y_k_dξ_dξ * abs(ξ^(-2N - 2)))
     end
 
     if iszero(aₖ)
-        return S_dξ_dξ * Aₖ
+        return ξ^(-sₖ) * S_dξ_dξ * Aₖ
     else
         S = sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-            c₂ₙₖ * ξ^(-2n - sₖ)
+            c₂ₙₖ * ξ^(-2n)
         end
         S_dξ = -sum(zip(ns, c₂ₙₖs)) do (n, c₂ₙₖ)
-            (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1 - sₖ)
+            (2n + sₖ) * c₂ₙₖ * ξ^(-2n - 1)
         end
 
         if S isa Arblib.AcbOrRef # FIXME: Handle AcbSeries
-            S = add_error(S, C_R_Y_k * abs(ξ^(-2N - sₖ)))
-            S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1 - sₖ)))
+            S = add_error(S, C_R_Y_k * abs(ξ^(-2N)))
+            S_dξ = add_error(S_dξ, C_R_Y_k_dξ * abs(ξ^(-2N - 1)))
         end
 
-        return exp(aₖ * ξ^2) * (((2aₖ * ξ)^2 + 2aₖ) * S + 4aₖ * ξ * S_dξ + S_dξ_dξ) * Aₖ
+        return exp(aₖ * ξ^2) *
+               ξ^(-sₖ) *
+               (((2aₖ * ξ)^2 + 2aₖ) * S + 4aₖ * ξ * S_dξ + S_dξ_dξ) *
+               Aₖ
     end
 end
 
