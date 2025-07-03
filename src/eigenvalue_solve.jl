@@ -60,21 +60,13 @@ function eigenvalue_solve(
     verbose && @info "Got" lambdaF64_approx
 
     ###
-    # Step 3: Solve for x and λ
+    # Step 3.2: Solve λ
     ###
-    verbose && @info "Solving for x and λ"
+    verbose && @info "Solving for λ"
 
-    xF64, cF64, lambdaF64 =
-        CGL2.H_approximate(lambdaF64_approx, νF64, κF64, ϵF64, ξ₁F64, λF64)
+    lambda = CGL2.H_solve(Acf(lambdaF64_approx), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
-    x, c1, c2, lambda =
-        CGL2.H_solve(Acf(xF64), Acf.(cF64), Acf(lambdaF64), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    @show ComplexF64(lambda) ≈ lambdaF64_approx
 
-    c = SVector(c1, c2)
-
-    @assert ComplexF64(x) ≈ xF64
-    @assert ComplexF64.(c) ≈ cF64
-    @assert ComplexF64(lambda) ≈ lambdaF64
-
-    return x, c, lambda
+    return lambda
 end

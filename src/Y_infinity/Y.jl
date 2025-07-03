@@ -88,12 +88,12 @@ function Y_infinity(
 end
 
 """
-    Y_infinity_jacobian(γ, κ, ϵ, ξ₁, λ::CGLParams)
+    Y_infinity_derivative(γ, κ, ϵ, ξ₁, λ::CGLParams)
 
-This function computes the Jacobian of [`Y_infinity`](@ref) w.r.t. the
-parameters `c` and `lambda`.
+This function computes the derivative of [`Y_infinity`](@ref) w.r.t.
+the parameter `lambda`.
 """
-function Y_infinity_jacobian(
+function Y_infinity_derivative(
     c::SVector{2,Acb},
     lambda::Acb,
     γ₁::Acb,
@@ -110,24 +110,20 @@ function Y_infinity_jacobian(
     norms = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C)
 
     # Compute zeroth order bounds
-    Y = add_error.(zero.(c), norms.Y * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY = add_error.(zero.(c), norms.Y_dξ * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y = add_error.(zero.(c), norms.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    dY = add_error.(zero.(c), norms.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
     # TODO: Add proper norm bounds
-    Y_dc₁ = add_error.(zero.(c), norms.Y * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY_dc₁ = add_error.(zero.(c), norms.Y_dξ * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    Y_dc₂ = add_error.(zero.(c), norms.Y * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY_dc₂ = add_error.(zero.(c), norms.Y_dξ * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    Y_dλ = add_error.(zero.(c), norms.Y * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY_dλ = add_error.(zero.(c), norms.Y_dξ * exp(real_a2(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y_dλ = add_error.(zero.(c), norms.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    dY_dλ = add_error.(zero.(c), norms.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     for _ = 1:3
         # TODO
     end
 
-    return SMatrix{4,3}(Y_dc₁..., dY_dc₁..., Y_dc₂..., dY_dc₂..., Y_dλ..., dY_dλ...)
+    return SVector(Y_dλ..., dY_dλ...)
 end
 
-function Y_infinity_jacobian(
+function Y_infinity_derivative(
     c::SVector{2,ComplexF64},
     lambda::ComplexF64,
     γ₁::ComplexF64,
@@ -139,10 +135,10 @@ function Y_infinity_jacobian(
 )
     Q_hat_ξ₁ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)[1]
 
-    return Y_infinity_jacobian(c, lambda, κ, ϵ, ξ₁, Q_hat_ξ₁, λ)
+    return Y_infinity_derivative(c, lambda, κ, ϵ, ξ₁, Q_hat_ξ₁, λ)
 end
 
-function Y_infinity_jacobian(
+function Y_infinity_derivative(
     c::SVector{2,ComplexF64},
     lambda::ComplexF64,
     κ::Float64,
@@ -180,12 +176,8 @@ function Y_infinity_jacobian(
     dY = Y12_dξ * c + Y12_dξ * I_K_1 + Y12 * I_K_1_dξ + Y34_dξ * I_K_2 + Y34 * I_K_2_dξ
 
     # FIXME: Implement these
-    Y_dc₁ = Y
-    dY_dc₁ = Y
-    Y_dc₂ = Y
-    dY_dc₂ = Y
     Y_dλ = Y
     dY_dλ = Y
 
-    return SMatrix{4,3}(Y_dc₁..., dY_dc₁..., Y_dc₂..., dY_dc₂..., Y_dλ..., dY_dλ...)
+    return SVector(Y_dλ..., dY_dλ...)
 end
