@@ -17,17 +17,33 @@ function Y_infinity(
 )
     v = Arb("0.1")
 
-    C = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    # Compute enclosure of forward solution
+    Q_hat, dQ_hat = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-    norms = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C)
+    # Precompute functions as well as function and norm bounds
+    F_Y = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+    C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y)
 
     # Compute zeroth order bounds
-    Y = add_error.(zero.(c), norms.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY = add_error.(zero.(c), norms.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y = add_error.(zero.(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    dY = add_error.(zero.(c), norms_Y.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
-    for _ = 1:3
-        # TODO
-    end
+    # Improve bounds
+    I_K_2 = zero(Y) # FIXME: Should not be zero
+
+    Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
+
+    I_K_1_dξ = F_Y.K_1 * F_Y.J_N * Y
+    I_K_2_dξ = -F_Y.K_2 * F_Y.J_N * Y
+
+    dY =
+        F_Y.Y_12_dξ * c +
+        F_Y.Y_12 * I_K_1_dξ +
+        F_Y.Y_34_dξ * I_K_2 +
+        F_Y.Y_34 * I_K_2_dξ
 
     return vcat(Y, dY)
 end
@@ -58,13 +74,8 @@ function Y_infinity(
 )
     A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
 
-    Y1 = Y_1(ξ₁, lambda, κ, ϵ, λ)
-    Y1_dξ = Y_1_dξ(ξ₁, lambda, κ, ϵ, λ)
-    Y2 = Y_2(ξ₁, lambda, κ, ϵ, λ)
-    Y2_dξ = Y_2_dξ(ξ₁, lambda, κ, ϵ, λ)
-
-    Y12 = hcat(Y1, Y2)
-    Y12_dξ = hcat(Y1_dξ, Y2_dξ)
+    Y12 = hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ))
+    Y12_dξ = hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ))
     Y34 = hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ))
     Y34_dξ = hcat(Y_3_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dξ(ξ₁, lambda, κ, ϵ, λ))
 

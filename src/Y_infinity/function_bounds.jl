@@ -33,17 +33,14 @@ end
 
 function C_J_N(C_ab::Arb, lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     (; σ, δ) = λ
-    # TODO: opnorm is most likely not rigorous. We probably want to
-    # compute explicit values for them.
-    p = 2
-    (; M1, M2, M3) = J_N_coeff_matrices(λ)
 
     return 2^(σ - 1) *
            C_ab^(σ + 1) *
            (
-               opnorm(Float64.(M1), p) +
-               2σ * opnorm(Float64.(M2), p) +
-               opnorm(Float64.(M3), p)
+               1 +
+               abs(δ) * (1 + 2σ) +
+               2σ * (1 + abs(δ)) +
+               max(1 + 2σ * abs(δ), 1 + abs(δ) * (1 + 2σ))
            )
 end
 
