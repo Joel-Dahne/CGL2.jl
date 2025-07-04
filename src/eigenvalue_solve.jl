@@ -64,9 +64,18 @@ function eigenvalue_solve(
     ###
     verbose && @info "Solving for λ"
 
-    lambda = CGL2.H_solve(Acf(lambdaF64_approx), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    verbose && @info "Solving for λ using midpoint of ν"
+    lambda_mid = CGL2.H_solve(Acf(lambdaF64_approx), midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
-    @show ComplexF64(lambda) ≈ lambdaF64_approx
+    # FIXME: Improve enclosures so that we don't need this scaling
+    ν_radius_scaling = Mag(1e-4)
+    verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
+    Arblib.mul!(Arblib.radref(Arblib.realref(ν)), radius(real(ν)), ν_radius_scaling)
+    Arblib.mul!(Arblib.radref(Arblib.imagref(ν)), radius(imag(ν)), ν_radius_scaling)
+    lambda = CGL2.H_solve(midpoint(Acf, lambda_mid), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+
+    # Note that the finite difference approximation is quite bad
+    @show isapprox(ComplexF64(lambda), lambdaF64_approx, rtol = 1e-4)
 
     return lambda
 end
