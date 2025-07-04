@@ -36,6 +36,23 @@ struct FunctionEnclosures_Y
         Q_hat_ξ₁, dQ_hat_ξ₁ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
         JN = J_N(Q_hat_ξ₁, λ)
 
+        # IMPROVE: Only compute these if include_dλ is true
+        Y_12_dλ = hcat(Y_1_dλ(ξ₁, lambda, κ, ϵ, λ), Y_2_dλ(ξ₁, lambda, κ, ϵ, λ))
+        Y_12_dλ_dξ = hcat(Y_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+        Y_34_dλ = hcat(Y_3_dλ(ξ₁, lambda, κ, ϵ, λ), Y_4_dλ(ξ₁, lambda, κ, ϵ, λ))
+        Y_34_dλ_dξ = hcat(Y_3_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+        K1_dλ, K2_dλ = K_1_2_dλ(
+            Y_12,
+            Y_12_dξ,
+            Y_34,
+            Y_34_dξ,
+            Y_12_dλ,
+            Y_12_dλ_dξ,
+            Y_34_dλ,
+            Y_34_dλ_dξ,
+            A,
+        )
 
         F = new(
             Y_12,
@@ -45,26 +62,13 @@ struct FunctionEnclosures_Y
             K1,
             K2,
             JN,
-            indeterminate.(Y_12),
-            indeterminate.(Y_12),
-            indeterminate.(Y_12),
-            indeterminate.(Y_12),
-            indeterminate.(K1),
-            indeterminate.(K2),
+            Y_12_dλ,
+            Y_12_dλ_dξ,
+            Y_34_dλ,
+            Y_34_dλ_dξ,
+            K1_dλ,
+            K2_dλ,
         )
-
-        if include_dλ
-            F.Y_12_dλ[] = hcat(Y_1_dλ(ξ₁, lambda, κ, ϵ, λ), Y_2_dλ(ξ₁, lambda, κ, ϵ, λ))
-            F.Y_12_dλ_dξ[] =
-                hcat(Y_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
-            F.Y_34_dλ[] = hcat(Y_3_dλ(ξ₁, lambda, κ, ϵ, λ), Y_4_dλ(ξ₁, lambda, κ, ϵ, λ))
-            F.Y_34_dλ_dξ[] =
-                hcat(Y_3_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
-
-            K1_dλ, K2_dλ = K_1_2_dλ(Y_12, Y_12_dξ, Y_34, Y_34_dξ, A)
-            F.K1_dλ[] = K1_dλ
-            F.K2_dλ[] = K2_dλ
-        end
 
         return F
     end
@@ -79,13 +83,16 @@ function J_N(Q_hat_ξ, λ::CGLParams{T}) where {T}
 end
 
 K_1_2(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2(
-    hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ)),
-    hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ)),
-    hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ)),
-    hcat(Y_3_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dξ(ξ₁, lambda, κ, ϵ, λ)),
+    hcat(Y_1(ξ, lambda, κ, ϵ, λ), Y_2(ξ, lambda, κ, ϵ, λ)),
+    hcat(Y_1_dξ(ξ, lambda, κ, ϵ, λ), Y_2_dξ(ξ, lambda, κ, ϵ, λ)),
+    hcat(Y_3(ξ, lambda, κ, ϵ, λ), Y_4(ξ, lambda, κ, ϵ, λ)),
+    hcat(Y_3_dξ(ξ, lambda, κ, ϵ, λ), Y_4_dξ(ξ, lambda, κ, ϵ, λ)),
     SMatrix{2,2}(ϵ, 1, -1, ϵ),
 )
 
+# TODO: This uses linear algebra with SMatrix. It is probably rigorous
+# for 2x2 matrices, but we should make sure to implement a rigorous
+# version.
 function K_1_2(
     Y12::SMatrix{2,2,T},
     Y12_dξ::SMatrix{2,2,T},
@@ -99,4 +106,33 @@ function K_1_2(
     K2 = -inv(m_K2_inv)
 
     return K1, K2
+end
+
+function K_1_2_dλ(
+    Y12::SMatrix{2,2,T},
+    Y12_dξ::SMatrix{2,2,T},
+    Y34::SMatrix{2,2,T},
+    Y34_dξ::SMatrix{2,2,T},
+    Y12_dλ::SMatrix{2,2,T},
+    Y12_dλ_dξ::SMatrix{2,2,T},
+    Y34_dλ::SMatrix{2,2,T},
+    Y34_dλ_dξ::SMatrix{2,2,T},
+    A::SMatrix{2,2},
+) where {T}
+    # This uses the formula d/dx inv(M) = -inv(M) * M_x * inv(M) for
+    # differentiating the inverses.
+    m_K2_inv = A * (Y34_dξ - Y12_dξ * inv(Y12) * Y34)
+    m_K2_inv_dλ =
+        A * (
+            Y34_dλ_dξ - Y12_dλ_dξ * inv(Y12) * Y34 -
+            -Y12_dξ * inv(Y12) * Y12_dλ * inv(Y12) * Y34 - Y12_dξ * inv(Y12) * Y34_dλ
+        )
+
+    K1_dλ =
+        -inv(Y12) * Y12_dλ * inv(Y12) * Y34 * inv(m_K2_inv) +
+        inv(Y12) * Y34_dλ * inv(m_K2_inv) -
+        inv(Y12) * Y34 * inv(m_K2_inv) * m_K2_inv_dλ * inv(m_K2_inv)
+    K2_dλ = inv(m_K2_inv) * m_K2_inv_dλ * inv(m_K2_inv)
+
+    return K1_dλ, K2_dλ
 end

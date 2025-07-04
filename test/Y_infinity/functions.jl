@@ -24,6 +24,11 @@
     Y_3, Y_3_dξ, Y_3_dξ_dξ = CGL2.Y_3, CGL2.Y_3_dξ, CGL2.Y_3_dξ_dξ
     Y_4, Y_4_dξ, Y_4_dξ_dξ = CGL2.Y_4, CGL2.Y_4_dξ, CGL2.Y_4_dξ_dξ
 
+    Y_1_dλ, Y_1_dλ_dξ = CGL2.Y_1_dλ, CGL2.Y_1_dλ_dξ
+    Y_2_dλ, Y_2_dλ_dξ = CGL2.Y_2_dλ, CGL2.Y_2_dλ_dξ
+    Y_3_dλ, Y_3_dλ_dξ = CGL2.Y_3_dλ, CGL2.Y_3_dλ_dξ
+    Y_4_dλ, Y_4_dλ_dξ = CGL2.Y_4_dλ, CGL2.Y_4_dλ_dξ
+
     @testset "Y1" begin
         @test all(
             Arblib.overlaps.(
@@ -38,17 +43,10 @@
             ),
         )
 
-        @test real(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-10
-
-        @test imag(Y_1_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-10
-
-        @test real(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> real(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
-
-        @test imag(Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> imag(Y_1(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+        @test Y_1_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_1(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
+        @test Y_1_dξ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm2(ξ -> Y_1(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-7
 
         # Test that is solves equation
         @test all(
@@ -84,6 +82,22 @@
                 ),
             ) < 1e-22
         end
+
+        # Check derivatives w.r.t. λ
+        @test Y_1_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_1(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_1_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_1_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_1_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_1_dλ(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
     end
 
     @testset "Y2" begin
@@ -100,17 +114,11 @@
             ),
         )
 
-        @test real(Y_2_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+        @test Y_2_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_2(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-8
 
-        @test imag(Y_2_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
-
-        @test real(Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> real(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
-
-        @test imag(Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> imag(Y_2(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-7
+        @test Y_2_dξ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm2(ξ -> Y_2(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-7
 
         # Test that is solves equation
         @test all(
@@ -146,6 +154,22 @@
                 ),
             ) < 1e-22
         end
+
+        # Check derivatives w.r.t. λ
+        @test Y_2_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_2(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_2_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_2_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_2_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_2_dλ(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
     end
 
     @testset "Y3" begin
@@ -162,17 +186,11 @@
             ),
         )
 
-        @test real(Y_3_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
+        @test Y_3_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_3(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-11
 
-        @test imag(Y_3_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
-
-        @test real(Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> real(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
-
-        @test imag(Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> imag(Y_3(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+        @test Y_3_dξ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm2(ξ -> Y_3(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-8
 
         # Test that is solves equation
         @test all(
@@ -204,6 +222,22 @@
                 (C - λI) * Y_3(ξ, lambda, κ, ϵ, λ),
             ) < 1e-22
         end
+
+        # Check derivatives w.r.t. λ
+        @test Y_3_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_3(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_3_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_3_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_3_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_3_dλ(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
     end
 
     @testset "Y4" begin
@@ -220,17 +254,11 @@
             ),
         )
 
-        @test real(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
+        @test Y_4_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_4(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-11
 
-        @test imag(Y_4_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-11
-
-        @test real(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> real(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
-
-        @test imag(Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ)) ≈
-              fdm2(ξ -> imag(Y_4(ξ, lambdaF64, κF64, ϵF64, λF64)), ξF64) rtol = 1e-8
+        @test Y_4_dξ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm2(ξ -> Y_4(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-8
 
         # Test that is solves equation
         @test all(
@@ -262,16 +290,32 @@
                 (C - λI) * Y_4(ξ, lambda, κ, ϵ, λ),
             ) < 1e-22
         end
+
+        # Check derivatives w.r.t. λ
+        @test Y_4_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_4(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_4_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                Y_4_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-10
+
+        @test Y_4_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> Y_4_dλ(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
     end
 
     @testset "K1 and K2" begin
         # K1 and K2 are suppose to give solutions to the linear system
         # Ψ * v = [[0, 0]; A \ F].
 
-        Y12 = hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ))
-        Y12_dξ = hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ))
-        Y34 = hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ))
-        Y34_dξ = hcat(Y_3_dξ(ξ₁, lambda, κ, ϵ, λ), Y_4_dξ(ξ₁, lambda, κ, ϵ, λ))
+        Y12 = hcat(Y_1(ξ, lambda, κ, ϵ, λ), Y_2(ξ, lambda, κ, ϵ, λ))
+        Y12_dξ = hcat(Y_1_dξ(ξ, lambda, κ, ϵ, λ), Y_2_dξ(ξ, lambda, κ, ϵ, λ))
+        Y34 = hcat(Y_3(ξ, lambda, κ, ϵ, λ), Y_4(ξ, lambda, κ, ϵ, λ))
+        Y34_dξ = hcat(Y_3_dξ(ξ, lambda, κ, ϵ, λ), Y_4_dξ(ξ, lambda, κ, ϵ, λ))
 
         Ψ = [Y12 Y34; Y12_dξ Y34_dξ]
         F = eltype(Ψ)[0.1, 0.25]
@@ -283,6 +327,34 @@
         v = [v12; v34]
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; A \ F]))
+
+        # Test derivatives w.r.t. λ
+        Y12_dλ = hcat(Y_1_dλ(ξ, lambda, κ, ϵ, λ), Y_2_dλ(ξ, lambda, κ, ϵ, λ))
+        Y12_dλ_dξ = hcat(Y_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), Y_2_dλ_dξ(ξ, lambda, κ, ϵ, λ))
+        Y34_dλ = hcat(Y_3_dλ(ξ, lambda, κ, ϵ, λ), Y_4_dλ(ξ, lambda, κ, ϵ, λ))
+        Y34_dλ_dξ = hcat(Y_3_dλ_dξ(ξ, lambda, κ, ϵ, λ), Y_4_dλ_dξ(ξ, lambda, κ, ϵ, λ))
+
+        K1_dλ, K2_dλ =
+            CGL2.K_1_2_dλ(Y12, Y12_dξ, Y34, Y34_dξ, Y12_dλ, Y12_dλ_dξ, Y34_dλ, Y34_dλ_dξ, A)
+
+        K1_dλ_fdm = fdm(
+            lambda_real -> CGL2.K_1_2(
+                ξF64,
+                complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64,
+            )[1],
+            real(lambdaF64)
+        )
+
+        K2_dλ_fdm = fdm(
+            lambda_real -> CGL2.K_1_2(
+                ξF64,
+                complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64,
+            )[2],
+            real(lambdaF64)
+        )
+
+        @test K1_dλ ≈ K1_dλ_fdm rtol = 1e-12
+        @test K2_dλ ≈ K2_dλ_fdm rtol = 1e-12
     end
 
     @testset "JN" begin
