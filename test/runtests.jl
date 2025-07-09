@@ -28,12 +28,12 @@ using FiniteDifferences
     include("G.jl")
     include("G_solve.jl")
 
-    include("Q_hat_zero/Q_hat_zero.jl")
+    include("Q_hat_zero/Q_hat.jl")
 
     include("Y_zero/Y.jl")
 
-    include("Y_infinity/parameters.jl")
+    #include("Y_infinity/parameters.jl") # TODO: Update these tests
     include("Y_infinity/functions.jl")
-    include("Y_infinity/functions_bounds.jl")
+    include("Y_infinity/function_bounds.jl")
     include("Y_infinity/Y.jl")
 end

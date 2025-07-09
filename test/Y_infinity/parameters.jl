@@ -12,14 +12,14 @@
         # matrix
         @test all(
             Arblib.overlaps.(
-                -0.5(A \ B₁) * CGL2.A011(typeof(κ)),
-                CGL2.a21(κ, ϵ) * CGL2.A011(typeof(κ)),
+                -0.5(A \ B₁) * CGL2.A1(typeof(κ)),
+                CGL2.a1(κ, ϵ) * CGL2.A1(typeof(κ)),
             ),
         )
         @test all(
             Arblib.overlaps.(
-                -0.5(A \ B₁) * CGL2.A012(typeof(κ)),
-                CGL2.a22(κ, ϵ) * CGL2.A012(typeof(κ)),
+                -0.5(A \ B₁) * CGL2.A2(typeof(κ)),
+                CGL2.a2(κ, ϵ) * CGL2.A2(typeof(κ)),
             ),
         )
 

@@ -165,8 +165,6 @@ function _Y_zero_taylor_remainder_dλ(
             Arblib.degree(Y1_dλ) ==
             Arblib.degree(Y2_dλ)
 
-    # TODO: Implement from here!an
-
     indeterminate_result = (indeterminate(κ), indeterminate(κ))
 
     isfinite(Y1) && isfinite(Y2) || return indeterminate_result

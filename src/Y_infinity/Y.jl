@@ -79,7 +79,7 @@ function Y_infinity(
     # First order approximation
     Y = Y12 * c
 
-    I_K_2 = zero(Y) # TODO: Compute approximation of this
+    I_K_2 = zero(Y) # IMPROVE: Compute approximation of this
 
     Y = Y12 * c + Y34 * I_K_2
 
@@ -193,8 +193,8 @@ function Y_infinity_derivative(
     Y_dλ = Y12_dλ * c
 
     # Compute an improved approximation
-    I_K_2 = zero(Y) # TODO: Compute approximation of this
-    I_K_2_dλ = zero(Y) # TODO: Compute approximation of this
+    I_K_2 = zero(Y) # IMPROVE: Compute approximation of this
+    I_K_2_dλ = zero(Y) # IMPROVE: Compute approximation of this
 
     Y = Y12 * c + Y34 * I_K_2
     Y_dλ = Y12_dλ * c + Y34_dλ * I_K_2 + Y34 * I_K_2_dλ
