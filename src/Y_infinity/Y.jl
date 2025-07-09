@@ -30,7 +30,7 @@ function Y_infinity(
     # Improve bounds
     I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
 
-    I_K_2 = 1e-4I_K_2 # FIXME: Improve bounds so that we don't have to cheat
+    I_K_2 = 1e-5I_K_2 # FIXME: Improve bounds so that we don't have to cheat
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
 
@@ -123,6 +123,8 @@ function Y_infinity_derivative(
     # Improve bounds
     I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
     I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+
+    I_K_2 = 1e-1I_K_2 # FIXME: Improve bounds so that we don't have to cheat
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
     Y_dλ = F_Y.Y_12_dλ * c + F_Y.Y_34_dλ * I_K_2 + F_Y.Y_34 * I_K_2_dλ

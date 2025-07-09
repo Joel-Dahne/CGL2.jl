@@ -63,4 +63,5 @@ function _args_to_complex(μ::T, γ_real::T, γ_imag::T, κ_or_ϵ::T) where {T<:
     return μ, _complex(γ_real, γ_imag), κ_or_ϵ
 end
 
-norm_inf(v) = mapreduce(abs, max, v)
+norm_inf(v::AbstractVector) = mapreduce(abs, max, v)
+norm_inf(v::AbstractMatrix) = maximum(row -> sum(abs, row), eachrow(v))

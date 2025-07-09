@@ -23,10 +23,8 @@ struct FunctionBounds_Y
         λ::CGLParams{Arb};
         include_dλ::Bool = false,
     )
-        C_ab = Arb(1) # FIXME
-
         C = new(
-            C_J_N(C_ab, lambda, κ, ϵ, ξ₁, λ),
+            C_J_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
             C_Y_12(lambda, κ, ϵ, ξ₁, λ),
             C_Y_34(lambda, κ, ϵ, ξ₁, λ),
             C_Y_12_dξ(lambda, κ, ϵ, ξ₁, λ),
@@ -57,11 +55,16 @@ struct FunctionBounds_Y
     end
 end
 
-function C_J_N(C_ab::Arb, lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+function C_J_N(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     (; σ, δ) = λ
 
+    # FIXME
+    Q_hat, _ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    a, b = reim(Q_hat)
+    C_ab = 1.1max(abs(a), abs(b)) / ξ₁^(-1 / σ)
+
     return 2^(σ - 1) *
-           C_ab^(σ + 1) *
+           C_ab^2σ *
            (
                1 +
                abs(δ) * (1 + 2σ) +
@@ -70,23 +73,35 @@ function C_J_N(C_ab::Arb, lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLPara
            )
 end
 
+# FIXME
 function C_Y_12(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    return one(lambda) # FIXME
+    return 1.5max(norm_inf(Y_1(ξ₁, lambda, κ, ϵ, λ)), norm_inf(Y_2(ξ₁, lambda, κ, ϵ, λ))) /
+           (exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^-real_s12(lambda, κ, λ))
 end
 
+# FIXME
 function C_Y_34(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    return one(lambda) # FIXME
+    return 1.5max(norm_inf(Y_3(ξ₁, lambda, κ, ϵ, λ)), norm_inf(Y_4(ξ₁, lambda, κ, ϵ, λ))) /
+           ξ₁^-real_s34(lambda, κ, λ)
 end
 
+# FIXME
 function C_Y_12_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_2_dξ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / (exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^(-real_s12(lambda, κ, λ) + 1))
 end
 
+# FIXME
 function C_Y_34_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_3_dξ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_4_dξ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / ξ₁^(-real_s34(lambda, κ, λ) - 1)
 end
 
-
+# FIXME
 function C_Y_12_dλ(
     lambda::Acb,
     κ::Arb,
@@ -95,7 +110,10 @@ function C_Y_12_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_1_dλ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_2_dλ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / (exp(real_a12(κ, ϵ) * ξ₁^2) * log(ξ₁) * ξ₁^-real_s12(lambda, κ, λ))
 end
 
 function C_Y_34_dλ(
@@ -106,9 +124,13 @@ function C_Y_34_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_3_dλ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_4_dλ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / (log(ξ₁) * ξ₁^-real_s34(lambda, κ, λ))
 end
 
+# FIXME
 function C_Y_12_dλ_dξ(
     lambda::Acb,
     κ::Arb,
@@ -117,9 +139,13 @@ function C_Y_12_dλ_dξ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / (exp(real_a12(κ, ϵ) * ξ₁^2) * log(ξ₁) * ξ₁^(-real_s12(lambda, κ, λ) + 1))
 end
 
+# FIXME
 function C_Y_34_dλ_dξ(
     lambda::Acb,
     κ::Arb,
@@ -128,17 +154,26 @@ function C_Y_34_dλ_dξ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    return 1.5max(
+        norm_inf(Y_3_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)),
+        norm_inf(Y_4_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)),
+    ) / (log(ξ₁) * ξ₁^(-real_s34(lambda, κ, λ) - 1))
 end
 
+# FIXME
 function C_K_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return one(lambda) # FIXME
+    K_1, _ = K_1_2(ξ₁, lambda, κ, ϵ, λ)
+    return 1.5norm_inf(K_1) /
+           (exp(-real_a12(κ, ϵ) * ξ₁^2) * ξ₁^(real_s12(lambda, κ, λ) - 1))
 end
 
+# FIXME
 function C_K_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return one(lambda) # FIXME
+    _, K_2 = K_1_2(ξ₁, lambda, κ, ϵ, λ)
+    return 1.5norm_inf(K_2) / ξ₁^(real_s34(lambda, κ, λ) - 1)
 end
 
+# FIXME
 function C_K_1_dλ(
     lambda::Acb,
     κ::Arb,
@@ -147,9 +182,12 @@ function C_K_1_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    K_1_dλ, _ = K_1_2_dλ(ξ₁, lambda, κ, ϵ, λ)
+    return 1.5norm_inf(K_1_dλ) /
+           (exp(-real_a12(κ, ϵ) * ξ₁^2) * log(ξ₁) * ξ₁^(real_s12(lambda, κ, λ) - 1))
 end
 
+# FIXME
 function C_K_2_dλ(
     lambda::Acb,
     κ::Arb,
@@ -158,5 +196,6 @@ function C_K_2_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return one(lambda) # FIXME
+    _, K_2_dλ = K_1_2_dλ(ξ₁, lambda, κ, ϵ, λ)
+    return 1.5norm_inf(K_2_dλ) / (log(ξ₁) * ξ₁^(real_s34(lambda, κ, λ) - 1))
 end
