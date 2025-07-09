@@ -34,4 +34,6 @@ using FiniteDifferences
 
     include("Y_infinity/parameters.jl")
     include("Y_infinity/functions.jl")
+    include("Y_infinity/functions_bounds.jl")
+    include("Y_infinity/Y.jl")
 end
