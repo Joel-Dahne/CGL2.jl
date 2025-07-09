@@ -340,17 +340,23 @@
         K1_dλ_fdm = fdm(
             lambda_real -> CGL2.K_1_2(
                 ξF64,
-                complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64,
+                complex(lambda_real, imag(lambdaF64)),
+                κF64,
+                ϵF64,
+                λF64,
             )[1],
-            real(lambdaF64)
+            real(lambdaF64),
         )
 
         K2_dλ_fdm = fdm(
             lambda_real -> CGL2.K_1_2(
                 ξF64,
-                complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64,
+                complex(lambda_real, imag(lambdaF64)),
+                κF64,
+                ϵF64,
+                λF64,
             )[2],
-            real(lambdaF64)
+            real(lambdaF64),
         )
 
         @test K1_dλ ≈ K1_dλ_fdm rtol = 1e-12

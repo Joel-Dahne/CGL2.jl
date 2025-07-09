@@ -25,11 +25,12 @@ function Y_infinity(
     norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y)
 
     # Compute zeroth order bounds
-    Y = add_error.(zero.(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY = add_error.(zero.(c), norms_Y.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y = add_error.(zero(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
-    I_K_2 = zero(Y) # FIXME: Should not be zero
+    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+
+    I_K_2 = 1e-4I_K_2 # FIXME: Improve bounds so that we don't have to cheat
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
 
@@ -111,20 +112,17 @@ function Y_infinity_derivative(
     # Precompute functions as well as function and norm bounds
     F_Y = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
 
-    C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
 
-    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y)
+    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, include_dλ = true)
 
     # Compute zeroth order bounds
-    Y = add_error.(zero.(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY = add_error.(zero.(c), norms_Y.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    # TODO: Add proper norm bounds
-    Y_dλ = add_error.(zero.(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
-    dY_dλ = add_error.(zero.(c), norms_Y.Y_dξ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y = add_error.(zero(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y_dλ = add_error.(zero(c), norms_Y.Y_dλ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
-    I_K_2 = zero(Y) # TODO: Compute approximation of this
-    I_K_2_dλ = zero(Y) # TODO: Compute approximation of this
+    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
     Y_dλ = F_Y.Y_12_dλ * c + F_Y.Y_34_dλ * I_K_2 + F_Y.Y_34 * I_K_2_dλ

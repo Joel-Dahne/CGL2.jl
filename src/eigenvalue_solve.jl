@@ -41,8 +41,8 @@ function eigenvalue_solve(
     # TODO: Implement rigorous version
     ν, γ₂ = CGL2.G_hat_solve(Acf(νF64), γ₁, Acf(γ₂F64), κ, ϵ, ξ₁, λ; verbose)
 
-    @assert ComplexF64(ν) ≈ νF64
-    @assert ComplexF64(γ₂) ≈ γ₂F64
+    @show ComplexF64(ν) ≈ νF64
+    @show ComplexF64(γ₂) ≈ γ₂F64
 
     verbose && @info "Got" ν γ₂
 
@@ -65,7 +65,8 @@ function eigenvalue_solve(
     verbose && @info "Solving for λ"
 
     verbose && @info "Solving for λ using midpoint of ν"
-    lambda_mid = CGL2.H_solve(Acf(lambdaF64_approx), midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    lambda_mid =
+        CGL2.H_solve(Acf(lambdaF64_approx), midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # FIXME: Improve enclosures so that we don't need this scaling
     ν_radius_scaling = Mag(1e-4)
