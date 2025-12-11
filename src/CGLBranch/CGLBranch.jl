@@ -194,7 +194,7 @@ function G(μ, κ, ϵ, ω, λ::Params)
         )
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 4000,
@@ -210,7 +210,7 @@ function G(μ, κ, ϵ, ω, λ::Params)
         )
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
@@ -221,7 +221,7 @@ function G(μ, κ, ϵ, ω, λ::Params)
         prob = ODEProblem{false}(system, SVector(μ, 0, 0, 0), (zero(ξ₁), ξ₁), (κ, ϵ, ω, λ))
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
@@ -319,7 +319,7 @@ function G_asym(μ, κ, ϵ, ω, λ::Params)
         )
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 4000,
@@ -335,7 +335,7 @@ function G_asym(μ, κ, ϵ, ω, λ::Params)
         )
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
@@ -346,7 +346,7 @@ function G_asym(μ, κ, ϵ, ω, λ::Params)
         prob = ODEProblem{false}(system, SVector(μ, 0, 0, 0), (zero(ξ₁), ξ₁), (κ, ϵ, ω, λ))
         sol = NonlinearSolve.solve(
             prob,
-            AutoVern7(Rodas5P()),
+            Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,

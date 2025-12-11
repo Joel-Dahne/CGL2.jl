@@ -28,7 +28,7 @@ function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::F
 
     sol = solve(
         prob,
-        AutoVern7(Rodas5P()),
+        Vern7(),
         abstol = tol,
         reltol = tol,
         save_everystep = false,
@@ -112,14 +112,7 @@ function Q_hat_zero_float_curve(
         (κ, ϵ, λ),
     )
 
-    sol = solve(
-        prob,
-        AutoVern7(Rodas5P()),
-        abstol = tol,
-        reltol = tol,
-        verbose = false;
-        saveat,
-    )
+    sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)
 
     return sol
 end
