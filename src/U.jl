@@ -28,6 +28,12 @@ end
 
 U(a::T, b::T, z::T) where {T<:Union{Float64,ComplexF64}} = Arblib.fpwrap_hypgeom_u(a, b, z)
 
+function U(a::T, b, z) where {T<:Union{ArbSeries,AcbSeries}}
+    Arblib.degree(a) == 1 || throw(ArgumentError("only supports degree 1"))
+
+    T((U(a[0], b, z), U_da(a[0], b, z) * a[1]))
+end
+
 # Used for differentiation w.r.t. a variable which both a and z depend
 # on.
 function U(a::T, b, z::T) where {T<:Union{ArbSeries,AcbSeries}}

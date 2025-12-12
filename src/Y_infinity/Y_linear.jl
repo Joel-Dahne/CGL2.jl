@@ -434,3 +434,138 @@ function Y_4_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
 
     return _Y_k_dλ_dξ(ξ, A₄, s₄, s₄_dλ, a₄, c2ns, c2ns_dλ, C_R_Y_k, C_R_Y_k_dξ)
 end
+
+function P_1(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    return U(a - lambda / 2κ, b, z) * SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function P_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    z_dξ = -2c * ξ
+    return U_dz(a - lambda / 2κ, b, z) *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function P_2(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    return U(conj(a) - lambda / 2κ, b, z) *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function P_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    z_dξ = -2conj(c) * ξ
+    return U_dz(conj(a) - lambda / 2κ, b, z) *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function E_1(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    return exp(z) *
+           U(b - a + lambda / 2κ, b, -z) *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function E_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    z_dξ = -2c * ξ
+    return exp(z) *
+           (U(b - a + lambda / 2κ, b, -z) - U_dz(b - a + lambda / 2κ, b, -z)) *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function E_2(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    return exp(z) *
+           U(b - conj(a) + lambda / 2κ, b, -z) *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function E_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    z_dξ = -2conj(c) * ξ
+    return exp(z) *
+           (U(b - conj(a) + lambda / 2κ, b, -z) - U_dz(b - conj(a) + lambda / 2κ, b, -z)) *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function P_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    return -U_da(a - lambda / 2κ, b, z) / 2κ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    z_dξ = -2c * ξ
+    return -U_dzda(a - lambda / 2κ, b, z) / 2κ *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function P_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    return -U_da(conj(a) - lambda / 2κ, b, z) / 2κ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    z_dξ = -2conj(c) * ξ
+    return -U_dzda(conj(a) - lambda / 2κ, b, z) / 2κ *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function E_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    return exp(z) * U_da(b - a + lambda / 2κ, b, -z) / 2κ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -c * ξ^2
+    z_dξ = -2c * ξ
+    return exp(z) *
+           (U_da(b - a + lambda / 2κ, b, -z) - U_dzda(b - a + lambda / 2κ, b, -z)) / 2κ *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(im, 1)
+end
+
+function E_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    return exp(z) * U_da(b - conj(a) + lambda / 2κ, b, -z) / 2κ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end
+
+function E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
+    a, b, c = _abc(κ, ϵ, λ)
+    z = -conj(c) * ξ^2
+    z_dξ = -2conj(c) * ξ
+    return exp(z) * (
+               U_da(b - conj(a) + lambda / 2κ, b, -z) -
+               U_dzda(b - conj(a) + lambda / 2κ, b, -z)
+           ) / 2κ *
+           z_dξ *
+           SVector{2,ifelse(T == Arb, Acb, Complex{T})}(-im, 1)
+end

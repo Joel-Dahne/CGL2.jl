@@ -6,7 +6,7 @@ function I_K_2_enclosure(
     ξ₁::Arb,
     v::Arb,
     λ::CGLParams{Arb},
-    C_Y::FunctionBounds_Y,
+    C_Y::Union{FunctionBounds_Y,FunctionBounds_Y_new},
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -32,7 +32,7 @@ function I_K_2_dλ_enclosure(
     ξ₁::Arb,
     v::Arb,
     λ::CGLParams{Arb},
-    C_Y::FunctionBounds_Y,
+    C_Y::Union{FunctionBounds_Y,FunctionBounds_Y_new},
     norms_Y::NormBounds_Y,
 )
     return I_K_2_dλ_1_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y) +
@@ -47,7 +47,7 @@ function I_K_2_dλ_1_enclosure(
     ξ₁::Arb,
     v::Arb,
     λ::CGLParams{Arb},
-    C_Y::FunctionBounds_Y,
+    C_Y::Union{FunctionBounds_Y,FunctionBounds_Y_new},
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -78,7 +78,7 @@ function I_K_2_dλ_2_enclosure(
     ξ₁::Arb,
     v::Arb,
     λ::CGLParams{Arb},
-    C_Y::FunctionBounds_Y,
+    C_Y::Union{FunctionBounds_Y,FunctionBounds_Y_new},
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ

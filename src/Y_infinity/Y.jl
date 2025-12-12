@@ -19,27 +19,43 @@ function Y_infinity(
 
     # Precompute functions as well as function and norm bounds
     F_Y = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    F_Y_new = FunctionEnclosures_Y_new(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
     C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    C_Y_new = FunctionBounds_Y_new(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
     norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y)
+    norms_Y_new = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y_new)
 
     # Compute zeroth order bounds
     Y = add_error.(zero(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y_new = add_error.(zero(c), norms_Y_new.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
     I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    I_K_2_new = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y_new, norms_Y_new)
 
-    I_K_2 = 1e-5I_K_2 # FIXME: Improve bounds so that we don't have to cheat
+    # FIXME: Improve bounds so that we don't have to cheat
+    I_K_2 = 1e-5I_K_2
+    I_K_2_new = 1e-5I_K_2_new
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
+    Y_new = F_Y_new.E_12 * c + F_Y_new.P_12 * I_K_2_new
 
     I_K_1_dξ = F_Y.K_1 * F_Y.J_N * Y
     I_K_2_dξ = -F_Y.K_2 * F_Y.J_N * Y
+    I_K_1_dξ_new = F_Y_new.K_1 * F_Y_new.J_N * Y_new
+    I_K_2_dξ_new = -F_Y_new.K_2 * F_Y_new.J_N * Y_new
 
     dY = F_Y.Y_12_dξ * c + F_Y.Y_12 * I_K_1_dξ + F_Y.Y_34_dξ * I_K_2 + F_Y.Y_34 * I_K_2_dξ
+    dY_new =
+        F_Y_new.E_12_dξ * c +
+        F_Y_new.E_12 * I_K_1_dξ_new +
+        F_Y_new.P_12_dξ * I_K_2_new +
+        F_Y_new.P_12 * I_K_2_dξ_new
 
     return vcat(Y, dY)
+    return vcat(Y, dY), vcat(Y_new, dY_new)
 end
 
 function Y_infinity(
@@ -66,6 +82,30 @@ function Y_infinity(
     Q_hat_ξ₁::ComplexF64,
     λ::CGLParams{Float64},
 )
+    E12 = hcat(E_1(ξ₁, lambda, κ, ϵ, λ), E_2(ξ₁, lambda, κ, ϵ, λ))
+    E12_dξ = hcat(E_1_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+    P12 = hcat(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ))
+    P12_dξ = hcat(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
+    K1, K2 = K_1_2(E12, E12_dξ, P12, P12_dξ, A)
+
+    JN = J_N(Q_hat_ξ₁, λ)
+
+    # First order approximation
+    Y = P12 * c
+
+    I_K_2 = zero(Y) # IMPROVE: Compute approximation of this
+
+    Y = E12 * c + P12 * I_K_2
+
+    I_K_1_dξ = K1 * JN * Y
+    I_K_2_dξ = -K2 * JN * Y
+
+    dY = E12_dξ * c + E12 * I_K_1_dξ + P12_dξ * I_K_2 + P12 * I_K_2_dξ
+
+    res_new = vcat(Y, dY)
+
     Y12 = hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ))
     Y12_dξ = hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ))
     Y34 = hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ))
@@ -89,6 +129,7 @@ function Y_infinity(
     dY = Y12_dξ * c + Y12 * I_K_1_dξ + Y34_dξ * I_K_2 + Y34 * I_K_2_dξ
 
     return vcat(Y, dY)
+    return vcat(Y, dY), res_new
 end
 
 """
@@ -111,29 +152,46 @@ function Y_infinity_derivative(
 
     # Precompute functions as well as function and norm bounds
     F_Y = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
+    F_Y_new = FunctionEnclosures_Y_new(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
 
     C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
+    C_Y_new = FunctionBounds_Y_new(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
 
     norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, include_dλ = true)
+    norms_Y_new = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y_new, include_dλ = true)
 
     # Compute zeroth order bounds
     Y = add_error.(zero(c), norms_Y.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
     Y_dλ = add_error.(zero(c), norms_Y.Y_dλ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y_new = add_error.(zero(c), norms_Y_new.Y * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
+    Y_dλ_new = add_error.(zero(c), norms_Y_new.Y_dλ * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
     I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
     I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    I_K_2_new = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y_new, norms_Y_new)
+    I_K_2_dλ_new = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y_new, norms_Y_new)
 
-    I_K_2 = 1e-1I_K_2 # FIXME: Improve bounds so that we don't have to cheat
+    # FIXME: Improve bounds so that we don't have to cheat
+    I_K_2 = 1e-1I_K_2
 
     Y = F_Y.Y_12 * c + F_Y.Y_34 * I_K_2
     Y_dλ = F_Y.Y_12_dλ * c + F_Y.Y_34_dλ * I_K_2 + F_Y.Y_34 * I_K_2_dλ
+    Y_new = F_Y_new.E_12 * c + F_Y_new.P_12 * I_K_2_new
+    Y_dλ_new =
+        F_Y_new.E_12_dλ * c + F_Y_new.P_12_dλ * I_K_2_new + F_Y_new.P_12 * I_K_2_dλ_new
 
     I_K_1_dξ = F_Y.K_1 * F_Y.J_N * Y
     I_K_2_dξ = -F_Y.K_2 * F_Y.J_N * Y
+    I_K_1_dξ_new = F_Y_new.K_1 * F_Y_new.J_N * Y_new
+    I_K_2_dξ_new = -F_Y_new.K_2 * F_Y_new.J_N * Y_new
 
     I_K_1_dλ_dξ = F_Y.K_1_dλ * F_Y.J_N * Y + F_Y.K_1 * F_Y.J_N * Y_dλ
     I_K_2_dλ_dξ = -F_Y.K_2_dλ * F_Y.J_N * Y - F_Y.K_2 * F_Y.J_N * Y_dλ
+    I_K_1_dλ_dξ_new =
+        F_Y_new.K_1_dλ * F_Y_new.J_N * Y + F_Y_new.K_1 * F_Y_new.J_N * Y_dλ_new
+    I_K_2_dλ_dξ_new =
+        -F_Y_new.K_2_dλ * F_Y_new.J_N * Y - F_Y_new.K_2 * F_Y_new.J_N * Y_dλ_new
 
     dY_dλ =
         F_Y.Y_12_dλ_dξ * c +
@@ -144,7 +202,17 @@ function Y_infinity_derivative(
         F_Y.Y_34_dλ * I_K_2_dξ +
         F_Y.Y_34 * I_K_2_dλ_dξ
 
+    dY_dλ_new =
+        F_Y_new.E_12_dλ_dξ * c +
+        F_Y_new.E_12_dλ * I_K_1_dξ_new +
+        F_Y_new.E_12 * I_K_1_dλ_dξ_new +
+        F_Y_new.P_12_dλ_dξ * I_K_2_new +
+        F_Y_new.P_12_dξ * I_K_2_dλ_new +
+        F_Y_new.P_12_dλ * I_K_2_dξ_new +
+        F_Y_new.P_12 * I_K_2_dλ_dξ_new
+    \
     return SVector(Y_dλ..., dY_dλ...)
+    return SVector(Y_dλ..., dY_dλ...), SVector(Y_dλ_new..., dY_dλ_new...)
 end
 
 function Y_infinity_derivative(
@@ -171,6 +239,51 @@ function Y_infinity_derivative(
     Q_hat_ξ₁::ComplexF64,
     λ::CGLParams{Float64},
 )
+    E12 = hcat(E_1(ξ₁, lambda, κ, ϵ, λ), E_2(ξ₁, lambda, κ, ϵ, λ))
+    E12_dξ = hcat(E_1_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+    P12 = hcat(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ))
+    P12_dξ = hcat(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+    E12_dλ = hcat(E_1_dλ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ(ξ₁, lambda, κ, ϵ, λ))
+    E12_dλ_dξ = hcat(E_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+    P12_dλ = hcat(P_1_dλ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ(ξ₁, lambda, κ, ϵ, λ))
+    P12_dλ_dξ = hcat(P_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
+    K1, K2 = K_1_2(E12, E12_dξ, P12, P12_dξ, A)
+    K1_dλ, K2_dλ =
+        K_1_2_dλ(E12, E12_dξ, P12, P12_dξ, E12_dλ, E12_dλ_dξ, P12_dλ, P12_dλ_dξ, A)
+
+    JN = J_N(Q_hat_ξ₁, λ)
+
+    # First order approximation
+    Y = E12 * c
+    Y_dλ = E12_dλ * c
+
+    # Compute an improved approximation
+    I_K_2 = zero(Y) # IMPROVE: Compute approximation of this
+    I_K_2_dλ = zero(Y) # IMPROVE: Compute approximation of this
+
+    Y = E12 * c + P12 * I_K_2
+    Y_dλ = E12_dλ * c + P12_dλ * I_K_2 + P12 * I_K_2_dλ
+
+    I_K_1_dξ = K1 * JN * Y
+    I_K_2_dξ = -K2 * JN * Y
+
+    I_K_1_dλ_dξ = K1_dλ * JN * Y + K1 * JN * Y_dλ
+    I_K_2_dλ_dξ = -K2_dλ * JN * Y - K2 * JN * Y_dλ
+
+    dY_dλ =
+        E12_dλ_dξ * c +
+        E12_dλ * I_K_1_dξ +
+        E12 * I_K_1_dλ_dξ +
+        P12_dλ_dξ * I_K_2 +
+        P12_dξ * I_K_2_dλ +
+        P12_dλ * I_K_2_dξ +
+        P12 * I_K_2_dλ_dξ
+
+    res_new = SVector(Y_dλ..., dY_dλ...)
+
     Y12 = hcat(Y_1(ξ₁, lambda, κ, ϵ, λ), Y_2(ξ₁, lambda, κ, ϵ, λ))
     Y12_dξ = hcat(Y_1_dξ(ξ₁, lambda, κ, ϵ, λ), Y_2_dξ(ξ₁, lambda, κ, ϵ, λ))
     Y34 = hcat(Y_3(ξ₁, lambda, κ, ϵ, λ), Y_4(ξ₁, lambda, κ, ϵ, λ))
@@ -215,4 +328,5 @@ function Y_infinity_derivative(
         Y34 * I_K_2_dλ_dξ
 
     return SVector(Y_dλ..., dY_dλ...)
+    return SVector(Y_dλ..., dY_dλ...), res_new
 end

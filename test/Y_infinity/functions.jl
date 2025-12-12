@@ -363,6 +363,74 @@
         @test K2_dλ ≈ K2_dλ_fdm rtol = 1e-12
     end
 
+    @testset "P_$j" for (j, P_j, P_j_dξ, P_j_dλ, P_j_dλ_dξ) in [
+        (1, CGL2.P_1, CGL2.P_1_dξ, CGL2.P_1_dλ, CGL2.P_1_dλ_dξ),
+        (2, CGL2.P_2, CGL2.P_2_dξ, CGL2.P_2_dλ, CGL2.P_2_dλ_dξ),
+    ]
+        @test all(
+            Arblib.overlaps.(
+                getindex.(P_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ), 1),
+                P_j_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test all(
+            Arblib.overlaps.(
+                getindex.(P_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ), 1),
+                P_j_dλ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test P_j_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> P_j(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-12
+
+        @test P_j_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                P_j(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-8
+
+        @test P_j_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                P_j_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-9
+    end
+
+    @testset "E_$j" for (j, E_j, E_j_dξ, E_j_dλ, E_j_dλ_dξ) in [
+        (1, CGL2.E_1, CGL2.E_1_dξ, CGL2.E_1_dλ, CGL2.E_1_dλ_dξ),
+        (2, CGL2.E_2, CGL2.E_2_dξ, CGL2.E_2_dλ, CGL2.E_2_dλ_dξ),
+    ]
+        @test all(
+            Arblib.overlaps.(
+                getindex.(E_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ), 1),
+                E_j_dξ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test all(
+            Arblib.overlaps.(
+                getindex.(E_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ), 1),
+                E_j_dλ(ξ, lambda, κ, ϵ, λ),
+            ),
+        )
+
+        @test E_j_dξ(ξ, lambda, κ, ϵ, λ) ≈
+              fdm(ξ -> E_j(ξ, lambdaF64, κF64, ϵF64, λF64), ξF64) rtol = 1e-10
+
+        @test E_j_dλ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                E_j(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-8
+
+        @test E_j_dλ_dξ(ξ, lambda, κ, ϵ, λ) ≈ fdm(
+            lambda_real ->
+                E_j_dξ(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
+            real(lambdaF64),
+        ) rtol = 1e-8
+    end
+
     @testset "JN" begin
         # The precise value for a and b should not play any role in
         # the correctness, we just compute some approximation here.

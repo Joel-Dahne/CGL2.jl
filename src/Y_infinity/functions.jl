@@ -74,6 +74,82 @@ struct FunctionEnclosures_Y
     end
 end
 
+struct FunctionEnclosures_Y_new
+    E_12::SMatrix{2,2,Acb}
+    E_12_dξ::SMatrix{2,2,Acb}
+    P_12::SMatrix{2,2,Acb}
+    P_12_dξ::SMatrix{2,2,Acb}
+    K_1::SMatrix{2,2,Acb}
+    K_2::SMatrix{2,2,Acb}
+    J_N::SMatrix{2,2,Acb}
+
+    E_12_dλ::SMatrix{2,2,Acb}
+    E_12_dλ_dξ::SMatrix{2,2,Acb}
+    P_12_dλ::SMatrix{2,2,Acb}
+    P_12_dλ_dξ::SMatrix{2,2,Acb}
+    K_1_dλ::SMatrix{2,2,Acb}
+    K_2_dλ::SMatrix{2,2,Acb}
+
+    function FunctionEnclosures_Y_new(
+        lambda::Acb,
+        γ₁::Acb,
+        γ₂::Acb,
+        κ::Arb,
+        ϵ::Arb,
+        ξ₁::Arb,
+        λ::CGLParams{Arb};
+        include_dλ::Bool = false,
+    )
+        E_12 = hcat(E_1(ξ₁, lambda, κ, ϵ, λ), E_2(ξ₁, lambda, κ, ϵ, λ))
+        E_12_dξ = hcat(E_1_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+        P_12 = hcat(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ))
+        P_12_dξ = hcat(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+        A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
+        K1, K2 = K_1_2(E_12, E_12_dξ, P_12, P_12_dξ, A)
+
+        # Compute enclosure of forward solution
+        Q_hat_ξ₁, _ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+        JN = J_N(Q_hat_ξ₁, λ)
+
+        # IMPROVE: Only compute these if include_dλ is true
+        E_12_dλ = hcat(E_1_dλ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ(ξ₁, lambda, κ, ϵ, λ))
+        E_12_dλ_dξ = hcat(E_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+        P_12_dλ = hcat(P_1_dλ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ(ξ₁, lambda, κ, ϵ, λ))
+        P_12_dλ_dξ = hcat(P_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))
+
+        K1_dλ, K2_dλ = K_1_2_dλ(
+            E_12,
+            E_12_dξ,
+            P_12,
+            P_12_dξ,
+            E_12_dλ,
+            E_12_dλ_dξ,
+            P_12_dλ,
+            P_12_dλ_dξ,
+            A,
+        )
+
+        F = new(
+            E_12,
+            E_12_dξ,
+            P_12,
+            P_12_dξ,
+            K1,
+            K2,
+            JN,
+            E_12_dλ,
+            E_12_dλ_dξ,
+            P_12_dλ,
+            P_12_dλ_dξ,
+            K1_dλ,
+            K2_dλ,
+        )
+
+        return F
+    end
+end
+
 function J_N(Q_hat_ξ, λ::CGLParams{T}) where {T}
     (; σ) = λ
     a, b = reim(Q_hat_ξ)
@@ -90,19 +166,27 @@ K_1_2(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2(
     SMatrix{2,2}(ϵ, 1, -1, ϵ),
 )
 
+K_1_2_new(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2(
+    hcat(E_1(ξ, lambda, κ, ϵ, λ), E_2(ξ, lambda, κ, ϵ, λ)),
+    hcat(E_1_dξ(ξ, lambda, κ, ϵ, λ), E_2_dξ(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
+    SMatrix{2,2}(ϵ, 1, -1, ϵ),
+)
+
 # TODO: This uses linear algebra with SMatrix. It is probably rigorous
 # for 2x2 matrices, but we should make sure to implement a rigorous
 # version.
 function K_1_2(
-    Y12::SMatrix{2,2,T},
-    Y12_dξ::SMatrix{2,2,T},
-    Y34::SMatrix{2,2,T},
-    Y34_dξ::SMatrix{2,2,T},
+    E12::SMatrix{2,2,T},
+    E12_dξ::SMatrix{2,2,T},
+    P12::SMatrix{2,2,T},
+    P12_dξ::SMatrix{2,2,T},
     A::SMatrix{2,2},
 ) where {T}
-    m_K2_inv = A * (Y34_dξ - Y12_dξ * inv(Y12) * Y34)
+    m_K2_inv = A * (P12_dξ - E12_dξ * inv(E12) * P12)
 
-    K1 = inv(Y12) * Y34 * inv(m_K2_inv)
+    K1 = inv(E12) * P12 * inv(m_K2_inv)
     K2 = -inv(m_K2_inv)
 
     return K1, K2
@@ -120,30 +204,42 @@ K_1_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2_dλ(
     SMatrix{2,2}(ϵ, 1, -1, ϵ),
 )
 
+K_1_2_dλ_new(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2_dλ(
+    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
+    hcat(E_1_dλ(ξ, lambda, κ, ϵ, λ), E_2_dλ(ξ, lambda, κ, ϵ, λ)),
+    hcat(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1_dλ(ξ, lambda, κ, ϵ, λ), P_2_dλ(ξ, lambda, κ, ϵ, λ)),
+    hcat(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
+    SMatrix{2,2}(ϵ, 1, -1, ϵ),
+)
+
 function K_1_2_dλ(
-    Y12::SMatrix{2,2,T},
-    Y12_dξ::SMatrix{2,2,T},
-    Y34::SMatrix{2,2,T},
-    Y34_dξ::SMatrix{2,2,T},
-    Y12_dλ::SMatrix{2,2,T},
-    Y12_dλ_dξ::SMatrix{2,2,T},
-    Y34_dλ::SMatrix{2,2,T},
-    Y34_dλ_dξ::SMatrix{2,2,T},
+    E12::SMatrix{2,2,T},
+    E12_dξ::SMatrix{2,2,T},
+    P12::SMatrix{2,2,T},
+    P12_dξ::SMatrix{2,2,T},
+    E12_dλ::SMatrix{2,2,T},
+    E12_dλ_dξ::SMatrix{2,2,T},
+    P12_dλ::SMatrix{2,2,T},
+    P12_dλ_dξ::SMatrix{2,2,T},
     A::SMatrix{2,2},
 ) where {T}
     # This uses the formula d/dx inv(M) = -inv(M) * M_x * inv(M) for
     # differentiating the inverses.
-    m_K2_inv = A * (Y34_dξ - Y12_dξ * inv(Y12) * Y34)
+    m_K2_inv = A * (P12_dξ - E12_dξ * inv(E12) * P12)
     m_K2_inv_dλ =
         A * (
-            Y34_dλ_dξ - Y12_dλ_dξ * inv(Y12) * Y34 -
-            -Y12_dξ * inv(Y12) * Y12_dλ * inv(Y12) * Y34 - Y12_dξ * inv(Y12) * Y34_dλ
+            P12_dλ_dξ - E12_dλ_dξ * inv(E12) * P12 -
+            -E12_dξ * inv(E12) * E12_dλ * inv(E12) * P12 - E12_dξ * inv(E12) * P12_dλ
         )
 
     K1_dλ =
-        -inv(Y12) * Y12_dλ * inv(Y12) * Y34 * inv(m_K2_inv) +
-        inv(Y12) * Y34_dλ * inv(m_K2_inv) -
-        inv(Y12) * Y34 * inv(m_K2_inv) * m_K2_inv_dλ * inv(m_K2_inv)
+        -inv(E12) * E12_dλ * inv(E12) * P12 * inv(m_K2_inv) +
+        inv(E12) * P12_dλ * inv(m_K2_inv) -
+        inv(E12) * P12 * inv(m_K2_inv) * m_K2_inv_dλ * inv(m_K2_inv)
     K2_dλ = inv(m_K2_inv) * m_K2_inv_dλ * inv(m_K2_inv)
 
     return K1_dλ, K2_dλ
