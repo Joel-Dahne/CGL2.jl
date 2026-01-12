@@ -268,105 +268,104 @@ function C_Y_34_dλ_dξ(
     ) / (log(ξ₁) * ξ₁^(-real_s34(lambda, κ, λ) - 1))
 end
 
-# TODO: Update this
 function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_bma_b * abs(c^((a - lambda / 2κ) - b))
+    return CU.U_bma_b * abs(c^(-b + a - lambda / 2κ))
 end
 
 function C_E_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
-    (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_bma_b * abs(conj(c)^((conj(a) - lambda / 2κ) - b))
+    return CU_conj.U_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_P_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_a_b * abs((-c)^(lambda / 2κ - a))
+    return CU.U_a_b * abs((-c)^(-a + lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_P_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
-    (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_a_b * abs(conj(-c)^(lambda / 2κ - conj(a)))
+    return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_E_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    C1 = abs(c^((a - lambda / 2κ) - b)) * CU.U_bma_b
-    C2 = abs(c^((a - lambda / 2κ) - b - 1)) * CU.U_dz_bma_b
-
-    return abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2
+    return 2(CU.U_bma_b * abs(c) + CU.U_dz_bma_b * ξ₁^-2) * abs(c^(-b + a - lambda / 2κ))
 end
 
 function C_E_2_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    C1 = abs(conj(c)^((conj(a) - lambda / 2κ) - b)) * CU_conj.U_bma_b
-    C2 = abs(conj(c)^((conj(a) - lambda / 2κ) - b - 1)) * CU_conj.U_dz_bma_b
-
-    return abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2
+    return 2(CU_conj.U_bma_b * abs(conj(c)) + CU_conj.U_dz_bma_b * ξ₁^-2) *
+           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_P_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return abs(2(-c)^(lambda / 2κ - a)) * CU.U_dz_a_b
+    return 2CU.U_dz_a_b * abs((-c)^(-a + lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_P_2_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return abs(2conj(-c)^(lambda / 2κ - conj(a))) * CU_conj.U_dz_a_b
+    return 2CU_conj.U_dz_a_b * abs((-conj(c))^(-conj(a) + lambda / 2κ))
 end
 
 function C_E_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_da_bma_b * abs(c^((a - lambda / 2κ) - b)) / 2κ * (2 + abs(log(c)) / log(ξ₁))
+    return inv(2κ) *
+           CU.U_da_bma_b *
+           (abs(log(c)) / log(ξ₁) + 2) *
+           abs(c^(-b + a - lambda / 2κ))
 end
 
 function C_E_2_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_da_bma_b * abs(conj(c)^((conj(a) - lambda / 2κ) - b)) / 2κ *
-           (2 + abs(log(conj(c))) / log(ξ₁))
+    return inv(2κ) *
+           CU_conj.U_da_bma_b *
+           (abs(log(conj(c))) / log(ξ₁) + 2) *
+           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
 end
 
 function C_P_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_da_a_b * abs((-c)^-(a - lambda / 2κ)) / 2κ * (2 + abs(log(-c)) / log(ξ₁))
+    return inv(2κ) *
+           CU.U_da_a_b *
+           (abs(log(-c)) / log(ξ₁) + 2) *
+           abs((-c)^(-a + lambda / 2κ))
 end
 
 function C_P_2_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_da_a_b * abs(conj(-c)^-(conj(a) - lambda / 2κ)) / 2κ *
-           (2 + abs(log(conj(-c))) / log(ξ₁))
+    return inv(κ) *
+           CU_conj.U_da_a_b *
+           (abs(log(-conj(c))) / log(ξ₁) + 2) *
+           abs((-conj(c))^(-conj(a) + lambda / 2κ))
 end
 
-# PROVE: Verify this
 function C_E_1_dλ_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    #C1 = abs((-c)^((a - lambda / 2κ) - b)) * CU.U_da_bma_b
-    #C2 = abs((-c)^((a - lambda / 2κ) - b - 1)) * CU.U_dzda_bma_b
-
-    return Arb(1) # FIXME
-    #return (abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2) / 2κ
+    return inv(κ) *
+           (
+               CU.U_da_bma_b * abs(c) * (abs(log(c)) / log(ξ₁) + 2) +
+               CU.U_bmap1_bp1 / log(ξ₁) * ξ₁^-2 +
+               CU.U_da_bmap1_bp1 *
+               abs(b - a + lambda / 2κ) *
+               (abs(log(c)) / log(ξ₁) + 2) *
+               ξ₁^-2
+           ) *
+           abs(c^(-b + a - lambda / 2κ))
 end
 
 function C_E_2_dλ_dξ(
@@ -379,22 +378,29 @@ function C_E_2_dλ_dξ(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    #C1 = abs((-c)^((a - lambda / 2κ) - b)) * CU.U_da_bma_b
-    #C2 = abs((-c)^((a - lambda / 2κ) - b - 1)) * CU.U_dzda_bma_b
-
-    return Arb(1) # FIXME
-    #return (abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2) / 2κ
+    return inv(κ) *
+           (
+               CU_conj.U_da_bma_b * abs(conj(c)) * (abs(log(conj(c))) / log(ξ₁) + 2) +
+               CU_conj.U_bmap1_bp1 / log(ξ₁) * ξ₁^-2 +
+               CU_conj.U_da_bmap1_bp1 *
+               abs(b - conj(a) + lambda / 2κ) *
+               (abs(log(conj(c))) / log(ξ₁) + 2) *
+               ξ₁^-2
+           ) *
+           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
 end
 
-# FIXME
 function C_P_1_dλ_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return Arb(1) # FIXME
-    #return abs(2c^-(a - lambda / 2κ)) * CU.U_dz_a_b
+    return inv(κ) *
+           (
+               CU.U_ap1_bp1 / log(ξ₁) +
+               CU.U_da_ap1_bp1 * abs(a - lambda / 2κ) * (abs(log(-c)) / log(ξ₁) + 2)
+           ) *
+           abs((-c)^(-a + lambda / 2κ))
 end
 
-# FIXME
 function C_P_2_dλ_dξ(
     lambda::Acb,
     κ::Arb,
@@ -405,8 +411,14 @@ function C_P_2_dλ_dξ(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return Arb(1) # FIXME
-    #return abs(2c^-(a - lambda / 2κ)) * CU.U_dz_a_b
+    return inv(κ) *
+           (
+               CU_conj.U_ap1_bp1 / log(ξ₁) +
+               CU_conj.U_da_ap1_bp1 *
+               abs(conj(a) - lambda / 2κ) *
+               (abs(log(-conj(c))) / log(ξ₁) + 2)
+           ) *
+           abs((-conj(c))^(-conj(a) + lambda / 2κ))
 end
 
 # TODO: Remove
