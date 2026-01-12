@@ -1,7 +1,7 @@
 module CGL2
 
-using Arblib
 using ArbExtras
+using Arblib
 using CSV
 using DataFrames
 using LinearAlgebra
@@ -12,6 +12,8 @@ using OrdinaryDiffEqVerner
 using SpecialFunctions
 using StaticArrays
 
+import Arpack
+import BlockArrays
 import Dates
 import Distributed
 import ForwardDiff
@@ -20,8 +22,6 @@ import IntervalArithmetic:
     BareInterval, Interval, bareinterval, interval, inf, sup, isempty_interval, nai
 import ProgressLogging: @progress, @withprogress, @logprogress
 import SparseArrays
-import BlockArrays
-import Arpack
 
 include("CGLBranch/CGLBranch.jl")
 
