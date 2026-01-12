@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "6f68653e46f3e5368069bea16fca9956204fd82f"
+project_hash = "136289fc46301bb9269f84c40310d3f93c897bce"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -244,7 +244,7 @@ uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.9+0"
 
 [[deps.CGL2]]
-deps = ["ArbExtras", "Arblib", "Arpack", "BifurcationKit", "BlockArrays", "CSV", "DataFrames", "Dates", "Distributed", "ForwardDiff", "IntervalArithmetic", "LaTeXStrings", "LinearAlgebra", "NonlinearSolve", "OhMyThreads", "OrdinaryDiffEqRosenbrock", "OrdinaryDiffEqVerner", "ProgressLogging", "SlurmClusterManager", "SparseArrays", "SpecialFunctions", "StaticArrays", "TerminalLoggers"]
+deps = ["ArbExtras", "Arblib", "Arpack", "BifurcationKit", "BlockArrays", "CSV", "DataFrames", "Dates", "Distributed", "ForwardDiff", "IntervalArithmetic", "LaTeXStrings", "LinearAlgebra", "NonlinearSolve", "OhMyThreads", "OrdinaryDiffEqRosenbrock", "OrdinaryDiffEqVerner", "ProgressLogging", "SparseArrays", "SpecialFunctions", "StaticArrays", "TerminalLoggers"]
 path = "."
 uuid = "0e9dd3b1-9aac-4165-954d-8319b87fc115"
 version = "0.1.0"
@@ -943,10 +943,10 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 version = "1.11.0"
 
 [[deps.IntervalArithmetic]]
-deps = ["CRlibm", "MacroTools", "OpenBLASConsistentFPCSR_jll", "Random", "RoundingEmulator"]
-git-tree-sha1 = "79342df41c3c24664e5bf29395cfdf2f2a599412"
+deps = ["CRlibm", "MacroTools", "OpenBLASConsistentFPCSR_jll", "Printf", "Random", "RoundingEmulator"]
+git-tree-sha1 = "02b61501dbe6da3b927cc25dacd7ce32390ee970"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.36"
+version = "1.0.2"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticArblibExt = "Arblib"
@@ -2058,12 +2058,6 @@ version = "2.10.0"
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
-
-[[deps.SlurmClusterManager]]
-deps = ["Distributed"]
-git-tree-sha1 = "0689bbb1a914b979cf01419c7d8b553425ba18e9"
-uuid = "c82cd089-7bf7-41d7-976b-6b5d413cbe0a"
-version = "1.1.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"

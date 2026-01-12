@@ -46,7 +46,7 @@ function Q_hat_zero_capd(
     λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 )
-    S = BareInterval{Float64}
+    S = Interval{Float64}
 
     Q_hat_ξ₀ = if !iszero(ξ₀)
         @assert 0 < ξ₀ < ξ₁
@@ -63,7 +63,7 @@ function Q_hat_zero_capd(
         end
         convert(SVector{4,S}, Q_hat_ξ₀)
     else
-        SVector{4,S}(ν_real, ν_imag, bareinterval(0.0), bareinterval(0.0))
+        SVector{4,S}(ν_real, ν_imag, interval(0.0), interval(0.0))
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
@@ -118,7 +118,7 @@ function Q_hat_zero_jacobian_capd(
     λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 )
-    S = BareInterval{Float64}
+    S = Interval{Float64}
 
     Q_hat_ξ₀, J_ξ₀ = let
         if !iszero(ξ₀)
@@ -139,19 +139,19 @@ function Q_hat_zero_jacobian_capd(
             Q_hat_ξ₀ = convert(SVector{4,S}, Q_hat_ξ₀)
             J_ξ₀ = convert(SMatrix{4,2,S}, J_ξ₀)
         else
-            Q_hat_ξ₀ = SVector{4,S}(ν_real, ν_imag, bareinterval(0.0), bareinterval(0.0))
+            Q_hat_ξ₀ = SVector{4,S}(ν_real, ν_imag, interval(0.0), interval(0.0))
             # Empty integration so the only non-zero derivatives are
             # the ones of Q_hat_ξ₀[1] and Q_hat_ξ₀[2] w.r.t. ν_real
             # and ν_imag, which are both 1.
             J_ξ₀ = SMatrix{4,2,S}(
-                bareinterval(1.0),
-                bareinterval(0.0),
-                bareinterval(0.0),
-                bareinterval(0.0),
-                bareinterval(1.0),
-                bareinterval(0.0),
-                bareinterval(0.0),
-                bareinterval(0.0),
+                interval(1.0),
+                interval(0.0),
+                interval(0.0),
+                interval(0.0),
+                interval(1.0),
+                interval(0.0),
+                interval(0.0),
+                interval(0.0),
             )
         end
 

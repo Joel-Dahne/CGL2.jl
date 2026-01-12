@@ -17,16 +17,14 @@ import BlockArrays
 import Dates
 import Distributed
 import ForwardDiff
-import IntervalArithmetic
-import IntervalArithmetic:
-    BareInterval, Interval, bareinterval, interval, inf, sup, isempty_interval, nai
+import IntervalArithmetic: Interval, interval, inf, sup
 import ProgressLogging: @progress, @withprogress, @logprogress
 import SparseArrays
 
 include("CGLBranch/CGLBranch.jl")
 
 include("arb.jl")
-include("interval.jl")
+#include("interval.jl")
 include("helper.jl")
 include("special-functions.jl")
 include("det.jl")
