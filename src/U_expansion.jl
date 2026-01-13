@@ -21,8 +21,19 @@ struct UBounds
     U_da_ap2_bp2::Arb
     U_da_bma_b::Arb
     U_da_bmap1_bp1::Arb
+    # inv(U)
+    U_inv_bma_b::Arb
+    # inv(U_da)
+    U_da_inv_bma_b::Arb
 
-    function UBounds(a::Acb, b::Acb, c::Acb, ξ₁::Arb; include_da::Bool = false)
+    function UBounds(
+        a::Acb,
+        b::Acb,
+        c::Acb,
+        ξ₁::Arb;
+        include_da::Bool = false,
+        include_inv::Bool = false,
+    )
         z₁ = c * ξ₁^2
         mz₁ = -z₁
 
@@ -44,6 +55,8 @@ struct UBounds
             include_da ? C_U_da(a + 2, b + 2, z₁) : indeterminate(Arb),
             include_da ? C_U_da(b - a, b, mz₁) : indeterminate(Arb),
             include_da ? C_U_da(b - a + 1, b + 1, z₁) : indeterminate(Arb),
+            include_inv ? C_U_inv(b - a, b, mz₁) : indeterminate(Arb),
+            (include_inv & include_da) ? C_U_da_inv(b - a, b, mz₁) : indeterminate(Arb),
         )
     end
 end
@@ -260,4 +273,72 @@ function C_U_da(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
         C_R_U_2(n, a, b, z₁)
 
     return S1 + S2 / abs(log(z₁)) + R * abs(z₁)^-n
+end
+
+"""
+    C_U_inv(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(inv(U(a, b, z))) <= C * abs(z^a)
+```
+for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) > abs(z₁)`
+"""
+function C_U_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
+    term = zero(a)
+    abs_term = zero(Arb)
+
+    S = zero(Arb)
+    for k = 1:(n-1)
+        Arblib.abs!(abs_term, p_U!(term, k, a, b, z₁))
+        Arblib.add!(S, S, abs_term)
+    end
+
+    res = 1 - S - C_R_U(n, a, b, z₁) * abs(z₁)^-n
+
+    if Arblib.ispositive(res)
+        return inv(res)
+    else
+        return indeterminate(res)
+    end
+end
+
+"""
+    C_U_da_inv(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(inv(U_da(a, b, z))) <= C * abs(inv(log(z)) * z^a)
+```
+for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
+"""
+function C_U_da_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
+    term = zero(a)
+    abs_term = zero(Arb)
+
+    S1 = zero(Arb)
+    for k = 1:(n-1)
+        Arblib.abs!(abs_term, p_U!(term, k, a, b, z₁))
+        Arblib.add!(S1, S1, abs_term)
+    end
+
+    S2 = zero(Arb)
+    for k = 0:(n-1)
+        Arblib.abs!(abs_term, p_U_da!(term, k, a, b, z₁))
+        Arblib.add!(S2, S2, abs_term)
+    end
+
+    # Note that Γ'(a) / Γ(a) is exactly the digamma function
+    R =
+        (1 + abs(digamma(a) / log(z₁))) * C_R_U(n, a, b, z₁) +
+        C_R_U_1(n, a, b, z₁) +
+        C_R_U_2(n, a, b, z₁)
+
+    res = 1 - S1 - S2 / abs(log(z₁)) - R * abs(z₁)^-n
+
+    if Arblib.ispositive(res)
+        return inv(res)
+    else
+        return indeterminate(res)
+    end
 end

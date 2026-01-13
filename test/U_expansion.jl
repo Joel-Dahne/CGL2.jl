@@ -12,7 +12,7 @@
         a, b, c = CGL2._abc(κ, ϵ, λ)
         z₁ = c * ξ₁^2
 
-        CU = CGL2.UBounds(a, b, c, ξ₁, include_da = true)
+        CU = CGL2.UBounds(a, b, c, ξ₁, include_da = true, include_inv = true)
 
         for z in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* z₁
             # U
@@ -87,6 +87,18 @@
                   CU.U_da_bmap1_bp1 * abs(log(z) * z^(-(b - a + 1)))
             @test abs(CGL2.U_da(b - a + 1, b + 1, z)) >=
                   0.9CU.U_da_bmap1_bp1 * abs(log(z) * z^(-(b - a + 1)))
+
+            # inv(U)
+
+            @test abs(inv(CGL2.U(b - a, b, z))) <= CU.U_inv_bma_b * abs(z^(b - a))
+            @test abs(inv(CGL2.U(b - a, b, z))) >= 0.9CU.U_inv_bma_b * abs(z^(b - a))
+
+            # inv(U_da)
+
+            @test abs(inv(CGL2.U_da(b - a, b, z))) <=
+                  CU.U_da_inv_bma_b * abs(inv(log(z)) * z^(b - a))
+            @test abs(inv(CGL2.U_da(b - a, b, z))) >=
+                  0.9CU.U_da_inv_bma_b * abs(inv(log(z)) * z^(b - a))
         end
     end
 
