@@ -21,10 +21,21 @@ struct UBounds
     U_da_ap2_bp2::Arb
     U_da_bma_b::Arb
     U_da_bmap1_bp1::Arb
-    # inv(U)
-    U_inv_bma_b::Arb
-    # inv(U_da)
-    U_da_inv_bma_b::Arb
+    # U_da_dz
+    U_da_dz_a_b::Arb
+    U_da_dz_bma_b::Arb
+    # U_L
+    U_L_a_b::Arb
+    U_L_bma_b::Arb
+    # U_dz_L
+    U_dz_L_a_b::Arb
+    U_dz_L_bma_b::Arb
+    # U_da_L
+    U_da_L_a_b::Arb
+    U_da_L_bma_b::Arb
+    # U_da_dz_L
+    U_da_dz_L_a_b::Arb
+    U_da_dz_L_bma_b::Arb
 
     function UBounds(
         a::Acb,
@@ -32,7 +43,7 @@ struct UBounds
         c::Acb,
         ξ₁::Arb;
         include_da::Bool = false,
-        include_inv::Bool = false,
+        include_L::Bool = false,
     )
         z₁ = c * ξ₁^2
         mz₁ = -z₁
@@ -55,8 +66,16 @@ struct UBounds
             include_da ? C_U_da(a + 2, b + 2, z₁) : indeterminate(Arb),
             include_da ? C_U_da(b - a, b, mz₁) : indeterminate(Arb),
             include_da ? C_U_da(b - a + 1, b + 1, z₁) : indeterminate(Arb),
-            include_inv ? C_U_inv(b - a, b, mz₁) : indeterminate(Arb),
-            (include_inv & include_da) ? C_U_da_inv(b - a, b, mz₁) : indeterminate(Arb),
+            include_da ? C_U_da_dz(a, b, z₁) : indeterminate(Arb),
+            include_da ? C_U_da_dz(b - a, b, mz₁) : indeterminate(Arb),
+            include_L ? C_U_L(a, b, z₁) : indeterminate(Arb),
+            include_L ? C_U_L(b - a, b, mz₁) : indeterminate(Arb),
+            include_L ? C_U_dz_L(a, b, z₁) : indeterminate(Arb),
+            include_L ? C_U_dz_L(b - a, b, mz₁) : indeterminate(Arb),
+            (include_L & include_da) ? C_U_da_L(a, b, z₁) : indeterminate(Arb),
+            (include_L & include_da) ? C_U_da_L(b - a, b, mz₁) : indeterminate(Arb),
+            (include_L & include_da) ? C_U_da_dz_L(a, b, z₁) : indeterminate(Arb),
+            (include_L & include_da) ? C_U_da_dz_L(b - a, b, mz₁) : indeterminate(Arb),
         )
     end
 end
@@ -241,6 +260,15 @@ function C_U(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
     return S + C_R_U(n, a, b, z₁) * abs(z₁)^-n
 end
 
+"""
+    C_U_dz(a::Acb, b::Acb, z₁::Acb, n::Integer = 1)
+
+Return `C` such that
+```
+abs(U_dz(a, b, z, n)) <= C * abs(z^(-a - n))
+```
+for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) > abs(z₁)`
+"""
 C_U_dz(a::Acb, b::Acb, z₁::Acb, n::Integer = 1) =
     if n < 0
         throw(ArgumentError("n must be non-negative"))
@@ -250,6 +278,15 @@ C_U_dz(a::Acb, b::Acb, z₁::Acb, n::Integer = 1) =
         return C_U(a + n, b + n, z₁) * abs(rising(a, n))
     end
 
+"""
+    C_U_da(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(U_da(a, b, z)) <= C * abs(log(z) * z^(-a))
+```
+for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
+"""
 function C_U_da(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
     term = zero(a)
     abs_term = zero(Arb)
@@ -276,15 +313,28 @@ function C_U_da(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
 end
 
 """
+    C_U_da_dz(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(U_dzda(a, b, z)) <= C * abs(log(z) * z^(-a - 1))
+```
+for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
+"""
+C_U_da_dz(a::Acb, b::Acb, z₁::Acb) =
+    C_U_da(a + 1, b + 1, z₁) * abs(a) + C_U(a + 1, b + 1, z₁) / abs(log(z₁))
+
+"""
     C_U_inv(a::Acb, b::Acb, z₁::Acb)
 
 Return `C` such that
 ```
-abs(inv(U(a, b, z))) <= C * abs(z^a)
+abs(U(a, b, z)) >= C * abs(z^a)
 ```
-for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) > abs(z₁)`
+for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) >
+abs(z₁)`
 """
-function C_U_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
+function C_U_L(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
     term = zero(a)
     abs_term = zero(Arb)
 
@@ -294,25 +344,31 @@ function C_U_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
         Arblib.add!(S, S, abs_term)
     end
 
-    res = 1 - S - C_R_U(n, a, b, z₁) * abs(z₁)^-n
-
-    if Arblib.ispositive(res)
-        return inv(res)
-    else
-        return indeterminate(res)
-    end
+    return 1 - S - C_R_U(n, a, b, z₁) * abs(z₁)^-n
 end
 
 """
-    C_U_da_inv(a::Acb, b::Acb, z₁::Acb)
+    C_U_dz_inv(a::Acb, b::Acb, z₁::Acb)
 
 Return `C` such that
 ```
-abs(inv(U_da(a, b, z))) <= C * abs(inv(log(z)) * z^a)
+abs(U_dz(a, b, z)) >= C * abs(z^(-a - 1))
+```
+for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) >
+abs(z₁)`
+"""
+C_U_dz_L(a::Acb, b::Acb, z₁::Acb) = C_U_L(a + 1, b + 1, z₁) * abs(a)
+
+"""
+    C_U_da_L(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(U_da(a, b, z)) >= C * abs(log(z) * z^-a)
 ```
 for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
 """
-function C_U_da_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
+function C_U_da_L(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
     term = zero(a)
     abs_term = zero(Arb)
 
@@ -334,11 +390,17 @@ function C_U_da_inv(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
         C_R_U_1(n, a, b, z₁) +
         C_R_U_2(n, a, b, z₁)
 
-    res = 1 - S1 - S2 / abs(log(z₁)) - R * abs(z₁)^-n
-
-    if Arblib.ispositive(res)
-        return inv(res)
-    else
-        return indeterminate(res)
-    end
+    return 1 - S1 - S2 / abs(log(z₁)) - R * abs(z₁)^-n
 end
+
+"""
+    C_U_da_dz_L(a::Acb, b::Acb, z₁::Acb)
+
+Return `C` such that
+```
+abs(U_dzda(a, b, z)) >= C * abs(log(z) * z^(-a - 1))
+```
+for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
+"""
+C_U_da_dz_L(a::Acb, b::Acb, z₁::Acb) =
+    C_U_da_L(a + 1, b + 1, z₁) * abs(a) - C_U(a + 1, b + 1, z₁) / abs(log(z₁))
