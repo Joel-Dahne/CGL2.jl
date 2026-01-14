@@ -191,6 +191,12 @@ struct FunctionBounds_Y_new
         C.P_12[] = C.P_1 + C.P_2
         C.E_12_dξ[] = C.E_1_dξ + C.E_2_dξ
         C.P_12_dξ[] = C.P_1_dξ + C.P_2_dξ
+
+        C.E_12_inv[] = max(inv(C.E_1_L), inv(C.E_2_L))
+        C.P_12_inv[] = max(inv(C.P_1_L), inv(C.P_2_L))
+        C.E_12_dξ_inv[] = max(inv(C.E_1_dξ_L), inv(C.E_2_dξ_L))
+        C.P_12_dξ_inv[] = max(inv(C.P_1_dξ_L), inv(C.P_2_dξ_L))
+
         # K_1 depends on K_2 so compute them in opposite order
         C.K_2[] = C_K_2(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_1[] = C_K_1(lambda, κ, ϵ, ξ₁, λ, C)
@@ -198,28 +204,34 @@ struct FunctionBounds_Y_new
         if include_dλ
             C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
             C.E_2_dλ[] = C_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            C.E_12_dλ[] = C.E_1_dλ + C.E_2_dλ
             C.E_1_dλ_L[] = C_E_1_dλ_L(lambda, κ, ϵ, ξ₁, λ, CU)
             C.E_2_dλ_L[] = C_E_2_dλ_L(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            #C.E_12_dλ_inv[] = XXX
+
             C.P_1_dλ[] = C_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
             C.P_2_dλ[] = C_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            C.P_12_dλ[] = C.P_1_dλ + C.P_2_dλ
             C.P_1_dλ_L[] = C_P_1_dλ_L(lambda, κ, ϵ, ξ₁, λ, CU)
             C.P_2_dλ_L[] = C_P_2_dλ_L(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            #C.P_12_dλ_inv[] = XXX
+
             C.E_1_dλ_dξ[] = C_E_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
             C.E_2_dλ_dξ[] = C_E_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            C.E_12_dλ_dξ[] = C.E_1_dλ_dξ + C.E_2_dλ_dξ
             C.E_1_dλ_dξ_L[] = C_E_1_dλ_dξ_L(lambda, κ, ϵ, ξ₁, λ, CU)
             C.E_2_dλ_dξ_L[] = C_E_2_dλ_dξ_L(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            #C.E_12_dλ_dξ_inv[] = XXX
+
             C.P_1_dλ_dξ[] = C_P_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
             C.P_2_dλ_dξ[] = C_P_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            C.P_12_dλ_dξ[] = C.P_1_dλ_dξ + C.P_2_dλ_dξ
             C.P_1_dλ_dξ_L[] = C_P_1_dλ_dξ_L(lambda, κ, ϵ, ξ₁, λ, CU)
             C.P_2_dλ_dξ_L[] = C_P_2_dλ_dξ_L(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-            #C.P_12_dλ_dξ_inv[] = XXX
+
+            C.E_12_dλ[] = C.E_1_dλ + C.E_2_dλ
+            C.P_12_dλ[] = C.P_1_dλ + C.P_2_dλ
+            C.E_12_dλ_dξ[] = C.E_1_dλ_dξ + C.E_2_dλ_dξ
+            C.P_12_dλ_dξ[] = C.P_1_dλ_dξ + C.P_2_dλ_dξ
+
+            C.E_12_dλ_inv[] = max(inv(C.E_1_dλ_L), inv(C.E_2_dλ_L))
+            C.P_12_dλ_inv[] = max(inv(C.P_1_dλ_L), inv(C.P_2_dλ_L))
+            C.E_12_dλ_dξ_inv[] = max(inv(C.E_1_dλ_dξ_L), inv(C.E_2_dλ_dξ_L))
+            C.P_12_dλ_dξ_inv[] = max(inv(C.P_1_dλ_dξ_L), inv(C.P_2_dλ_dξ_L))
+
             C.K_1_dλ[] = C_K_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
             C.K_2_dλ[] = C_K_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
         end
