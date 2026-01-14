@@ -344,7 +344,7 @@ function C_U_L(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
         Arblib.add!(S, S, abs_term)
     end
 
-    return 1 - S - C_R_U(n, a, b, z₁) * abs(z₁)^-n
+    return max(0, 1 - S - C_R_U(n, a, b, z₁) * abs(z₁)^-n)
 end
 
 """
@@ -357,7 +357,7 @@ abs(U_dz(a, b, z)) >= C * abs(z^(-a - 1))
 for `z` such that `abs(imag(z)) > abs(imag(z₁))` and `abs(z) >
 abs(z₁)`
 """
-C_U_dz_L(a::Acb, b::Acb, z₁::Acb) = C_U_L(a + 1, b + 1, z₁) * abs(a)
+C_U_dz_L(a::Acb, b::Acb, z₁::Acb) = max(0, C_U_L(a + 1, b + 1, z₁) * abs(a))
 
 """
     C_U_da_L(a::Acb, b::Acb, z₁::Acb)
@@ -390,7 +390,7 @@ function C_U_da_L(a::Acb, b::Acb, z₁::Acb, n::Integer = 20)
         C_R_U_1(n, a, b, z₁) +
         C_R_U_2(n, a, b, z₁)
 
-    return 1 - S1 - S2 / abs(log(z₁)) - R * abs(z₁)^-n
+    return max(0, 1 - S1 - S2 / abs(log(z₁)) - R * abs(z₁)^-n)
 end
 
 """
@@ -403,4 +403,4 @@ abs(U_dzda(a, b, z)) >= C * abs(log(z) * z^(-a - 1))
 for `z` such that `angle(z) = angle(z₁)` and `abs(z) >= abs(z₁)`.
 """
 C_U_da_dz_L(a::Acb, b::Acb, z₁::Acb) =
-    C_U_da_L(a + 1, b + 1, z₁) * abs(a) - C_U(a + 1, b + 1, z₁) / abs(log(z₁))
+    max(0, C_U_da_L(a + 1, b + 1, z₁) * abs(a) - C_U(a + 1, b + 1, z₁) / abs(log(z₁)))

@@ -360,13 +360,13 @@ end
 function C_E_1_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_L_bma_b * abs(c^(-b + a - lambda / 2κ))
+    return max(0, CU.U_L_bma_b * abs(c^(-b + a - lambda / 2κ)))
 end
 
 function C_E_2_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_L_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return max(0, CU_conj.U_L_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ)))
 end
 
 function C_P_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -384,13 +384,13 @@ end
 function C_P_1_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU.U_L_a_b * abs((-c)^(-a + lambda / 2κ))
+    return max(0, CU.U_L_a_b * abs((-c)^(-a + lambda / 2κ)))
 end
 
 function C_P_2_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return CU_conj.U_L_a_b * abs(conj(-c)^(-conj(a) + lambda / 2κ))
+    return max(0, CU_conj.U_L_a_b * abs(conj(-c)^(-conj(a) + lambda / 2κ)))
 end
 
 function C_E_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -409,7 +409,10 @@ end
 function C_E_1_dξ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return 2(CU.U_L_bma_b * abs(c) - CU.U_dz_bma_b * ξ₁^-2) * abs(c^(-b + a - lambda / 2κ))
+    return max(
+        0,
+        2(CU.U_L_bma_b * abs(c) - CU.U_dz_bma_b * ξ₁^-2) * abs(c^(-b + a - lambda / 2κ)),
+    )
 end
 
 function C_E_2_dξ_L(
@@ -422,8 +425,11 @@ function C_E_2_dξ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return 2(CU_conj.U_L_bma_b * abs(conj(c)) - CU_conj.U_dz_bma_b * ξ₁^-2) *
-           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return max(
+        0,
+        2(CU_conj.U_L_bma_b * abs(conj(c)) - CU_conj.U_dz_bma_b * ξ₁^-2) *
+        abs(conj(c)^(-b + conj(a) - lambda / 2κ)),
+    )
 end
 
 function C_P_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -441,7 +447,7 @@ end
 function C_P_1_dξ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return 2CU.U_dz_L_a_b * abs((-c)^(-a + lambda / 2κ))
+    return max(0, 2CU.U_dz_L_a_b * abs((-c)^(-a + lambda / 2κ)))
 end
 
 function C_P_2_dξ_L(
@@ -454,7 +460,7 @@ function C_P_2_dξ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return 2CU_conj.U_dz_L_a_b * abs((-conj(c))^(-conj(a) + lambda / 2κ))
+    return max(0, 2CU_conj.U_dz_L_a_b * abs((-conj(c))^(-conj(a) + lambda / 2κ)))
 end
 
 function C_E_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -478,10 +484,13 @@ end
 function C_E_1_dλ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(2κ) *
-           CU.U_da_L_bma_b *
-           (2 - abs(log(c)) / log(ξ₁)) *
-           abs(c^(-b + a - lambda / 2κ))
+    return max(
+        0,
+        inv(2κ) *
+        CU.U_da_L_bma_b *
+        (2 - abs(log(c)) / log(ξ₁)) *
+        abs(c^(-b + a - lambda / 2κ)),
+    )
 end
 
 function C_E_2_dλ_L(
@@ -494,10 +503,13 @@ function C_E_2_dλ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(2κ) *
-           CU_conj.U_da_L_bma_b *
-           (2 - abs(log(conj(c))) / log(ξ₁)) *
-           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return max(
+        0,
+        inv(2κ) *
+        CU_conj.U_da_L_bma_b *
+        (2 - abs(log(conj(c))) / log(ξ₁)) *
+        abs(conj(c)^(-b + conj(a) - lambda / 2κ)),
+    )
 end
 
 function C_P_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -521,10 +533,13 @@ end
 function C_P_1_dλ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(2κ) *
-           CU.U_da_L_a_b *
-           (2 - abs(log(-c)) / log(ξ₁)) *
-           abs((-c)^(-a + lambda / 2κ))
+    return max(
+        0,
+        inv(2κ) *
+        CU.U_da_L_a_b *
+        (2 - abs(log(-c)) / log(ξ₁)) *
+        abs((-c)^(-a + lambda / 2κ)),
+    )
 end
 
 function C_P_2_dλ_L(
@@ -537,10 +552,13 @@ function C_P_2_dλ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(2κ) *
-           CU_conj.U_da_L_a_b *
-           (2 - abs(log(-conj(c))) / log(ξ₁)) *
-           abs((-conj(c))^(-conj(a) + lambda / 2κ))
+    return max(
+        0,
+        inv(2κ) *
+        CU_conj.U_da_L_a_b *
+        (2 - abs(log(-conj(c))) / log(ξ₁)) *
+        abs((-conj(c))^(-conj(a) + lambda / 2κ)),
+    )
 end
 
 function C_E_1_dλ_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -571,10 +589,13 @@ end
 function C_E_1_dλ_dξ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(κ) *
-           (CU.U_da_L_a_b * abs(c) - CU.U_da_dz_a_b * ξ₁^-2) *
-           (2 - abs(log(c)) / log(ξ₁)) *
-           abs(c^(-b + a - lambda / 2κ))
+    return max(
+        0,
+        inv(κ) *
+        (CU.U_da_L_a_b * abs(c) - CU.U_da_dz_a_b * ξ₁^-2) *
+        (2 - abs(log(c)) / log(ξ₁)) *
+        abs(c^(-b + a - lambda / 2κ)),
+    )
 end
 
 function C_E_2_dλ_dξ_L(
@@ -587,10 +608,13 @@ function C_E_2_dλ_dξ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(κ) *
-           (CU_conj.U_da_L_a_b * abs(conj(c)) - CU_conj.U_da_dz_a_b * ξ₁^-2) *
-           (2 - abs(log(conj(c))) / log(ξ₁)) *
-           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return max(
+        0,
+        inv(κ) *
+        (CU_conj.U_da_L_a_b * abs(conj(c)) - CU_conj.U_da_dz_a_b * ξ₁^-2) *
+        (2 - abs(log(conj(c))) / log(ξ₁)) *
+        abs(conj(c)^(-b + conj(a) - lambda / 2κ)),
+    )
 end
 
 function C_P_1_dλ_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -621,10 +645,13 @@ end
 function C_P_1_dλ_dξ_L(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(κ) *
-           CU.U_da_dz_a_b *
-           (2 - abs(log(-c)) / log(ξ₁)) *
-           abs((-c)^(-a + lambda / 2κ))
+    return max(
+        0,
+        inv(κ) *
+        CU.U_da_dz_a_b *
+        (2 - abs(log(-c)) / log(ξ₁)) *
+        abs((-c)^(-a + lambda / 2κ)),
+    )
 end
 
 function C_P_2_dλ_dξ_L(
@@ -637,10 +664,13 @@ function C_P_2_dλ_dξ_L(
 )
     a, b, c = _abc(κ, ϵ, λ)
 
-    return inv(κ) *
-           CU_conj.U_da_dz_a_b *
-           (2 - abs(log(-conj(c))) / log(ξ₁)) *
-           abs((-conj(c))^(-conj(a) + lambda / 2κ))
+    return max(
+        0,
+        inv(κ) *
+        CU_conj.U_da_dz_a_b *
+        (2 - abs(log(-conj(c))) / log(ξ₁)) *
+        abs((-conj(c))^(-conj(a) + lambda / 2κ)),
+    )
 end
 
 function C_K_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds_Y)
