@@ -12,7 +12,7 @@
         a, b, c = CGL2._abc(κ, ϵ, λ)
         z₁ = c * ξ₁^2
 
-        CU = CGL2.UBounds(a, b, c, ξ₁, include_da = true, include_L = true)
+        CU = CGL2.UBounds(a, b, c, ξ₁, include_da = true)
 
         for z in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* z₁
             # U
@@ -97,43 +97,6 @@
                   CU.U_da_dz_bma_b * abs(log(z) * z^(-(b - a) - 1))
             @test abs(CGL2.U_dzda(b - a, b, z)) >=
                   0.7CU.U_da_dz_bma_b * abs(log(z) * z^(-(b - a) - 1))
-
-            # U_L
-
-            @test abs(CGL2.U(a, b, z)) >= CU.U_L_a_b * abs(z^(-a))
-            @test abs(CGL2.U(a, b, z)) <= 1.1CU.U_L_a_b * abs(z^(-a))
-
-            @test abs(CGL2.U(b - a, b, z)) >= CU.U_L_bma_b * abs(z^(-(b - a)))
-            @test abs(CGL2.U(b - a, b, z)) <= 1.1CU.U_L_bma_b * abs(z^(-(b - a)))
-
-            # U_dz_L
-
-            @test abs(CGL2.U_dz(a, b, z)) >= CU.U_dz_L_a_b * abs(z^(-a - 1))
-            @test abs(CGL2.U_dz(a, b, z)) <= 1.1CU.U_dz_L_a_b * abs(z^(-a - 1))
-
-            @test abs(CGL2.U_dz(b - a, b, z)) >= CU.U_dz_L_bma_b * abs(z^(-(b - a) - 1))
-            @test abs(CGL2.U_dz(b - a, b, z)) <= 1.1CU.U_dz_L_bma_b * abs(z^(-(b - a) - 1))
-
-            # U_da_L
-
-            @test abs(CGL2.U_da(a, b, z)) >= CU.U_da_L_a_b * abs(log(z) * z^(-a))
-            @test abs(CGL2.U_da(a, b, z)) <= 1.1CU.U_da_L_a_b * abs(log(z) * z^(-a))
-
-            @test abs(CGL2.U_da(b - a, b, z)) >=
-                  CU.U_da_L_bma_b * abs(log(z) * z^(-(b - a)))
-            @test abs(CGL2.U_da(b - a, b, z)) <=
-                  1.1CU.U_da_L_bma_b * abs(log(z) * z^(-(b - a)))
-
-            # U_da_dz_L
-
-            @test abs(CGL2.U_dzda(a, b, z)) >= CU.U_da_dz_L_a_b * abs(log(z) * z^(-a - 1))
-            @test abs(CGL2.U_dzda(a, b, z)) <=
-                  1.2CU.U_da_dz_L_a_b * abs(log(z) * z^(-a - 1))
-
-            @test abs(CGL2.U_dzda(b - a, b, z)) >=
-                  CU.U_da_dz_L_bma_b * abs(log(z) * z^(-(b - a) - 1))
-            @test abs(CGL2.U_dzda(b - a, b, z)) <=
-                  1.3CU.U_da_dz_L_bma_b * abs(log(z) * z^(-(b - a) - 1))
         end
     end
 
