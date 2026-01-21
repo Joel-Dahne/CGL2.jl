@@ -158,19 +158,35 @@ function J_N(Q_hat_ξ, λ::CGLParams{T}) where {T}
     return -abs2(Q_hat_ξ)^(σ - 1) * (a^2 * M1 + 2σ * a * b * M2 + b^2 * M3)
 end
 
+function K_1_2_new(ξ, lambda, κ, ϵ, λ::CGLParams)
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
+    M = SMatrix{2,2}(im, 1, -im, 1)
+    K_1 =
+        -SMatrix{2,2}(J_P_1(ξ, lambda, κ, ϵ, λ), 0, 0, J_P_2(ξ, lambda, κ, ϵ, λ)) *
+        inv(A * M)
+    K_2 =
+        SMatrix{2,2}(J_E_1(ξ, lambda, κ, ϵ, λ), 0, 0, J_E_2(ξ, lambda, κ, ϵ, λ)) *
+        inv(A * M)
+    return K_1, K_2
+end
+
+function K_1_2_dλ_new(ξ, lambda, κ, ϵ, λ::CGLParams)
+    A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
+    M = SMatrix{2,2}(im, 1, -im, 1)
+    K_1 =
+        -SMatrix{2,2}(J_P_1_dλ(ξ, lambda, κ, ϵ, λ), 0, 0, J_P_2_dλ(ξ, lambda, κ, ϵ, λ)) *
+        inv(A * M)
+    K_2 =
+        SMatrix{2,2}(J_E_1_dλ(ξ, lambda, κ, ϵ, λ), 0, 0, J_E_2_dλ(ξ, lambda, κ, ϵ, λ)) *
+        inv(A * M)
+    return K_1, K_2
+end
+
 K_1_2(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2(
     hcat(Y_1(ξ, lambda, κ, ϵ, λ), Y_2(ξ, lambda, κ, ϵ, λ)),
     hcat(Y_1_dξ(ξ, lambda, κ, ϵ, λ), Y_2_dξ(ξ, lambda, κ, ϵ, λ)),
     hcat(Y_3(ξ, lambda, κ, ϵ, λ), Y_4(ξ, lambda, κ, ϵ, λ)),
     hcat(Y_3_dξ(ξ, lambda, κ, ϵ, λ), Y_4_dξ(ξ, lambda, κ, ϵ, λ)),
-    SMatrix{2,2}(ϵ, 1, -1, ϵ),
-)
-
-K_1_2_new(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2(
-    hcat(E_1(ξ, lambda, κ, ϵ, λ), E_2(ξ, lambda, κ, ϵ, λ)),
-    hcat(E_1_dξ(ξ, lambda, κ, ϵ, λ), E_2_dξ(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
     SMatrix{2,2}(ϵ, 1, -1, ϵ),
 )
 
@@ -201,18 +217,6 @@ K_1_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2_dλ(
     hcat(Y_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), Y_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
     hcat(Y_3_dλ(ξ, lambda, κ, ϵ, λ), Y_4_dλ(ξ, lambda, κ, ϵ, λ)),
     hcat(Y_3_dλ_dξ(ξ, lambda, κ, ϵ, λ), Y_4_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-    SMatrix{2,2}(ϵ, 1, -1, ϵ),
-)
-
-K_1_2_dλ_new(ξ, lambda, κ, ϵ, λ::CGLParams) = K_1_2_dλ(
-    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ)),
-    hcat(E_1_dλ(ξ, lambda, κ, ϵ, λ), E_2_dλ(ξ, lambda, κ, ϵ, λ)),
-    hcat(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1_dλ(ξ, lambda, κ, ϵ, λ), P_2_dλ(ξ, lambda, κ, ϵ, λ)),
-    hcat(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
     SMatrix{2,2}(ϵ, 1, -1, ϵ),
 )
 

@@ -656,19 +656,21 @@ end
 function J_P_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
     (; d) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    return B_W_1_dλ(lambda, κ, ϵ, λ) * P_1(ξ, lambda, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(d - 1) +
-           B_W_1(lambda, κ, ϵ, λ) * P_1_dλ(ξ, lambda, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(d - 1)
+    return (
+               B_W_1_dλ(lambda, κ, ϵ, λ) * P_1(ξ, lambda, κ, ϵ, λ) +
+               B_W_1(lambda, κ, ϵ, λ) * P_1_dλ(ξ, lambda, κ, ϵ, λ)
+           ) *
+           exp(c * ξ^2) *
+           ξ^(d - 1)
 end
 
 function J_P_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
     (; d) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    return B_W_2_dλ(lambda, κ, ϵ, λ) *
-           P_2(ξ, lambda, κ, ϵ, λ) *
-           exp(conj(c) * ξ^2) *
-           ξ^(d - 1) +
-           B_W_2(lambda, κ, ϵ, λ) *
-           P_2_dλ(ξ, lambda, κ, ϵ, λ) *
+    return (
+               B_W_2_dλ(lambda, κ, ϵ, λ) * P_2(ξ, lambda, κ, ϵ, λ) +
+               B_W_2(lambda, κ, ϵ, λ) * P_2_dλ(ξ, lambda, κ, ϵ, λ)
+           ) *
            exp(conj(c) * ξ^2) *
            ξ^(d - 1)
 end
@@ -676,19 +678,21 @@ end
 function J_E_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
     (; d) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    return B_W_1_dλ(lambda, κ, ϵ, λ) * E_1(ξ, lambda, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(d - 1) +
-           B_W_1(lambda, κ, ϵ, λ) * E_1_dλ(ξ, lambda, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(d - 1)
+    return (
+               B_W_1_dλ(lambda, κ, ϵ, λ) * E_1(ξ, lambda, κ, ϵ, λ) +
+               B_W_1(lambda, κ, ϵ, λ) * E_1_dλ(ξ, lambda, κ, ϵ, λ)
+           ) *
+           exp(c * ξ^2) *
+           ξ^(d - 1)
 end
 
 function J_E_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
     (; d) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    return B_W_2_dλ(lambda, κ, ϵ, λ) *
-           E_2(ξ, lambda, κ, ϵ, λ) *
-           exp(conj(c) * ξ^2) *
-           ξ^(d - 1) +
-           B_W_2(lambda, κ, ϵ, λ) *
-           E_2_dλ(ξ, lambda, κ, ϵ, λ) *
+    return (
+               B_W_2_dλ(lambda, κ, ϵ, λ) * E_2(ξ, lambda, κ, ϵ, λ) +
+               B_W_2(lambda, κ, ϵ, λ) * E_2_dλ(ξ, lambda, κ, ϵ, λ)
+           ) *
            exp(conj(c) * ξ^2) *
            ξ^(d - 1)
 end
