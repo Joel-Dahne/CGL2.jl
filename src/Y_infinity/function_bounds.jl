@@ -59,30 +59,24 @@ struct FunctionBounds_Y_new
     J_N::Arb
     E_1::Arb
     E_2::Arb
-    E_12::Arb
     P_1::Arb
     P_2::Arb
-    P_12::Arb
     E_1_dξ::Arb
     E_2_dξ::Arb
-    E_12_dξ::Arb
     P_1_dξ::Arb
     P_2_dξ::Arb
-    P_12_dξ::Arb
-    K_1::Arb
-    K_2::Arb
+    K_1_1::Arb
+    K_1_2::Arb
+    K_2_1::Arb
+    K_2_2::Arb
     E_1_dλ::Arb
     E_2_dλ::Arb
-    E_12_dλ::Arb
     P_1_dλ::Arb
     P_2_dλ::Arb
-    P_12_dλ::Arb
     E_1_dλ_dξ::Arb
     E_2_dλ_dξ::Arb
-    E_12_dλ_dξ::Arb
     P_1_dλ_dξ::Arb
     P_2_dλ_dξ::Arb
-    P_12_dλ_dξ::Arb
     J_E_1::Arb
     J_E_2::Arb
     J_P_1::Arb
@@ -91,8 +85,10 @@ struct FunctionBounds_Y_new
     J_E_2_dλ::Arb
     J_P_1_dλ::Arb
     J_P_2_dλ::Arb
-    K_1_dλ::Arb
-    K_2_dλ::Arb
+    K_1_dλ_1::Arb
+    K_1_dλ_2::Arb
+    K_2_dλ_1::Arb
+    K_2_dλ_2::Arb
 
     function FunctionBounds_Y_new(
         lambda::Acb,
@@ -112,30 +108,24 @@ struct FunctionBounds_Y_new
             C_J_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
             C_E_1(lambda, κ, ϵ, ξ₁, λ, CU),
             C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            indeterminate(κ), # C_E_12
             C_P_1(lambda, κ, ϵ, ξ₁, λ, CU),
             C_P_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            indeterminate(κ), # C_P_12
             C_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
             C_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            indeterminate(κ), # C_E_12_dξ
             C_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
             C_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            indeterminate(κ), # C_P_12_dξ
-            indeterminate(κ), # C_K_1
-            indeterminate(κ), # C_K_2
+            indeterminate(κ), # C_K_1_1
+            indeterminate(κ), # C_K_2_2
+            indeterminate(κ), # C_K_1_1
+            indeterminate(κ), # C_K_2_2
             indeterminate(κ), # C_E_1_dλ
             indeterminate(κ), # C_E_2_dλ
-            indeterminate(κ), # C_E_12_dλ
             indeterminate(κ), # C_P_1_dλ
             indeterminate(κ), # C_P_2_dλ
-            indeterminate(κ), # C_P_12_dλ
             indeterminate(κ), # C_E_1_dλ_dξ
             indeterminate(κ), # C_E_2_dλ_dξ
-            indeterminate(κ), # C_E_12_dλ_dξ
-            indeterminate(κ), # C_P_12_dλ_dξ
-            indeterminate(κ), # C_P_12_dλ_dξ
-            indeterminate(κ), # C_P_12_dλ_dξ
+            indeterminate(κ), # C_P_1_dλ_dξ
+            indeterminate(κ), # C_P_2_dλ_dξ
             indeterminate(κ), # J_E_1
             indeterminate(κ), # J_E_2
             indeterminate(κ), # J_P_1
@@ -144,23 +134,21 @@ struct FunctionBounds_Y_new
             indeterminate(κ), # J_E_2_dλ
             indeterminate(κ), # J_P_1_dλ
             indeterminate(κ), # J_P_2_dλ
-            indeterminate(κ), # K_1_dλ
-            indeterminate(κ), # K_2_dλ
+            indeterminate(κ), # K_1_dλ_1
+            indeterminate(κ), # K_2_dλ_2
+            indeterminate(κ), # K_1_dλ_1
+            indeterminate(κ), # K_2_dλ_2
         )
-
-
-        C.E_12[] = max(C.E_1, C.E_2)
-        C.P_12[] = max(C.P_1, C.P_2)
-        C.E_12_dξ[] = max(C.E_1_dξ, C.E_2_dξ)
-        C.P_12_dξ[] = max(C.P_1_dξ, C.P_2_dξ)
 
         C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_E_2[] = C_J_E_2(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_P_2[] = C_J_P_2(lambda, κ, ϵ, ξ₁, λ, C)
 
-        C.K_1[] = C_K_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.K_2[] = C_K_2(lambda, κ, ϵ, ξ₁, λ, C)
+        C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, λ, C)
+        C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
+        C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
+        C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, λ, C)
 
         if include_dλ
             C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
@@ -175,18 +163,15 @@ struct FunctionBounds_Y_new
             C.P_1_dλ_dξ[] = C_P_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
             C.P_2_dλ_dξ[] = C_P_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
 
-            C.E_12_dλ[] = max(C.E_1_dλ, C.E_2_dλ)
-            C.P_12_dλ[] = max(C.P_1_dλ, C.P_2_dλ)
-            C.E_12_dλ_dξ[] = max(C.E_1_dλ_dξ, C.E_2_dλ_dξ)
-            C.P_12_dλ_dξ[] = max(C.P_1_dλ_dξ, C.P_2_dλ_dξ)
-
             C.J_E_1_dλ[] = C_J_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
             C.J_E_2_dλ[] = C_J_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
             C.J_P_1_dλ[] = C_J_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
             C.J_P_2_dλ[] = C_J_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
 
-            C.K_1_dλ[] = C_K_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
-            C.K_2_dλ[] = C_K_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
+            C.K_1_dλ_1[] = C_K_1_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
+            C.K_1_dλ_2[] = C_K_1_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
+            C.K_2_dλ_1[] = C_K_2_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
+            C.K_2_dλ_2[] = C_K_2_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
         end
 
         return C
@@ -531,7 +516,7 @@ function C_K_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C:
            (exp(-real_a12(κ, ϵ) * ξ₁^2) * ξ₁^(real_s12(lambda, κ, λ) - 1))
 end
 
-function C_K_1(
+function C_K_1_1(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -539,7 +524,18 @@ function C_K_1(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y_new,
 )
-    return inv(sqrt(1 + ϵ^2)) * max(C.J_P_1, C.J_P_2)
+    return inv(sqrt(1 + ϵ^2)) * C.J_P_1
+end
+
+function C_K_1_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y_new,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_P_2
 end
 
 function C_K_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds_Y)
@@ -547,7 +543,7 @@ function C_K_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C:
     return 1.5norm_inf(K_2) / ξ₁^(real_s34(lambda, κ, λ) - 1)
 end
 
-function C_K_2(
+function C_K_2_1(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -555,7 +551,18 @@ function C_K_2(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y_new,
 )
-    return inv(sqrt(1 + ϵ^2)) * max(C.J_E_1, C.J_E_2)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_1
+end
+
+function C_K_2_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y_new,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_2
 end
 
 # FIXME
@@ -572,7 +579,7 @@ function C_K_1_dλ(
            (exp(-real_a12(κ, ϵ) * ξ₁^2) * log(ξ₁) * ξ₁^(real_s12(lambda, κ, λ) - 1))
 end
 
-function C_K_1_dλ(
+function C_K_1_dλ_1(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -580,7 +587,18 @@ function C_K_1_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y_new,
 )
-    return inv(sqrt(1 + ϵ^2)) * max(C.J_P_1_dλ, C.J_P_2_dλ)
+    return inv(sqrt(1 + ϵ^2)) * C.J_P_1_dλ
+end
+
+function C_K_1_dλ_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y_new,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_P_2_dλ
 end
 
 # FIXME
@@ -596,7 +614,7 @@ function C_K_2_dλ(
     return 1.5norm_inf(K_2_dλ) / (log(ξ₁) * ξ₁^(real_s34(lambda, κ, λ) - 1))
 end
 
-function C_K_2_dλ(
+function C_K_2_dλ_1(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -604,5 +622,16 @@ function C_K_2_dλ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y_new,
 )
-    return inv(sqrt(1 + ϵ^2)) * max(C.J_E_1_dλ, C.J_E_2_dλ)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_1_dλ
+end
+
+function C_K_2_dλ_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y_new,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dλ
 end

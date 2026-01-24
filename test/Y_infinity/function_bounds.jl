@@ -1,6 +1,5 @@
 @testset "Y_infinity_function_bounds" begin
     lambda = Acb(0.19028080950252219, 2.769747313863597)
-    ν = Acb(2.1134119144964454, 2.5294091893480206)
     γ₁ = Acb(0.1979686615344728, 0.15613711743772288)
     γ₂ = Acb(-116.03421868436834, 101.21494871936197)
     κ = Arb(0.8073018593981386)
@@ -64,8 +63,12 @@
         # difference should however be of lower order and it still
         # gives some information as a test.
         Q_hat, _ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
+
         @test norm_inf(CGL2.J_N(Q_hat, λ)) <= C_Y.J_N * ξ^-2
-        @test norm_inf(CGL2.J_N(Q_hat, λ)) >= 0.5C_Y.J_N * ξ^-2
+        @test norm_inf(CGL2.J_N(Q_hat, λ)) >= 0.6C_Y.J_N * ξ^-2
+        # IMPROVE: We could maybe improve on this bound?
+        @test norm_inf(CGL2.J_N(Q_hat, λ)) <= C_Y_new.J_N * ξ^-2
+        @test norm_inf(CGL2.J_N(Q_hat, λ)) >= 0.6C_Y_new.J_N * ξ^-2
 
         ####
         ## Y_12
@@ -204,48 +207,6 @@
               ξ^(1 / σ - d - real(lambda) / κ + 1)
 
         ####
-        ## E_12
-        ####
-
-        @test norm_inf(hcat(E_1(ξ, lambda, κ, ϵ, λ), E_2(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.E_12 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(lambda) / κ)
-        @test norm_inf(hcat(E_1(ξ, lambda, κ, ϵ, λ), E_2(ξ, lambda, κ, ϵ, λ))) >=
-              0.9C_Y_new.E_12 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(lambda) / κ)
-
-        @test norm_inf(hcat(E_1_dξ(ξ, lambda, κ, ϵ, λ), E_2_dξ(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.E_12_dξ * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(lambda) / κ + 1)
-        @test norm_inf(hcat(E_1_dξ(ξ, lambda, κ, ϵ, λ), E_2_dξ(ξ, lambda, κ, ϵ, λ))) >=
-              0.8C_Y_new.E_12_dξ *
-              exp(-real(c) * ξ^2) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-
-        @test norm_inf(hcat(E_1_dλ(ξ, lambda, κ, ϵ, λ), E_2_dλ(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.E_12_dλ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ)
-        @test norm_inf(hcat(E_1_dλ(ξ, lambda, κ, ϵ, λ), E_2_dλ(ξ, lambda, κ, ϵ, λ))) >=
-              0.5C_Y_new.E_12_dλ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ)
-
-        @test norm_inf(
-            hcat(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-        ) <=
-              C_Y_new.E_12_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-        @test norm_inf(
-            hcat(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-        ) >=
-              0.6C_Y_new.E_12_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-
-        ####
         ## P_1 and P_2
         ####
 
@@ -282,32 +243,6 @@
               0.4C_Y_new.P_1_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
         @test abs(P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)) >=
               0.4C_Y_new.P_2_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-
-        ####
-        ## P_12
-        ####
-
-        @test norm_inf(hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.P_12 * ξ^(-1 / σ + real(lambda) / κ)
-        @test norm_inf(hcat(P_1(ξ, lambda, κ, ϵ, λ), P_2(ξ, lambda, κ, ϵ, λ))) >=
-              0.9C_Y_new.P_12 * ξ^(-1 / σ + real(lambda) / κ)
-
-        @test norm_inf(hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.P_12_dξ * ξ^(-1 / σ + real(lambda) / κ - 1)
-        @test norm_inf(hcat(P_1_dξ(ξ, lambda, κ, ϵ, λ), P_2_dξ(ξ, lambda, κ, ϵ, λ))) >=
-              0.8C_Y_new.P_12_dξ * ξ^(-1 / σ + real(lambda) / κ - 1)
-
-        @test norm_inf(hcat(P_1_dλ(ξ, lambda, κ, ϵ, λ), P_2_dλ(ξ, lambda, κ, ϵ, λ))) <=
-              C_Y_new.P_12_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-        @test norm_inf(hcat(P_1_dλ(ξ, lambda, κ, ϵ, λ), P_2_dλ(ξ, lambda, κ, ϵ, λ))) >=
-              0.6C_Y_new.P_12_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-
-        @test norm_inf(
-            hcat(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-        ) <= C_Y_new.P_12_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-        @test norm_inf(
-            hcat(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)),
-        ) >= 0.5C_Y_new.P_12_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
 
         ######
         ## J_E_1 and J_E_2
@@ -376,29 +311,52 @@
         ######
 
         K_1, K_2 = K_1_2_new(ξ, lambda, κ, ϵ, λ)
-        @test norm_inf(K_1) <=
-              C_Y_new.K_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1) >=
-              0.95C_Y_new.K_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1, 1) <=
+              C_Y_new.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1, 1) >=
+              0.95C_Y_new.K_1_1 *
+              exp(real(c) * ξ^2) *
+              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1, 2) <=
+              C_Y_new.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1, 2) >=
+              0.9C_Y_new.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
 
-        @test norm_inf(K_2) <= C_Y_new.K_2 * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2) >= 0.95C_Y_new.K_2 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2, 1) <= C_Y_new.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2, 1) >= 0.9C_Y_new.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2, 2) <= C_Y_new.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2, 2) >= 0.85C_Y_new.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
 
         K_1_dλ, K_2_dλ = K_1_2_dλ_new(ξ, lambda, κ, ϵ, λ)
-        @test norm_inf(K_1_dλ) <=
-              C_Y_new.K_1_dλ *
+        @test norm_inf(K_1_dλ, 1) <=
+              C_Y_new.K_1_dλ_1 *
               exp(real(c) * ξ^2) *
               log(ξ) *
               ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1_dλ) >=
-              0.4C_Y_new.K_1_dλ *
+        @test norm_inf(K_1_dλ, 1) >=
+              0.4C_Y_new.K_1_dλ_1 *
+              exp(real(c) * ξ^2) *
+              log(ξ) *
+              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1_dλ, 2) <=
+              C_Y_new.K_1_dλ_2 *
+              exp(real(c) * ξ^2) *
+              log(ξ) *
+              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
+        @test norm_inf(K_1_dλ, 2) >=
+              0.4C_Y_new.K_1_dλ_2 *
               exp(real(c) * ξ^2) *
               log(ξ) *
               ξ^(- 1 / σ + d + real(lambda) / κ - 1)
 
-        @test norm_inf(K_2_dλ) <= C_Y_new.K_2_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2_dλ) >=
-              0.4C_Y_new.K_2_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2_dλ, 1) <=
+              C_Y_new.K_2_dλ_1 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2_dλ, 1) >=
+              0.4C_Y_new.K_2_dλ_1 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2_dλ, 2) <=
+              C_Y_new.K_2_dλ_2 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2_dλ, 2) >=
+              0.4C_Y_new.K_2_dλ_2 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
 
         K_1, K_2 = K_1_2(ξ, lambda, κ, ϵ, λ)
         @test norm_inf(K_1) <=

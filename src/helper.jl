@@ -65,3 +65,6 @@ end
 
 norm_inf(v::AbstractVector) = mapreduce(abs, max, v)
 norm_inf(v::AbstractMatrix) = maximum(row -> sum(abs, row), eachrow(v))
+
+norm_inf(v::AbstractVector, j::Int) = abs(v[j])
+norm_inf(v::AbstractMatrix, j::Int) = sum(abs, v[j, :])

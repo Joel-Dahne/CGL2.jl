@@ -1,10 +1,13 @@
 @testset "functions" begin
     # IMPROVE: Test for more parameters
+    lambda = Acb(0.19028080950252219, 2.769747313863597)
+    γ₁ = Acb(0.1979686615344728, 0.15613711743772288)
+    γ₂ = Acb(-116.03421868436834, 101.21494871936197)
     ξ = Arb(30)
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
-    lambda = Acb(0.2 + 1.3im)
     λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
+    (; d, ω, σ) = λ
 
     ξF64 = Float64(ξ)
     κF64 = Float64(κ)
@@ -13,6 +16,8 @@
     λF64 = CGLParams{Float64}(λ)
 
     (; A, B₁, B₂, C, λI) = CGL2.coeff_matrices(lambda, κ, ϵ, λ)
+
+    F_Y = CGL2.FunctionEnclosures_Y_new(lambda, γ₁, γ₂, κ, ϵ, ξ, λ)
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
@@ -367,6 +372,26 @@
         (1, CGL2.P_1, CGL2.P_1_dξ, CGL2.P_1_dλ, CGL2.P_1_dλ_dξ),
         (2, CGL2.P_2, CGL2.P_2_dξ, CGL2.P_2_dλ, CGL2.P_2_dλ_dξ),
     ]
+        Pj_series = P_j(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ)
+        Pj = Pj_series[0]
+        Pj_dξ = Pj_series[1]
+        Pj_dξ_dξ = 2Pj_series[2]
+
+        # Test that it solves the ODE
+        if j == 1
+            @test Arblib.contains_zero(
+                (ϵ + im) * Pj_dξ_dξ +
+                (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Pj_dξ +
+                (κ / σ + ω * im - lambda) * Pj,
+            )
+        else
+            @test Arblib.contains_zero(
+                (ϵ - im) * Pj_dξ_dξ +
+                (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Pj_dξ +
+                (κ / σ - ω * im - lambda) * Pj,
+            )
+        end
+
         @test Arblib.overlaps(
             P_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1],
             P_j_dξ(ξ, lambda, κ, ϵ, λ),
@@ -397,6 +422,26 @@
         (1, CGL2.E_1, CGL2.E_1_dξ, CGL2.E_1_dλ, CGL2.E_1_dλ_dξ),
         (2, CGL2.E_2, CGL2.E_2_dξ, CGL2.E_2_dλ, CGL2.E_2_dλ_dξ),
     ]
+        Ej_series = E_j(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, λ)
+        Ej = Ej_series[0]
+        Ej_dξ = Ej_series[1]
+        Ej_dξ_dξ = 2Ej_series[2]
+
+        # Test that it solves the ODE
+        if j == 1
+            @test Arblib.contains_zero(
+                (ϵ + im) * Ej_dξ_dξ +
+                (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Ej_dξ +
+                (κ / σ + ω * im - lambda) * Ej,
+            )
+        else
+            @test Arblib.contains_zero(
+                (ϵ - im) * Ej_dξ_dξ +
+                (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Ej_dξ +
+                (κ / σ - ω * im - lambda) * Ej,
+            )
+        end
+
         @test Arblib.overlaps(
             E_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1],
             E_j_dξ(ξ, lambda, κ, ϵ, λ),
@@ -486,6 +531,11 @@
                 λ,
             )/W_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ))[1],
         )
+
+        @test Arblib.overlaps(
+            J_P_j_dλ(ξ, lambda, κ, ϵ, λ),
+            J_P_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1],
+        )
     end
 
     @testset "J_E_$j" for (j, J_E_j, J_E_j_dλ, E_j, E_j_dλ, W_j) in [
@@ -507,6 +557,56 @@
                 λ,
             )/W_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ))[1],
         )
+
+        @test Arblib.overlaps(
+            J_E_j_dλ(ξ, lambda, κ, ϵ, λ),
+            J_E_j(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1],
+        )
+    end
+
+    @testset "K1_new and K2_new" begin
+        # K1 and K2 are suppose to give solutions to the linear system
+        # Ψ * v = [[0, 0]; A \ F].
+
+        M = SMatrix{2,2}(im, 1, -im, 1)
+        Ψ = [M * F_Y.E_12 M * F_Y.P_12; M * F_Y.E_12_dξ M * F_Y.P_12_dξ]
+        F = eltype(Ψ)[0.1, 0.25]
+
+        v = [-F_Y.K_1 * F; -F_Y.K_2 * F]
+
+        @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; A \ F]))
+
+        K1_dλ, K2_dλ = CGL2.K_1_2_dλ_new(ξ, lambda, κ, ϵ, λ)
+
+        K1_dλ_series = getindex.(CGL2.K_1_2_new(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1], 1)
+        K2_dλ_series = getindex.(CGL2.K_1_2_new(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[2], 1)
+
+        K1_dλ_fdm = fdm(
+            lambda_real -> CGL2.K_1_2_new(
+                ξF64,
+                complex(lambda_real, imag(lambdaF64)),
+                κF64,
+                ϵF64,
+                λF64,
+            )[1],
+            real(lambdaF64),
+        )
+
+        K2_dλ_fdm = fdm(
+            lambda_real -> CGL2.K_1_2_new(
+                ξF64,
+                complex(lambda_real, imag(lambdaF64)),
+                κF64,
+                ϵF64,
+                λF64,
+            )[2],
+            real(lambdaF64),
+        )
+
+        @test all(Arblib.overlaps.(F_Y.K_1_dλ, K1_dλ_series))
+        @test all(Arblib.overlaps.(F_Y.K_2_dλ, K2_dλ_series))
+        @test F_Y.K_1_dλ ≈ K1_dλ_fdm rtol = 1e-12
+        @test F_Y.K_2_dλ ≈ K2_dλ_fdm rtol = 1e-12
     end
 
     @testset "JN" begin
