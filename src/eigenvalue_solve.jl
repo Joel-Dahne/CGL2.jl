@@ -47,9 +47,15 @@ function eigenvalue_solve(
     verbose && @info "Got" ν γ₂
 
     ###
-    # Step 3.1: Find approximate eigenvalue from finite difference method
+    # Step 3.1: Find approximate eigenvalue
     ###
     verbose && @info "Computing approximate eigenvalue"
+
+    ###
+    # Step 3.1.1: Find approximation using finite difference method
+    ###
+    verbose && @info "Computing approximation using finite difference"
+
     λsF64 = filter(
         lambda -> imag(lambda) > 0,
         CGL2.linearization_eigenvalues_real_1(νF64, κF64, ϵF64, ξ₁F64, λF64)[1],
@@ -60,20 +66,31 @@ function eigenvalue_solve(
     verbose && @info "Got" lambdaF64_approx
 
     ###
+    # Step 3.1.2: Refine approximation using Newton
+    ###
+    verbose && @info "Refining approximation using Newton"
+
+    # IMPROVE: Consider running more iterations?
+    H_approx = H(AcbSeries((lambdaF64_approx, 1)), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    lambda_approx = lambdaF64_approx - midpoint(Acf, H_approx[0]) / midpoint(Acf, H_approx[1])
+
+    verbose && @info "Got" lambda_approx
+
+    ###
     # Step 3.2: Solve λ
     ###
     verbose && @info "Solving for λ"
 
     verbose && @info "Solving for λ using midpoint of ν"
     lambda_mid =
-        CGL2.H_solve(Acf(lambdaF64_approx), midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+        CGL2.H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # FIXME: Improve enclosures so that we don't need this scaling
-    ν_radius_scaling = Mag(1e-4)
+    ν_radius_scaling = Mag(1e-2)
     verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
     Arblib.mul!(Arblib.radref(Arblib.realref(ν)), radius(real(ν)), ν_radius_scaling)
     Arblib.mul!(Arblib.radref(Arblib.imagref(ν)), radius(imag(ν)), ν_radius_scaling)
-    lambda = CGL2.H_solve(midpoint(Acf, lambda_mid), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    lambda = CGL2.H_solve(lambda_approx, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # Note that the finite difference approximation is quite bad
     @show isapprox(ComplexF64(lambda), lambdaF64_approx, rtol = 1e-4)
