@@ -17,7 +17,7 @@ import BlockArrays
 import Dates
 import Distributed
 import ForwardDiff
-import IntervalArithmetic: Interval, interval, inf, sup
+import IntervalArithmetic: Interval, interval, emptyinterval, inf, sup
 import ProgressLogging: @progress, @withprogress, @logprogress
 import SparseArrays
 

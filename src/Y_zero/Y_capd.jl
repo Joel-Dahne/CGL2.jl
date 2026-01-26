@@ -89,7 +89,7 @@ function _Y_zero_capd(
         else
             8
         end
-        res = fill(IntervalArithmetic.emptyinterval(Interval{Float64}), n)
+        res = fill(emptyinterval(Interval{Float64}), n)
     else
         res = parse.(Interval{Float64}, split(output, "\n"))::Vector{Interval{Float64}}
     end

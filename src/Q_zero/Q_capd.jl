@@ -102,7 +102,7 @@ function _Q_zero_capd(
         else
             4
         end
-        Q = fill(IntervalArithmetic.emptyinterval(Interval{Float64}), n)
+        Q = fill(emptyinterval(Interval{Float64}), n)
     else
         Q = parse.(Interval{Float64}, split(output, "\n"))::Vector{Interval{Float64}}
     end
