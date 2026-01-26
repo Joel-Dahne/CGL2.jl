@@ -65,10 +65,9 @@ function norm_bound_Y(
     λ::CGLParams{Arb},
     C_Y::FunctionBounds_Y_new,
 )
-    C_T = C_T_Y(lambda, κ, ϵ, ξ₁, v, λ, C_Y)
-
+    C_T = C_T_12(lambda, κ, ϵ, ξ₁, v, λ, C_Y)
     if 2C_T * ξ₁^(-2) < 1
-        return C_Y.E_12 * norm_inf(c) * ξ₁^-v / (1 - C_T * ξ₁^-2)
+        return inv(1 - C_T * ξ₁^-2) * 2max(C_Y.E_1 * abs(c[1]), C_Y.E_2 * abs(c[2])) * ξ₁^-v
     else
         #@debug "Non-finite norm" 2C_T * ξ₁^(-2)
         return indeterminate(Arb)
@@ -108,9 +107,8 @@ function norm_bound_Y_dλ(
     C_Y::FunctionBounds_Y_new,
     norms_Y::NormBounds_Y,
 )
-    num = C_Y_dλ_1(v, C_Y) * norm_inf(c) + C_Y_dλ_2(lambda, κ, ξ₁, v, λ, C_Y) * norms_Y.Y
+    num = C_Y_dλ_1(c, v, C_Y) + C_Y_dλ_2(lambda, κ, ξ₁, v, λ, C_Y) * norms_Y.Y
     den = 1 - C_Y_dλ_3(lambda, κ, ξ₁, v, λ, C_Y)
-
     if den > 0
         return num / den
     else
