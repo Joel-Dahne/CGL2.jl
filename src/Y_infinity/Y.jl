@@ -33,7 +33,7 @@ function Y_infinity(
     I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
 
     # FIXME: Improve bounds so that we don't have to cheat
-    I_K_2 = 1e-5I_K_2
+    I_K_2 = 5e-4I_K_2
 
     Y = M * (F_Y.E_12 * c + F_Y.P_12 * I_K_2)
 
@@ -41,12 +41,8 @@ function Y_infinity(
     I_K_2_dξ = -F_Y.K_2 * F_Y.J_N * Y
 
     dY =
-        M * (
-            F_Y.E_12_dξ * c +
-            F_Y.E_12 * I_K_1_dξ +
-            F_Y.P_12_dξ * I_K_2 +
-            F_Y.P_12 * I_K_2_dξ
-        )
+        M *
+        (F_Y.E_12_dξ * c + F_Y.E_12 * I_K_1_dξ + F_Y.P_12_dξ * I_K_2 + F_Y.P_12 * I_K_2_dξ)
 
     return vcat(Y, dY)
     res_new = vcat(Y, dY)
@@ -191,17 +187,13 @@ function Y_infinity_derivative(
     I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
 
     Y = M * (F_Y.E_12 * c + F_Y.P_12 * I_K_2)
-    Y_dλ =
-        M *
-        (F_Y.E_12_dλ * c + F_Y.P_12_dλ * I_K_2 + F_Y.P_12 * I_K_2_dλ)
+    Y_dλ = M * (F_Y.E_12_dλ * c + F_Y.P_12_dλ * I_K_2 + F_Y.P_12 * I_K_2_dλ)
 
     I_K_1_dξ = F_Y.K_1 * F_Y.J_N * Y
     I_K_2_dξ = -F_Y.K_2 * F_Y.J_N * Y
 
-    I_K_1_dλ_dξ =
-        F_Y.K_1_dλ * F_Y.J_N * Y + F_Y.K_1 * F_Y.J_N * Y_dλ
-    I_K_2_dλ_dξ =
-        -F_Y.K_2_dλ * F_Y.J_N * Y - F_Y.K_2 * F_Y.J_N * Y_dλ
+    I_K_1_dλ_dξ = F_Y.K_1_dλ * F_Y.J_N * Y + F_Y.K_1 * F_Y.J_N * Y_dλ
+    I_K_2_dλ_dξ = -F_Y.K_2_dλ * F_Y.J_N * Y - F_Y.K_2 * F_Y.J_N * Y_dλ
 
     dY_dλ =
         M * (

@@ -72,7 +72,8 @@ function eigenvalue_solve(
 
     # IMPROVE: Consider running more iterations?
     H_approx = H(AcbSeries((lambdaF64_approx, 1)), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    lambda_approx = lambdaF64_approx - midpoint(Acf, H_approx[0]) / midpoint(Acf, H_approx[1])
+    lambda_approx =
+        lambdaF64_approx - midpoint(Acf, H_approx[0]) / midpoint(Acf, H_approx[1])
 
     verbose && @info "Got" lambda_approx
 
@@ -82,8 +83,7 @@ function eigenvalue_solve(
     verbose && @info "Solving for λ"
 
     verbose && @info "Solving for λ using midpoint of ν"
-    lambda_mid =
-        CGL2.H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    lambda_mid = CGL2.H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # FIXME: Improve enclosures so that we don't need this scaling
     ν_radius_scaling = Mag(1e-2)

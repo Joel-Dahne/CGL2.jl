@@ -19,7 +19,7 @@ function I_K_2_enclosure(
 
     C_I_K_2 = C_Y.K_1 * C_Y.J_N / abs(exponent)
 
-    I_K_2_bound = C_I_K_2 * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^(exponent) * norms_Y.Y
+    I_K_2_bound = C_I_K_2 * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
 
     return add_error.(zero(c), I_K_2_bound)
 end
@@ -37,17 +37,16 @@ function I_K_2_enclosure(
 )
     (; d, σ) = λ
     _, _, c_ = _abc(κ, ϵ, λ) # TODO: We use the name c for two things...
-    exponent = 2 / σ - d - 2real(lambda) / κ + v - 2
+    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
 
     @assert v > 0
     @assert -real(c_) < 0
     @assert exponent < 0
 
-
-    I_K_2_1_bound =
-        C_I_K_2_1(lambda, κ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^(exponent) * norms_Y.Y
     I_K_2_2_bound =
-        C_I_K_2_2(lambda, κ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^(exponent) * norms_Y.Y
+        C_I_K_2_2(lambda, κ, ϵ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
+    I_K_2_1_bound =
+        C_I_K_2_1(lambda, κ, ϵ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
 
     return add_error.(zero(c), SVector(I_K_2_1_bound, I_K_2_2_bound))
 end
@@ -86,13 +85,13 @@ function I_K_2_dλ_1_enclosure(
     @assert real_a < 0
     @assert exponent < 0
 
-    C_I_K_2_dλ_1_1 = C_Y.K_1_dλ * C_Y.J_N / (exponent)^2
+    C_I_K_2_dλ_1_1 = C_Y.K_1_dλ * C_Y.J_N / exponent^2
     C_I_K_2_dλ_1_2 = C_Y.K_1_dλ * C_Y.J_N / abs(exponent)
 
     I_K_2_dλ_bound =
         (C_I_K_2_dλ_1_1 * log(ξ₁) + C_I_K_2_dλ_1_2) *
         exp(real_a12(κ, ϵ) * ξ₁^2) *
-        ξ₁^(exponent) *
+        ξ₁^exponent *
         norms_Y.Y
 
     return add_error.(zero(c), I_K_2_dλ_bound)
@@ -111,23 +110,23 @@ function I_K_2_dλ_1_enclosure(
 )
     (; d, σ) = λ
     _, _, c_ = _abc(κ, ϵ, λ) # TODO: We use the name c for two things...
-    exponent = 2 / σ - d - 2real(lambda) / κ + v - 2
+    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
 
     @assert v > 0
     @assert -real(c_) < 0
     @assert exponent < 0
 
     I_K_2_dλ_1_1_bound =
-        C_I_K_2_dλ_1_1(lambda, κ, ξ₁, v, λ, C_Y) *
+        C_I_K_2_dλ_1_1(lambda, κ, ϵ, ξ₁, v, λ, C_Y) *
         exp(-real(c_) * ξ₁^2) *
         log(ξ₁) *
-        ξ₁^(exponent) *
+        ξ₁^exponent *
         norms_Y.Y
     I_K_2_dλ_1_2_bound =
-        C_I_K_2_dλ_1_2(lambda, κ, ξ₁, v, λ, C_Y) *
+        C_I_K_2_dλ_1_2(lambda, κ, ϵ, ξ₁, v, λ, C_Y) *
         exp(-real(c_) * ξ₁^2) *
         log(ξ₁) *
-        ξ₁^(exponent) *
+        ξ₁^exponent *
         norms_Y.Y
 
     return add_error.(zero(c), SVector(I_K_2_dλ_1_1_bound, I_K_2_dλ_1_2_bound))
@@ -154,7 +153,7 @@ function I_K_2_dλ_2_enclosure(
 
     C_I_K_dλ_2 = C_Y.K_1 * C_Y.J_N / abs(exponent)
 
-    I_K_2_dλ_bound = C_I_K_dλ_2 * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^(exponent) * norms_Y.Y
+    I_K_2_dλ_bound = C_I_K_dλ_2 * exp(real_a12(κ, ϵ) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
 
     return add_error.(zero(c), I_K_2_dλ_bound)
 end
@@ -172,21 +171,21 @@ function I_K_2_dλ_2_enclosure(
 )
     (; d, σ) = λ
     _, _, c_ = _abc(κ, ϵ, λ) # TODO: We use the name c for two things...
-    exponent = 2 / σ - d - 2real(lambda) / κ + v - 2
+    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
 
     @assert v > 0
     @assert -real(c_) < 0
     @assert exponent < 0
 
     I_K_2_dλ_2_1_bound =
-        C_I_K_2_dλ_2_1(lambda, κ, v, λ, C_Y) *
+        C_I_K_2_dλ_2_1(lambda, κ, ϵ, v, λ, C_Y) *
         exp(-real(c_) * ξ₁^2) *
-        ξ₁^(exponent) *
+        ξ₁^exponent *
         norms_Y.Y_dλ
     I_K_2_dλ_2_2_bound =
-        C_I_K_2_dλ_2_2(lambda, κ, v, λ, C_Y) *
+        C_I_K_2_dλ_2_2(lambda, κ, ϵ, v, λ, C_Y) *
         exp(-real(c_) * ξ₁^2) *
-        ξ₁^(exponent) *
+        ξ₁^exponent *
         norms_Y.Y_dλ
 
     return add_error.(zero(c), SVector(I_K_2_dλ_2_1_bound, I_K_2_dλ_2_2_bound))

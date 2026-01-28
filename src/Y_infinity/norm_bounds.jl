@@ -107,8 +107,8 @@ function norm_bound_Y_dλ(
     C_Y::FunctionBounds_Y_new,
     norms_Y::NormBounds_Y,
 )
-    num = C_Y_dλ_1(c, v, C_Y) + C_Y_dλ_2(lambda, κ, ξ₁, v, λ, C_Y) * norms_Y.Y
-    den = 1 - C_Y_dλ_3(lambda, κ, ξ₁, v, λ, C_Y)
+    num = C_Y_dλ_1(c, v, C_Y) + C_Y_dλ_2(lambda, κ, ϵ, ξ₁, v, λ, C_Y) * norms_Y.Y
+    den = 1 - C_Y_dλ_3(lambda, κ, ϵ, ξ₁, v, λ, C_Y)
     if den > 0
         return num / den
     else
