@@ -1,3 +1,23 @@
+"""
+    FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ; include_dλ = false)
+
+This contains all the bounds of functions that are needed in the
+enclosure asymptotic expansion of `Y` at infinity.
+
+More precisely it contains the bounds from
+
+- Lemma REF(lemma:P_i_E_i-bounds)
+- Lemma REF(lemma:I_K_1-I_K_2-bounds)
+- Lemma REF(lemma:bound-J_N)
+
+If `include_dλ = false` it doesn't include the bounds corresponding to
+derivatives in `lambda`.
+
+It checks all the conditions on the parameters that these lemmas
+assume. If any of these conditions are not satisfied it will set the
+corresponding bound to an indeterminate value. When using this struct
+the bounds can therefore safely be assume to hold.
+"""
 struct FunctionBounds_Y
     J_N::Arb
     E_1::Arb
@@ -44,6 +64,16 @@ struct FunctionBounds_Y
         include_dλ::Bool = false,
     )
         a, b, c = _abc(κ, ϵ, λ)
+
+        # This is the only direct condition in Lemma
+        # REF(lemma:P_i_E_i-bounds) and REF(lemma:I_K_1-I_K_2-bounds).
+        # The conditions related to the bounds for U are checked by
+        # Ubounds.
+        ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
+
+        # TODO: Add checks for the conditions related to C_J_N once it
+        # is fully implemented.
+
         CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = include_dλ)
         CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = include_dλ)
 
