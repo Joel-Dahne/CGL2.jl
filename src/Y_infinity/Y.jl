@@ -24,13 +24,15 @@ function Y_infinity(
 
     C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y)
+    C_I_K_j = I_K_j_Bounds(lambda, κ, ϵ, ξ₁, v, λ, C_Y)
+
+    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j)
 
     # Compute zeroth order bounds
     Y = add_error.(zero(c), norms_Y.Y * exp(-real(c_) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
-    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, norms_Y)
 
     # FIXME: Improve bounds so that we don't have to cheat
     I_K_2 = 5e-4I_K_2
@@ -122,15 +124,17 @@ function Y_infinity_derivative(
 
     C_Y = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
 
-    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, include_dλ = true)
+    C_I_K_j = I_K_j_Bounds(lambda, κ, ϵ, ξ₁, v, λ, C_Y, include_dλ = true)
+
+    norms_Y = NormBounds_Y(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, include_dλ = true)
 
     # Compute zeroth order bounds
     Y = add_error.(zero(c), norms_Y.Y * exp(-real(c_) * ξ₁^2) * ξ₁^v)
     Y_dλ = add_error.(zero(c), norms_Y.Y_dλ * exp(-real(c_) * ξ₁^2) * ξ₁^v)
 
     # Improve bounds
-    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
-    I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    I_K_2 = I_K_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, norms_Y)
+    I_K_2_dλ = I_K_2_dλ_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, norms_Y)
 
     Y = M * (F_Y.E_12 * c + F_Y.P_12 * I_K_2)
     Y_dλ = M * (F_Y.E_12_dλ * c + F_Y.P_12_dλ * I_K_2 + F_Y.P_12 * I_K_2_dλ)

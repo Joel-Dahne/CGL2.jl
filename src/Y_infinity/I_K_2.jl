@@ -7,6 +7,7 @@ function I_K_2_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Y::FunctionBounds_Y,
+    C_I_K_j::I_K_j_Bounds,
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -17,10 +18,8 @@ function I_K_2_enclosure(
     @assert -real(c_) < 0
     @assert exponent < 0
 
-    I_K_2_2_bound =
-        C_I_K_2_2(lambda, κ, ϵ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
-    I_K_2_1_bound =
-        C_I_K_2_1(lambda, κ, ϵ, v, λ, C_Y) * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
+    I_K_2_2_bound = C_I_K_j.C_I_K_2_2 * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
+    I_K_2_1_bound = C_I_K_j.C_I_K_2_1 * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y
 
     return add_error.(zero(c), SVector(I_K_2_1_bound, I_K_2_2_bound))
 end
@@ -34,10 +33,11 @@ function I_K_2_dλ_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Y::FunctionBounds_Y,
+    C_I_K_j::I_K_j_Bounds,
     norms_Y::NormBounds_Y,
 )
-    return I_K_2_dλ_1_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y) +
-           I_K_2_dλ_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, norms_Y)
+    return I_K_2_dλ_1_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, norms_Y) +
+           I_K_2_dλ_2_enclosure(c, lambda, κ, ϵ, ξ₁, v, λ, C_Y, C_I_K_j, norms_Y)
 end
 
 function I_K_2_dλ_1_enclosure(
@@ -49,6 +49,7 @@ function I_K_2_dλ_1_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Y::FunctionBounds_Y,
+    C_I_K_j::I_K_j_Bounds,
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -60,17 +61,9 @@ function I_K_2_dλ_1_enclosure(
     @assert exponent < 0
 
     I_K_2_dλ_1_1_bound =
-        C_I_K_2_dλ_1_1(lambda, κ, ϵ, ξ₁, v, λ, C_Y) *
-        exp(-real(c_) * ξ₁^2) *
-        log(ξ₁) *
-        ξ₁^exponent *
-        norms_Y.Y
+        C_I_K_j.C_I_K_2_dλ_1_1 * exp(-real(c_) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Y.Y
     I_K_2_dλ_1_2_bound =
-        C_I_K_2_dλ_1_2(lambda, κ, ϵ, ξ₁, v, λ, C_Y) *
-        exp(-real(c_) * ξ₁^2) *
-        log(ξ₁) *
-        ξ₁^exponent *
-        norms_Y.Y
+        C_I_K_j.C_I_K_2_dλ_1_2 * exp(-real(c_) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Y.Y
 
     return add_error.(zero(c), SVector(I_K_2_dλ_1_1_bound, I_K_2_dλ_1_2_bound))
 end
@@ -84,6 +77,7 @@ function I_K_2_dλ_2_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Y::FunctionBounds_Y,
+    C_I_K_j::I_K_j_Bounds,
     norms_Y::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -95,15 +89,9 @@ function I_K_2_dλ_2_enclosure(
     @assert exponent < 0
 
     I_K_2_dλ_2_1_bound =
-        C_I_K_2_dλ_2_1(lambda, κ, ϵ, v, λ, C_Y) *
-        exp(-real(c_) * ξ₁^2) *
-        ξ₁^exponent *
-        norms_Y.Y_dλ
+        C_I_K_j.C_I_K_2_dλ_2_1 * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y_dλ
     I_K_2_dλ_2_2_bound =
-        C_I_K_2_dλ_2_2(lambda, κ, ϵ, v, λ, C_Y) *
-        exp(-real(c_) * ξ₁^2) *
-        ξ₁^exponent *
-        norms_Y.Y_dλ
+        C_I_K_j.C_I_K_2_dλ_2_2 * exp(-real(c_) * ξ₁^2) * ξ₁^exponent * norms_Y.Y_dλ
 
     return add_error.(zero(c), SVector(I_K_2_dλ_2_1_bound, I_K_2_dλ_2_2_bound))
 end

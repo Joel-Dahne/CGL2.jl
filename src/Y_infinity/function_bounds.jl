@@ -14,9 +14,9 @@ If `include_dλ = false` it doesn't include the bounds corresponding to
 derivatives in `lambda`.
 
 It checks all the conditions on the parameters that these lemmas
-assume. If any of these conditions are not satisfied it will set the
-corresponding bound to an indeterminate value. When using this struct
-the bounds can therefore safely be assume to hold.
+assume. If any of these conditions are not satisfied it will throw an
+error. When using this struct the bounds can therefore safely be
+assume to hold.
 """
 struct FunctionBounds_Y
     J_N::Arb
