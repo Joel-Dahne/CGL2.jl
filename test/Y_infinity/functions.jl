@@ -255,19 +255,21 @@
         # Ψ * v = [[0, 0]; A \ F].
 
         (; A) = CGL2.coeff_matrices(lambda, κ, ϵ, λ)
+        P = SMatrix{2,2,Acb}(im, 1, -im, 1)
 
-        M = SMatrix{2,2}(im, 1, -im, 1)
-        Ψ = [M * F_Y.E_12 M * F_Y.P_12; M * F_Y.E_12_dξ M * F_Y.P_12_dξ]
+        Ψ = [F_Y.E_12 F_Y.P_12; F_Y.E_12_dξ F_Y.P_12_dξ]
         F = eltype(Ψ)[0.1, 0.25]
 
         v = [-F_Y.K_1 * F; -F_Y.K_2 * F]
 
-        @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; A \ F]))
+        @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; inv(P) * A * P \ F]))
 
         K1_dξ, K2_dξ = CGL2.K_1_2_dξ(ξ, lambda, κ, ϵ, λ)
 
-        K1_dξ_series = getindex.(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1], 1)
-        K2_dξ_series = getindex.(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[2], 1)
+        K1_dξ_series =
+            Diagonal(getindex.(diag(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1]), 1))
+        K2_dξ_series =
+            Diagonal(getindex.(diag(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[2]), 1))
 
         K1_dξ_fdm = fdm(
             ξ_real ->
@@ -283,13 +285,15 @@
 
         @test all(Arblib.overlaps.(F_Y.K_1_dξ, K1_dξ_series))
         @test all(Arblib.overlaps.(F_Y.K_2_dξ, K2_dξ_series))
-        @test F_Y.K_1_dξ ≈ K1_dξ_fdm rtol = 1e-10
-        @test F_Y.K_2_dξ ≈ K2_dξ_fdm rtol = 1e-12
+        @test ComplexF64.(F_Y.K_1_dξ) ≈ K1_dξ_fdm rtol = 1e-10
+        @test ComplexF64.(F_Y.K_2_dξ) ≈ K2_dξ_fdm rtol = 1e-12
 
         K1_dλ, K2_dλ = CGL2.K_1_2_dλ(ξ, lambda, κ, ϵ, λ)
 
-        K1_dλ_series = getindex.(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1], 1)
-        K2_dλ_series = getindex.(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[2], 1)
+        K1_dλ_series =
+            Diagonal(getindex.(diag(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1]), 1))
+        K2_dλ_series =
+            Diagonal(getindex.(diag(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[2]), 1))
 
         K1_dλ_fdm = fdm(
             lambda_real -> CGL2.K_1_2(
@@ -315,8 +319,8 @@
 
         @test all(Arblib.overlaps.(F_Y.K_1_dλ, K1_dλ_series))
         @test all(Arblib.overlaps.(F_Y.K_2_dλ, K2_dλ_series))
-        @test F_Y.K_1_dλ ≈ K1_dλ_fdm rtol = 1e-12
-        @test F_Y.K_2_dλ ≈ K2_dλ_fdm rtol = 1e-12
+        @test ComplexF64.(F_Y.K_1_dλ) ≈ K1_dλ_fdm rtol = 1e-12
+        @test ComplexF64.(F_Y.K_2_dλ) ≈ K2_dλ_fdm rtol = 1e-12
     end
 
     @testset "J_N" begin
@@ -346,5 +350,42 @@
         JN_dξ = getindex.(JN(ArbSeries((a, a_dξ)), ArbSeries((b, b_dξ))), 1)
 
         @test all(Arblib.overlaps.(JN_dξ, CGL2.J_N_dξ(Acb(a, b), Acb(a_dξ, b_dξ), λ)))
+    end
+
+    @testset "I_N" begin
+        P = SMatrix{2,2,Acb}(im, 1, -im, 1)
+
+        # The precise value for a and b should not play any role in
+        # the correctness, we just compute some approximation here.
+        νF64 = 1.9261384880241954 + 3.0638598354170337im
+        a, b, a_dξ, b_dξ =
+            Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, λF64))
+
+        # Compute Jacobian by going through ArbSeries
+        N = (a, b) -> (a^2 + b^2)^λ.σ * SVector(-λ.δ * a - b, a - λ.δ * b)
+        N_a = getindex.(N(ArbSeries((a, 1)), b), 1)
+        N_b = getindex.(N(a, ArbSeries((b, 1))), 1)
+        JN_direct = [N_a N_b]
+        IN_direct = inv(P) * JN_direct * P
+
+        @test all(Arblib.overlaps.(IN_direct, CGL2.I_N(Acb(a, b), λ)))
+
+        # Compute derivative w.r.t. ξ using formula for Jacobian plus ArbSeries
+        @assert isone(λ.σ)
+        @assert iszero(λ.δ)
+        IN(a, b) = SMatrix{2,2}(
+            2im * (a^2 + b^2),
+            im * (a - im * b)^2,
+            -im * (a + im * b)^2,
+            2im * (a^2 + b^2),
+        )
+
+        # Check that the above implementation agrees with previous one
+        @test all(Arblib.overlaps.(IN_direct, IN(a, b)))
+
+        # Compute derivative w.r.t. ξ
+        IN_dξ = getindex.(IN(ArbSeries((a, a_dξ)), ArbSeries((b, b_dξ))), 1)
+
+        @test all(Arblib.overlaps.(IN_dξ, CGL2.I_N_dξ(Acb(a, b), Acb(a_dξ, b_dξ), λ)))
     end
 end
