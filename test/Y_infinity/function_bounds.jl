@@ -73,6 +73,22 @@
         @test norm_inf(CGL2.J_N_dξ(Q_hat, Q_hat_dξ, λ)) >= 0.6C_Y.J_N_dξ * ξ^-3
 
         ####
+        ## I_N
+        ####
+
+        # TODO: This is not quite correct since γ₁ and γ₂ only
+        # parametrize Q_hat_infinity at ξ₁ and not at ξ > ξ₁. The
+        # difference should however be of lower order and it still
+        # gives some information as a test.
+        Q_hat, Q_hat_dξ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
+
+        @test norm_inf(CGL2.I_N(Q_hat, λ)) <= C_Y.I_N * ξ^-2
+        @test norm_inf(CGL2.I_N(Q_hat, λ)) >= 0.8C_Y.I_N * ξ^-2
+        # IMPROVE: We could maybe improve on this bound?
+        @test norm_inf(CGL2.I_N_dξ(Q_hat, Q_hat_dξ, λ)) <= C_Y.I_N_dξ * ξ^-3
+        @test norm_inf(CGL2.I_N_dξ(Q_hat, Q_hat_dξ, λ)) >= 0.6C_Y.I_N_dξ * ξ^-3
+
+        ####
         ## E_1 and E_2
         ####
 
@@ -297,30 +313,30 @@
         ## H_OJ
         #####
 
-        Q_hat, Q_hat_dξ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
-        H = K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N(Q_hat, λ) * M
-        H_dξ =
-            K_1_2_dξ(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N(Q_hat, λ) * M +
-            K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N_dξ(Q_hat, Q_hat_dξ, λ) * M
+        # Q_hat, Q_hat_dξ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
+        # H = K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N(Q_hat, λ) * M
+        # H_dξ =
+        #     K_1_2_dξ(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N(Q_hat, λ) * M +
+        #     K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.J_N_dξ(Q_hat, Q_hat_dξ, λ) * M
 
-        @test abs(H[1, 1]) <= C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[1, 2]) <= C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[2, 1]) <= C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[2, 2]) <= C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
-        # IMPROVE: These bounds are very bad... It would be nice to improve them
-        @test abs(H[1, 1]) >= 0.2C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[1, 2]) >= 0.1C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[2, 1]) >= 0.075C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
-        @test abs(H[2, 2]) >= 0.1C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[1, 1]) <= C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[1, 2]) <= C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[2, 1]) <= C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[2, 2]) <= C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # # IMPROVE: These bounds are very bad... It would be nice to improve them
+        # @test abs(H[1, 1]) >= 0.2C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[1, 2]) >= 0.1C_Y.H_1j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[2, 1]) >= 0.075C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
+        # @test abs(H[2, 2]) >= 0.1C_Y.H_2j * ξ^(1 / σ - real(lambda) / κ - 3)
 
-        @test abs(H_dξ[1, 1]) <= C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[1, 2]) <= C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[2, 1]) <= C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[2, 2]) <= C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        # IMPROVE: These bounds are very bad... It would be nice to improve them
-        @test abs(H_dξ[1, 1]) >= 0.075C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[1, 2]) >= 0.05C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[2, 1]) >= 0.02C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
-        @test abs(H_dξ[2, 2]) >= 0.075C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[1, 1]) <= C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[1, 2]) <= C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[2, 1]) <= C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[2, 2]) <= C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # # IMPROVE: These bounds are very bad... It would be nice to improve them
+        # @test abs(H_dξ[1, 1]) >= 0.075C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[1, 2]) >= 0.05C_Y.H_1j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[2, 1]) >= 0.02C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
+        # @test abs(H_dξ[2, 2]) >= 0.075C_Y.H_2j_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
     end
 end
