@@ -166,13 +166,29 @@
         )
     end
 
-    @testset "J_P_$j" for (j, J_P_j, J_P_j_dλ, P_j, P_j_dλ, W_j) in [
-        (1, CGL2.J_P_1, CGL2.J_P_1_dλ, CGL2.P_1, CGL2.P_1_dλ, CGL2.W_1),
-        (2, CGL2.J_P_2, CGL2.J_P_2_dλ, CGL2.P_2, CGL2.P_2_dλ, CGL2.W_2),
+    @testset "J_P_$j" for (j, J_P_j, J_P_j_dξ, J_P_j_dλ, P_j, P_j_dλ, W_j) in [
+        (1, CGL2.J_P_1, CGL2.J_P_1_dξ, CGL2.J_P_1_dλ, CGL2.P_1, CGL2.P_1_dλ, CGL2.W_1),
+        (2, CGL2.J_P_2, CGL2.J_P_2_dξ, CGL2.J_P_2_dλ, CGL2.P_2, CGL2.P_2_dλ, CGL2.W_2),
     ]
         @test Arblib.overlaps(
             J_P_j(ξ, lambda, κ, ϵ, λ),
             P_j(ξ, lambda, κ, ϵ, λ) / W_j(ξ, lambda, κ, ϵ, λ),
+        )
+
+        @test Arblib.overlaps(
+            J_P_j_dξ(ξ, lambda, κ, ϵ, λ),
+            (P_j(
+                AcbSeries((ξ, 1)),
+                lambda,
+                κ,
+                ϵ,
+                λ,
+            )/W_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ))[1],
+        )
+
+        @test Arblib.overlaps(
+            J_P_j_dξ(ξ, lambda, κ, ϵ, λ),
+            J_P_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1],
         )
 
         @test Arblib.overlaps(
@@ -192,13 +208,29 @@
         )
     end
 
-    @testset "J_E_$j" for (j, J_E_j, J_E_j_dλ, E_j, E_j_dλ, W_j) in [
-        (1, CGL2.J_E_1, CGL2.J_E_1_dλ, CGL2.E_1, CGL2.E_1_dλ, CGL2.W_1),
-        (2, CGL2.J_E_2, CGL2.J_E_2_dλ, CGL2.E_2, CGL2.E_2_dλ, CGL2.W_2),
+    @testset "J_E_$j" for (j, J_E_j, J_E_j_dξ, J_E_j_dλ, E_j, E_j_dλ, W_j) in [
+        (1, CGL2.J_E_1, CGL2.J_E_1_dξ, CGL2.J_E_1_dλ, CGL2.E_1, CGL2.E_1_dλ, CGL2.W_1),
+        (2, CGL2.J_E_2, CGL2.J_E_2_dξ, CGL2.J_E_2_dλ, CGL2.E_2, CGL2.E_2_dλ, CGL2.W_2),
     ]
         @test Arblib.overlaps(
             J_E_j(ξ, lambda, κ, ϵ, λ),
             E_j(ξ, lambda, κ, ϵ, λ) / W_j(ξ, lambda, κ, ϵ, λ),
+        )
+
+        @test Arblib.overlaps(
+            J_E_j_dξ(ξ, lambda, κ, ϵ, λ),
+            (E_j(
+                AcbSeries((ξ, 1)),
+                lambda,
+                κ,
+                ϵ,
+                λ,
+            )/W_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ))[1],
+        )
+
+        @test Arblib.overlaps(
+            J_E_j_dξ(ξ, lambda, κ, ϵ, λ),
+            J_E_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1],
         )
 
         @test Arblib.overlaps(
@@ -231,6 +263,28 @@
         v = [-F_Y.K_1 * F; -F_Y.K_2 * F]
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; A \ F]))
+
+        K1_dξ, K2_dξ = CGL2.K_1_2_dξ(ξ, lambda, κ, ϵ, λ)
+
+        K1_dξ_series = getindex.(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1], 1)
+        K2_dξ_series = getindex.(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[2], 1)
+
+        K1_dξ_fdm = fdm(
+            ξ_real ->
+                CGL2.K_1_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64)[1],
+            real(ξF64),
+        )
+
+        K2_dξ_fdm = fdm(
+            ξ_real ->
+                CGL2.K_1_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64)[2],
+            real(ξF64),
+        )
+
+        @test all(Arblib.overlaps.(F_Y.K_1_dξ, K1_dξ_series))
+        @test all(Arblib.overlaps.(F_Y.K_2_dξ, K2_dξ_series))
+        @test F_Y.K_1_dξ ≈ K1_dξ_fdm rtol = 1e-10
+        @test F_Y.K_2_dξ ≈ K2_dξ_fdm rtol = 1e-12
 
         K1_dλ, K2_dλ = CGL2.K_1_2_dλ(ξ, lambda, κ, ϵ, λ)
 
@@ -265,12 +319,12 @@
         @test F_Y.K_2_dλ ≈ K2_dλ_fdm rtol = 1e-12
     end
 
-    @testset "JN" begin
+    @testset "J_N" begin
         # The precise value for a and b should not play any role in
         # the correctness, we just compute some approximation here.
         νF64 = 1.9261384880241954 + 3.0638598354170337im
-        a, b =
-            Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, λF64)[1:2])
+        a, b, a_dξ, b_dξ =
+            Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, λF64))
 
         # Compute Jacobian by going through ArbSeries
         N = (a, b) -> (a^2 + b^2)^λ.σ * SVector(-λ.δ * a - b, a - λ.δ * b)
@@ -279,5 +333,18 @@
         JN_direct = [N_a N_b]
 
         @test all(Arblib.overlaps.(JN_direct, CGL2.J_N(Acb(a, b), λ)))
+
+        # Compute derivative w.r.t. ξ using formula for Jacobian plus ArbSeries
+        @assert isone(λ.σ) # This formula is only correct when σ is one
+        (; M1, M2, M3) = CGL2.J_N_coeff_matrices(λ)
+        JN(a, b) = -(a^2 * M1 + 2a * b * M2 + b^2 * M3)
+
+        # Check that the above implementation agrees with previous one
+        @test all(Arblib.overlaps.(JN_direct, JN(a, b)))
+
+        # Compute derivative w.r.t. ξ
+        JN_dξ = getindex.(JN(ArbSeries((a, a_dξ)), ArbSeries((b, b_dξ))), 1)
+
+        @test all(Arblib.overlaps.(JN_dξ, CGL2.J_N_dξ(Acb(a, b), Acb(a_dξ, b_dξ), λ)))
     end
 end

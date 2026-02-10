@@ -9,6 +9,7 @@ More precisely it contains the bounds from
 - Lemma REF(lemma:P_i_E_i-bounds)
 - Lemma REF(lemma:I_K_1-I_K_2-bounds)
 - Lemma REF(lemma:bound-J_N)
+- Lemma REF(lemma:H-bounds)
 
 If `include_dλ = false` it doesn't include the bounds corresponding to
 derivatives in `lambda`.
@@ -20,6 +21,7 @@ assume to hold.
 """
 struct FunctionBounds_Y
     J_N::Arb
+    J_N_dξ::Arb
     E_1::Arb
     E_2::Arb
     P_1::Arb
@@ -28,6 +30,8 @@ struct FunctionBounds_Y
     E_2_dξ::Arb
     P_1_dξ::Arb
     P_2_dξ::Arb
+    exp_E_1_dξ::Arb
+    exp_E_2_dξ::Arb
     K_1_1::Arb
     K_1_2::Arb
     K_2_1::Arb
@@ -44,6 +48,8 @@ struct FunctionBounds_Y
     J_E_2::Arb
     J_P_1::Arb
     J_P_2::Arb
+    J_E_1_dξ::Arb
+    J_E_2_dξ::Arb
     J_E_1_dλ::Arb
     J_E_2_dλ::Arb
     J_P_1_dλ::Arb
@@ -52,6 +58,10 @@ struct FunctionBounds_Y
     K_1_dλ_2::Arb
     K_2_dλ_1::Arb
     K_2_dλ_2::Arb
+    H_1j::Arb
+    H_2j::Arb
+    H_1j_dξ::Arb
+    H_2j_dξ::Arb
 
     function FunctionBounds_Y(
         lambda::Acb,
@@ -66,7 +76,8 @@ struct FunctionBounds_Y
         a, b, c = _abc(κ, ϵ, λ)
 
         # This is the only direct condition in Lemma
-        # REF(lemma:P_i_E_i-bounds) and REF(lemma:I_K_1-I_K_2-bounds).
+        # REF(lemma:P_i_E_i-bounds), REF(lemma:I_K_1-I_K_2-bounds) and
+        # REF(lemma:H-bounds).
         # The conditions related to the bounds for U are checked by
         # Ubounds.
         ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
@@ -79,6 +90,7 @@ struct FunctionBounds_Y
 
         C = new(
             C_J_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
+            C_J_N_dξ(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
             C_E_1(lambda, κ, ϵ, ξ₁, λ, CU),
             C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             C_P_1(lambda, κ, ϵ, ξ₁, λ, CU),
@@ -87,6 +99,8 @@ struct FunctionBounds_Y
             C_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             C_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
             C_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
+            C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
+            C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             indeterminate(κ), # C_K_1_1
             indeterminate(κ), # C_K_2_2
             indeterminate(κ), # C_K_1_1
@@ -103,6 +117,8 @@ struct FunctionBounds_Y
             indeterminate(κ), # J_E_2
             indeterminate(κ), # J_P_1
             indeterminate(κ), # J_P_2
+            indeterminate(κ), # J_E_1_dξ
+            indeterminate(κ), # J_E_2_dξ
             indeterminate(κ), # J_E_1_dλ
             indeterminate(κ), # J_E_2_dλ
             indeterminate(κ), # J_P_1_dλ
@@ -111,6 +127,10 @@ struct FunctionBounds_Y
             indeterminate(κ), # K_2_dλ_2
             indeterminate(κ), # K_1_dλ_1
             indeterminate(κ), # K_2_dλ_2
+            indeterminate(κ), # H_1j
+            indeterminate(κ), # H_2j
+            indeterminate(κ), # H_1j_dξ
+            indeterminate(κ), # H_2j_dξ
         )
 
         C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, λ, C)
@@ -118,10 +138,18 @@ struct FunctionBounds_Y
         C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_P_2[] = C_J_P_2(lambda, κ, ϵ, ξ₁, λ, C)
 
+        C.J_E_1_dξ[] = C_J_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+        C.J_E_2_dξ[] = C_J_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+
         C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+        C.H_1j[] = C_H_1j(lambda, κ, ϵ, ξ₁, λ, C)
+        C.H_2j[] = C_H_2j(lambda, κ, ϵ, ξ₁, λ, C)
+        C.H_1j_dξ[] = C_H_1j_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+        C.H_2j_dξ[] = C_H_2j_dξ(lambda, κ, ϵ, ξ₁, λ, C)
 
         if include_dλ
             C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
@@ -169,6 +197,30 @@ function C_J_N(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb
            )
 end
 
+function C_J_N_dξ(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+    (; σ, δ) = λ
+    # TODO: If we assume that σ is one then the factor
+    # abs2(Q_hat_ξ)^(σ - 1) doesn't play a role and the derivative is
+    # much simpler. Do we need to care about the general case?
+    @assert isone(σ)
+
+    # FIXME
+    Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    a, b = reim(Q_hat)
+    a_dξ, b_dξ = reim(Q_hat_dξ)
+    C_ab = 1.1max(abs(a), abs(b)) / ξ₁^(-1 / σ)
+    C_ab_dξ = 1.1max(abs(a_dξ), abs(b_dξ)) / ξ₁^(-1 / σ - 1)
+
+    return 2C_ab *
+           C_ab_dξ *
+           (
+               1 +
+               abs(δ) * (1 + 2σ) +
+               2σ * (1 + abs(δ)) +
+               max(1 + 2σ * abs(δ), 1 + abs(δ) * (1 + 2σ))
+           )
+end
+
 function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
     return CU.U_bma_b * abs(c^(-b + a - lambda / 2κ))
@@ -208,6 +260,23 @@ end
 function C_P_2_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
     return 2CU_conj.U_dz_a_b * abs((-conj(c))^(-conj(a) + lambda / 2κ))
+end
+
+function C_exp_E_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, λ)
+    return 2CU.U_dz_bma_b * abs(c^(-b + a - lambda / 2κ))
+end
+
+function C_exp_E_2_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    CU_conj::UBounds,
+)
+    a, b, c = _abc(κ, ϵ, λ)
+    return 2CU_conj.U_dz_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
 end
 
 function C_E_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -330,6 +399,34 @@ function C_J_P_2(
     C::FunctionBounds_Y,
 )
     return abs(B_W_2(lambda, κ, ϵ, λ)) * C.P_2
+end
+
+function C_J_E_1_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    (; d) = λ
+    # IMPROVE: This bound could likely be improved by about a factor 2
+    # by taking into account cancellations between the two terms.
+    return abs(B_W_1(lambda, κ, ϵ, λ)) * (C.exp_E_1_dξ + (d - 1) * C.E_1)
+end
+
+function C_J_E_2_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    (; d) = λ
+    # IMPROVE: This bound could likely be improved by about a factor 2
+    # taking into account cancellations between the two terms.
+    return abs(B_W_2(lambda, κ, ϵ, λ)) * (C.exp_E_2_dξ + (d - 1) * C.E_2)
 end
 
 function C_J_E_1_dλ(
@@ -466,4 +563,48 @@ function C_K_2_dλ_2(
     C::FunctionBounds_Y,
 )
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dλ
+end
+
+function C_H_1j(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return 2C.J_E_1 * C.J_N / sqrt(1 + ϵ^2)
+end
+
+function C_H_2j(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return 2C.J_E_2 * C.J_N / sqrt(1 + ϵ^2)
+end
+
+function C_H_1j_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return 2(C.J_E_1_dξ * C.J_N + C.J_E_1 * C.J_N_dξ) / sqrt(1 + ϵ^2)
+end
+
+function C_H_2j_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return 2(C.J_E_2_dξ * C.J_N + C.J_E_2 * C.J_N_dξ) / sqrt(1 + ϵ^2)
 end

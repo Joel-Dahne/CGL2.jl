@@ -216,6 +216,58 @@ function J_E_2(ξ, lambda, κ, ϵ, λ::CGLParams)
     return B_W_2(lambda, κ, ϵ, λ) * E_2(ξ, lambda, κ, ϵ, λ) * exp(conj(c) * ξ^2) * ξ^(d - 1)
 end
 
+function J_P_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    (; d) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    return B_W_1(lambda, κ, ϵ, λ) *
+           (
+               P_1_dξ(ξ, lambda, κ, ϵ, λ) * ξ^-1 +
+               2c * P_1(ξ, lambda, κ, ϵ, λ) +
+               (d - 1) * P_1(ξ, lambda, κ, ϵ, λ) * ξ^-2
+           ) *
+           exp(c * ξ^2) *
+           ξ^d
+end
+
+function J_P_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    (; d) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    return B_W_2(lambda, κ, ϵ, λ) *
+           (
+               P_2_dξ(ξ, lambda, κ, ϵ, λ) * ξ^-1 +
+               2conj(c) * P_2(ξ, lambda, κ, ϵ, λ) +
+               (d - 1) * P_2(ξ, lambda, κ, ϵ, λ) * ξ^-2
+           ) *
+           exp(conj(c) * ξ^2) *
+           ξ^d
+end
+
+function J_E_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    (; d) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    return B_W_1(lambda, κ, ϵ, λ) *
+           (
+               E_1_dξ(ξ, lambda, κ, ϵ, λ) * ξ^-1 +
+               2c * E_1(ξ, lambda, κ, ϵ, λ) +
+               (d - 1) * E_1(ξ, lambda, κ, ϵ, λ) * ξ^-2
+           ) *
+           exp(c * ξ^2) *
+           ξ^d
+end
+
+function J_E_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    (; d) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    return B_W_2(lambda, κ, ϵ, λ) *
+           (
+               E_2_dξ(ξ, lambda, κ, ϵ, λ) * ξ^-1 +
+               2conj(c) * E_2(ξ, lambda, κ, ϵ, λ) +
+               (d - 1) * E_2(ξ, lambda, κ, ϵ, λ) * ξ^-2
+           ) *
+           exp(conj(c) * ξ^2) *
+           ξ^d
+end
+
 function J_P_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
     (; d) = λ
     _, _, c = _abc(κ, ϵ, λ)
