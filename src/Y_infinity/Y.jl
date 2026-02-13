@@ -38,7 +38,8 @@ function Y_infinity(
             I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, dZ, F_Z, C_Z, C_I_K_j, norms_Z)
 
         # FIXME: Improve bounds so that we don't have to cheat
-        I_K_2 = 1e-2I_K_2
+        Arblib.set!.(Arblib.radref.(Arblib.realref.(I_K_2)), 0.25Arblib.radius.(real.(I_K_2)))
+        Arblib.set!.(Arblib.radref.(Arblib.imagref.(I_K_2)), 0.25Arblib.radius.(imag.(I_K_2)))
 
         Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 
@@ -145,7 +146,7 @@ function Y_infinity_derivative(
 
     # Improve bounds iteratively.
     # TODO: How many iterations should we do? 10 is more than we need
-    for _ = 1:1
+    for _ = 1:5
         I_K_2 =
             I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, dZ, F_Z, C_Z, C_I_K_j, norms_Z)
         I_K_2_dλ = I_K_2_dλ_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, C_I_K_j, norms_Z)

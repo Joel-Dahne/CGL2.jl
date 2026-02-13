@@ -34,10 +34,14 @@ struct FunctionBounds_Y
     P_2_dξ::Arb
     exp_E_1_dξ::Arb
     exp_E_2_dξ::Arb
+    exp_P_1_dξ::Arb
+    exp_P_2_dξ::Arb
     K_1_1::Arb
     K_1_2::Arb
     K_2_1::Arb
     K_2_2::Arb
+    K_2_dξ_1::Arb
+    K_2_dξ_2::Arb
     E_1_dλ::Arb
     E_2_dλ::Arb
     P_1_dλ::Arb
@@ -103,12 +107,16 @@ struct FunctionBounds_Y
             C_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             C_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
             C_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
-            C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
+            indeterminate(κ), # C_exp_E_1_dξ
+            indeterminate(κ), # C_exp_E_2_dξ
+            indeterminate(κ), # C_exp_P_1_dξ
+            indeterminate(κ), # C_exp_P_2_dξ
             indeterminate(κ), # C_K_1_1
+            indeterminate(κ), # C_K_1_2
+            indeterminate(κ), # C_K_2_1
             indeterminate(κ), # C_K_2_2
-            indeterminate(κ), # C_K_1_1
-            indeterminate(κ), # C_K_2_2
+            indeterminate(κ), # C_K_2_dξ_1
+            indeterminate(κ), # C_K_2_dξ_2
             indeterminate(κ), # C_E_1_dλ
             indeterminate(κ), # C_E_2_dλ
             indeterminate(κ), # C_P_1_dλ
@@ -137,6 +145,11 @@ struct FunctionBounds_Y
             indeterminate(κ), # H_2j_dξ
         )
 
+        C.exp_E_1_dξ[] = C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+        C.exp_E_2_dξ[] = C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+        C.exp_P_1_dξ[] = C_exp_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+        C.exp_P_2_dξ[] = C_exp_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+
         C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_E_2[] = C_J_E_2(lambda, κ, ϵ, ξ₁, λ, C)
         C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, λ, C)
@@ -149,6 +162,9 @@ struct FunctionBounds_Y
         C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+        C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, λ, C)
+        C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, λ, C)
 
         C.H_1j[] = C_H_1j(lambda, κ, ϵ, ξ₁, λ, C)
         C.H_2j[] = C_H_2j(lambda, κ, ϵ, ξ₁, λ, C)
@@ -304,6 +320,30 @@ function C_exp_E_2_dξ(
 )
     a, b, c = _abc(κ, ϵ, λ)
     return 2CU_conj.U_dz_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+end
+
+function C_exp_P_1_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    a, b, c = _abc(κ, ϵ, λ)
+    return 2abs(c) * C.P_1 + C.P_1_dξ * ξ₁^-2
+end
+
+function C_exp_P_2_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    a, b, c = _abc(κ, ϵ, λ)
+    return 2abs(c) * C.P_2 + C.P_2_dξ * ξ₁^-2
 end
 
 function C_E_1_dλ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
@@ -548,6 +588,28 @@ function C_K_2_2(
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2
 end
 
+function C_K_2_dξ_1(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_1_dξ
+end
+
+function C_K_2_dξ_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+)
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dξ
+end
+
 function C_K_1_dλ_1(
     lambda::Acb,
     κ::Arb,
@@ -600,7 +662,7 @@ function C_H_1j(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return 2C.J_E_1 * C.J_N / sqrt(1 + ϵ^2)
+    return C.K_2_1 * C.I_N
 end
 
 function C_H_2j(
@@ -611,7 +673,7 @@ function C_H_2j(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return 2C.J_E_2 * C.J_N / sqrt(1 + ϵ^2)
+    return C.K_2_2 * C.I_N
 end
 
 function C_H_1j_dξ(
@@ -622,7 +684,7 @@ function C_H_1j_dξ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return 2(C.J_E_1_dξ * C.J_N + C.J_E_1 * C.J_N_dξ) / sqrt(1 + ϵ^2)
+    return C.K_2_dξ_1 * C.I_N + C.K_2_1 * C.I_N_dξ
 end
 
 function C_H_2j_dξ(
@@ -633,5 +695,5 @@ function C_H_2j_dξ(
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
-    return 2(C.J_E_2_dξ * C.J_N + C.J_E_2 * C.J_N_dξ) / sqrt(1 + ϵ^2)
+    return C.K_2_dξ_2 * C.I_N + C.K_2_2 * C.I_N_dξ
 end

@@ -14,25 +14,20 @@ function I_K_2_enclosure(
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
-    _, _, c = _abc(κ, ϵ, λ) # TODO: We use the name c for two things...
-    M = SMatrix{2,2}(im, 1, -im, 1)
-    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
+    _, _, c = _abc(κ, ϵ, λ)
 
     @assert v > 0
-    @assert -real(c) < 0
-    @assert exponent < 0
+    @assert real(c) > 0
 
     # In the first iteration dY is non-finite. We then compute a
     # zeroth order bound.
+    if !all(isfinite, dZ)
+        exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
+        @assert exponent < 0
 
-    I_K_2_1_bound = C_I_K_j.C_I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
-    I_K_2_2_bound = C_I_K_j.C_I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
+        I_K_2_1_bound = C_I_K_j.C_I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
+        I_K_2_2_bound = C_I_K_j.C_I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
 
-    return add_error.(zero(c_0), SVector(I_K_2_1_bound, I_K_2_2_bound))
-
-    # TODO: Implement the below
-
-    if !all(isfinite, dY)
         return add_error.(zero(c_0), SVector(I_K_2_1_bound, I_K_2_2_bound))
     end
 
@@ -40,12 +35,12 @@ function I_K_2_enclosure(
     # We then compute an enclosure coming from integration by parts
     # two times. See Lemma REF(XXX).
 
-    H = F_Y.K_2 * F_Y.J_N * M
+    H = F_Z.K_2 * F_Z.I_N
 
-    D_11 = H[1, 1] * (exp(c*ξ₁^2)*inv(M)*Y)[1]
-    D_21 = H[2, 1] * (exp(c*ξ₁^2)*inv(M)*Y)[1]
-    D_12 = H[1, 2] * (exp(conj(c)*ξ₁^2)*inv(M)*Y)[2]
-    D_22 = H[2, 2] * (exp(conj(c)*ξ₁^2)*inv(M)*Y)[2]
+    D_11 = H[1, 1] * exp(c * ξ₁^2) * Z[1]
+    D_21 = H[2, 1] * exp(c * ξ₁^2) * Z[2]
+    D_12 = H[1, 2] * exp(conj(c) * ξ₁^2) * Z[1]
+    D_22 = H[2, 2] * exp(conj(c) * ξ₁^2) * Z[2]
 
     # IMPROVE: We could explicitly cancel the exponentials here.
     I_K_2_11_main = inv(2c) * exp(-c * ξ₁^2) * D_11
@@ -54,43 +49,50 @@ function I_K_2_enclosure(
     I_K_2_22_main = inv(2c) * exp(-conj(c) * ξ₁^2) * D_22
 
     # Bound remainder term
+    C_Z_1 =
+        C_Z.E_1 * abs(c_0[1]) +
+        (C_Z.E_1 * C_I_K_j.C_I_K_1_1 + C_Z.P_1 * C_I_K_j.C_I_K_2_1 * ξ₁^-2) *
+        ξ₁^(v - 2) *
+        norms_Z.Z
+    C_Z_2 =
+        C_Z.E_2 * abs(c_0[2]) +
+        (C_Z.E_2 * C_I_K_j.C_I_K_1_2 + C_Z.P_2 * C_I_K_j.C_I_K_2_2 * ξ₁^-2) *
+        ξ₁^(v - 2) *
+        norms_Z.Z
 
-    # TODO: Check that these are correct
-    C_D_11 = C_Y.J_E_1 * C_Y.J_N / sqrt(1 + ϵ^2)
-    C_D_12 = C_Y.J_E_1 * C_Y.J_N / sqrt(1 + ϵ^2)
-    C_D_21 = C_Y.J_E_2 * C_Y.J_N / sqrt(1 + ϵ^2)
-    C_D_22 = C_Y.J_E_2 * C_Y.J_N / sqrt(1 + ϵ^2)
+    C_exp_Z_1_dξ =
+        C_Z.exp_E_1_dξ * abs(c_0[1]) +
+        (
+            C_Z.exp_E_1_dξ * C_I_K_j.C_I_K_1_1 +
+            C_Z.E_1 * C_Z.K_1_1 * C_Z.I_N +
+            C_Z.exp_P_1_dξ * C_I_K_j.C_I_K_2_1 +
+            C_Z.P_1 * C_Z.K_2_1 * C_Z.I_N
+        ) * ξ₁^(v - 2)
+    C_exp_Z_2_dξ =
+        C_Z.exp_E_2_dξ * abs(c_0[2]) +
+        (
+            C_Z.exp_E_2_dξ * C_I_K_j.C_I_K_1_2 +
+            C_Z.E_2 * C_Z.K_1_2 * C_Z.I_N +
+            C_Z.exp_P_2_dξ * C_I_K_j.C_I_K_2_2 +
+            C_Z.P_2 * C_Z.K_2_2 * C_Z.I_N
+        ) * ξ₁^(v - 2)
 
-    # FIXME
-    C_D_11_dξ = Arb(1)
-    C_D_12_dξ = Arb(1)
-    C_D_21_dξ = Arb(1)
-    C_D_22_dξ = Arb(1)
+    C_D_11 = C_Z.H_1j * C_Z_1
+    C_D_12 = C_Z.H_1j * C_Z_2
+    C_D_21 = C_Z.H_2j * C_Z_1
+    C_D_22 = C_Z.H_2j * C_Z_2
 
-    # FIXME: Implement this and probably move it elsewhere?
-    exp_pow_integral_bound(c, b) = inv(2c) * exp(-c * ξ₁^2) * ξ₁^(b - 1)
+    C_D_11_dξ = C_Z.H_1j_dξ * C_Z_1 + C_Z.H_1j * C_exp_Z_1_dξ
+    C_D_12_dξ = C_Z.H_1j_dξ * C_Z_2 + C_Z.H_1j * C_exp_Z_2_dξ
+    C_D_21_dξ = C_Z.H_2j_dξ * C_Z_1 + C_Z.H_2j * C_exp_Z_1_dξ
+    C_D_22_dξ = C_Z.H_2j_dξ * C_Z_2 + C_Z.H_2j * C_exp_Z_2_dξ
 
-    # FIXME
-    I_K_2_11_bound =
-        inv(2abs(c)) * (
-            C_D_11_dξ * exp_pow_integral_bound(real(c), exponent) +
-            C_D_11 * exp_pow_integral_bound(real(c), exponent)
-        )
-    I_K_2_21_bound =
-        inv(2abs(c)) * (
-            C_D_21_dξ * exp_pow_integral_bound(real(c), exponent) +
-            C_D_21 * exp_pow_integral_bound(real(c), exponent)
-        )
-    I_K_2_12_bound =
-        inv(2abs(c)) * (
-            C_D_12_dξ * exp_pow_integral_bound(real(c), exponent) +
-            C_D_12 * exp_pow_integral_bound(real(c), exponent)
-        )
-    I_K_2_22_bound =
-        inv(2abs(c)) * (
-            C_D_22_dξ * exp_pow_integral_bound(real(c), exponent) +
-            C_D_22 * exp_pow_integral_bound(real(c), exponent)
-        )
+    exponent = 2 / σ - d - 2real(lambda) / κ - 6
+    @assert exponent < 0
+    I_K_2_11_bound = (C_D_11 + C_D_11_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
+    I_K_2_12_bound = (C_D_12 + C_D_12_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
+    I_K_2_21_bound = (C_D_21 + C_D_21_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
+    I_K_2_22_bound = (C_D_22 + C_D_22_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
 
     main = SVector(I_K_2_11_main + I_K_2_12_main, I_K_2_21_main + I_K_2_22_main)
     bound = SVector(I_K_2_11_bound + I_K_2_12_bound, I_K_2_21_bound + I_K_2_22_bound)
