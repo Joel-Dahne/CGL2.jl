@@ -377,7 +377,7 @@
             2im * (a^2 + b^2),
             im * (a - im * b)^2,
             -im * (a + im * b)^2,
-            2im * (a^2 + b^2),
+            -2im * (a^2 + b^2),
         )
 
         # Check that the above implementation agrees with previous one

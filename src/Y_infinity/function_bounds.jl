@@ -64,10 +64,14 @@ struct FunctionBounds_Y
     K_1_dλ_2::Arb
     K_2_dλ_1::Arb
     K_2_dλ_2::Arb
-    H_1j::Arb
-    H_2j::Arb
-    H_1j_dξ::Arb
-    H_2j_dξ::Arb
+    H_11::Arb
+    H_12::Arb
+    H_21::Arb
+    H_22::Arb
+    H_11_dξ::Arb
+    H_12_dξ::Arb
+    H_21_dξ::Arb
+    H_22_dξ::Arb
 
     function FunctionBounds_Y(
         lambda::Acb,
@@ -79,6 +83,7 @@ struct FunctionBounds_Y
         λ::CGLParams{Arb};
         include_dλ::Bool = false,
     )
+        (; σ, δ) = λ
         a, b, c = _abc(κ, ϵ, λ)
 
         # This is the only direct condition in Lemma
@@ -88,8 +93,13 @@ struct FunctionBounds_Y
         # Ubounds.
         ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
 
-        # TODO: Add checks for the conditions related to C_J_N once it
-        # is fully implemented.
+        # Add checks for the conditions related to C_J_N once it is
+        # fully implemented.
+        isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
+        iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
+        Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+        C_Q_hat = 1.1abs(Q_hat) / ξ₁^-1
+        C_Q_hat_dξ = 1.1abs(Q_hat_dξ) / ξ₁^-2
 
         CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = include_dλ)
         CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = include_dλ)
@@ -97,8 +107,8 @@ struct FunctionBounds_Y
         C = new(
             C_J_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
             C_J_N_dξ(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
-            C_I_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
-            C_I_N_dξ(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
+            C_I_N(lambda, κ, ϵ, ξ₁, λ, C_Q_hat),
+            C_I_N_dξ(lambda, κ, ϵ, ξ₁, λ, C_Q_hat, C_Q_hat_dξ),
             C_E_1(lambda, κ, ϵ, ξ₁, λ, CU),
             C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             C_P_1(lambda, κ, ϵ, ξ₁, λ, CU),
@@ -139,10 +149,14 @@ struct FunctionBounds_Y
             indeterminate(κ), # K_2_dλ_2
             indeterminate(κ), # K_1_dλ_1
             indeterminate(κ), # K_2_dλ_2
-            indeterminate(κ), # H_1j
-            indeterminate(κ), # H_2j
-            indeterminate(κ), # H_1j_dξ
-            indeterminate(κ), # H_2j_dξ
+            indeterminate(κ), # H_11
+            indeterminate(κ), # H_12
+            indeterminate(κ), # H_21
+            indeterminate(κ), # H_22
+            indeterminate(κ), # H_11_dξ
+            indeterminate(κ), # H_12_dξ
+            indeterminate(κ), # H_21_dξ
+            indeterminate(κ), # H_22_dξ
         )
 
         C.exp_E_1_dξ[] = C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
@@ -166,10 +180,14 @@ struct FunctionBounds_Y
         C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, λ, C)
         C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, λ, C)
 
-        C.H_1j[] = C_H_1j(lambda, κ, ϵ, ξ₁, λ, C)
-        C.H_2j[] = C_H_2j(lambda, κ, ϵ, ξ₁, λ, C)
-        C.H_1j_dξ[] = C_H_1j_dξ(lambda, κ, ϵ, ξ₁, λ, C)
-        C.H_2j_dξ[] = C_H_2j_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+        C.H_11[] = C_H_11(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+        C.H_12[] = C_H_12(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+        C.H_21[] = C_H_21(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+        C.H_22[] = C_H_22(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+        C.H_11_dξ[] = C_H_11_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+        C.H_12_dξ[] = C_H_12_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+        C.H_21_dξ[] = C_H_21_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+        C.H_22_dξ[] = C_H_22_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
 
         if include_dλ
             C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
@@ -241,26 +259,19 @@ function C_J_N_dξ(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁:
            )
 end
 
-function C_I_N(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    @assert isone(λ.σ)
-    @assert iszero(λ.δ)
-
-    # FIXME
-    Q_hat, _ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    C_Q_hat = 1.1abs(Q_hat) / ξ₁^-1
-
+function C_I_N(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_Q_hat::Arb)
     return 3C_Q_hat^2
 end
 
-function C_I_N_dξ(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    @assert isone(λ.σ)
-    @assert iszero(λ.δ)
-
-    # FIXME
-    Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    C_Q_hat = 1.1abs(Q_hat) / ξ₁^-1
-    C_Q_hat_dξ = 1.1abs(Q_hat_dξ) / ξ₁^-2
-
+function C_I_N_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C_Q_hat::Arb,
+    C_Q_hat_dξ::Arb,
+)
     return 6C_Q_hat * C_Q_hat_dξ
 end
 
@@ -654,46 +665,102 @@ function C_K_2_dλ_2(
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dλ
 end
 
-function C_H_1j(
+function C_H_11(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
+    C_Q_hat::Arb,
 )
-    return C.K_2_1 * C.I_N
+    return 2inv(sqrt(1 + ϵ)) * C.J_E_1 * C_Q_hat^2
 end
 
-function C_H_2j(
+function C_H_12(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
+    C_Q_hat::Arb,
 )
-    return C.K_2_2 * C.I_N
+    return inv(sqrt(1 + ϵ)) * C.J_E_1 * C_Q_hat^2
 end
 
-function C_H_1j_dξ(
+function C_H_21(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
+    C_Q_hat::Arb,
 )
-    return C.K_2_dξ_1 * C.I_N + C.K_2_1 * C.I_N_dξ
+    return inv(sqrt(1 + ϵ)) * C.J_E_2 * C_Q_hat^2
 end
 
-function C_H_2j_dξ(
+function C_H_22(
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb},
     C::FunctionBounds_Y,
+    C_Q_hat::Arb,
 )
-    return C.K_2_dξ_2 * C.I_N + C.K_2_2 * C.I_N_dξ
+    return 2inv(sqrt(1 + ϵ)) * C.J_E_2 * C_Q_hat^2
+end
+
+function C_H_11_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+    C_Q_hat::Arb,
+    C_Q_hat_dξ::Arb,
+)
+    return 2inv(sqrt(1 + ϵ)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
+end
+
+function C_H_12_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+    C_Q_hat::Arb,
+    C_Q_hat_dξ::Arb,
+)
+    return inv(sqrt(1 + ϵ)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
+end
+
+function C_H_21_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+    C_Q_hat::Arb,
+    C_Q_hat_dξ::Arb,
+)
+    return inv(sqrt(1 + ϵ)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
+end
+
+function C_H_22_dξ(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C::FunctionBounds_Y,
+    C_Q_hat::Arb,
+    C_Q_hat_dξ::Arb,
+)
+    return 2inv(sqrt(1 + ϵ)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
 end
