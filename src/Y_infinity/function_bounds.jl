@@ -488,9 +488,20 @@ function C_J_E_1_dξ(
     C::FunctionBounds_Y,
 )
     (; d) = λ
-    # IMPROVE: This bound could likely be improved by about a factor 2
-    # by taking into account cancellations between the two terms.
-    return abs(B_W_1(lambda, κ, ϵ, λ)) * (C.exp_E_1_dξ + (d - 1) * C.E_1)
+    a, b, c = _abc(κ, ϵ, λ)
+    a_tilde = b - a + lambda / 2κ
+    z₁ = c * ξ₁^2
+    n = 5
+
+    S = sum(0:(n-1)) do k
+        abs((d - 1) * p_U(k, a_tilde, b, z₁) - 2a_tilde * p_U(k, a_tilde + 1, b + 1, z₁))
+    end
+
+    R =
+        abs(d - 1) * C_R_U(n, a_tilde, b, z₁) +
+        2abs(a_tilde) * C_R_U(n, a_tilde + 1, b + 1, z₁)
+
+    return abs(B_W_1(lambda, κ, ϵ, λ)) * abs(c^-a_tilde) * (S + R * abs(z₁)^-n)
 end
 
 function C_J_E_2_dξ(
@@ -502,9 +513,26 @@ function C_J_E_2_dξ(
     C::FunctionBounds_Y,
 )
     (; d) = λ
-    # IMPROVE: This bound could likely be improved by about a factor 2
-    # taking into account cancellations between the two terms.
-    return abs(B_W_2(lambda, κ, ϵ, λ)) * (C.exp_E_2_dξ + (d - 1) * C.E_2)
+    a, b, c = _abc(κ, ϵ, λ)
+    c_conj = conj(c)
+    a_tilde_conj = b - conj(a) + lambda / 2κ
+    z₁_conj = c_conj * ξ₁^2
+    n = 5
+
+    S = sum(0:(n-1)) do k
+        abs(
+            (d - 1) * p_U(k, a_tilde_conj, b, z₁_conj) -
+            2a_tilde_conj * p_U(k, a_tilde_conj + 1, b + 1, z₁_conj),
+        )
+    end
+
+    R =
+        abs(d - 1) * C_R_U(n, a_tilde_conj, b, z₁_conj) +
+        2abs(a_tilde_conj) * C_R_U(n, a_tilde_conj + 1, b + 1, z₁_conj)
+
+    return abs(B_W_2(lambda, κ, ϵ, λ)) *
+           abs(c_conj^-a_tilde_conj) *
+           (S + R * abs(z₁_conj)^-n)
 end
 
 function C_J_E_1_dλ(

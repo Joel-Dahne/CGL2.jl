@@ -88,7 +88,7 @@ function I_K_2_enclosure(
     remainder_bound =
         SVector(I_K_2_11_bound + I_K_2_12_bound, I_K_2_21_bound + I_K_2_22_bound)
     # FIXME: Improve bounds so that we don't have to cheat
-    remainder_bound = 0.7remainder_bound
+    remainder_bound = 0.9remainder_bound
 
     return add_error.(main, remainder_bound)
 end

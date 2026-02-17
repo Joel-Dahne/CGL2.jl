@@ -227,12 +227,12 @@
         @test abs(J_E_1_dξ(ξ, lambda, κ, ϵ, λ)) <=
               C_Y.J_E_1_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
         @test abs(J_E_1_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.J_E_1_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
+              0.95C_Y.J_E_1_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
 
         @test abs(J_E_2_dξ(ξ, lambda, κ, ϵ, λ)) <=
               C_Y.J_E_2_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
         @test abs(J_E_2_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.5C_Y.J_E_2_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
+              0.85C_Y.J_E_2_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
 
         @test abs(J_E_1_dλ(ξ, lambda, κ, ϵ, λ)) <=
               C_Y.J_E_1_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
