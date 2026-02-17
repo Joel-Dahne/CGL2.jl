@@ -179,6 +179,40 @@ void vectorField_d3_optimized_epsilon_0(Node xi, Node in[], int /*dimIn*/, Node 
   out[5] = 0 * epsilon;
 }
 
+// Vector field optimized for the case d == 3, omega == -1, sigma == 1
+// and delta == 0
+void vectorField_d3_hat_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node* /*params*/, int /*noParams*/)
+{
+  Node a = in[0];
+  Node b = in[1];
+  Node alpha = in[2];
+  Node beta = in[3];
+  Node kappa = in[4];
+  Node epsilon = in[5];
+
+  Node a2b2_p1 = (a^2) + (b^2) + 1;
+  Node kappa_xi = kappa * xi;
+
+  Node F1 = -2 * (alpha + epsilon * beta) / xi +
+    kappa_xi * beta +
+    kappa * b -
+    a2b2_p1 * a;
+
+  Node F2 = -2 * (beta - epsilon * alpha) / xi -
+    kappa_xi * alpha -
+    kappa * a -
+    a2b2_p1 * b;
+
+  Node one_p_epsilon2 = 1 + (epsilon^2);
+
+  out[0] = alpha;
+  out[1] = beta;
+  out[2] = (F1 - epsilon * F2) / one_p_epsilon2;
+  out[3] = (epsilon * F1 + F2) / one_p_epsilon2;
+  out[4] = 0 * kappa;
+  out[5] = 0 * epsilon;
+}
+
 int main()
 {
   cout.precision(17); // Enough to exactly recover Float64 values
@@ -231,9 +265,11 @@ int main()
     vf.setParameter(1, sigma);
     vf.setParameter(2, delta);
   } else if (d == 3 && omega == 1 && sigma == 1 && delta == 0 && epsilon == 0 && !jacobian_epsilon) {
-      vf = IMap(vectorField_d3_optimized_epsilon_0, dim, dim, 0);
+    vf = IMap(vectorField_d3_optimized_epsilon_0, dim, dim, 0);
   } else if (d == 3 && omega == 1 && sigma == 1 && delta == 0) {
     vf = IMap(vectorField_d3_optimized, dim, dim, 0);
+  } else if (d == 3 && omega == -1 && sigma == 1 && delta == 0) {
+    vf = IMap(vectorField_d3_hat_optimized, dim, dim, 0);
   } else {
     vf = IMap(vectorField, dim, dim, 4);
     vf.setParameter(0, omega);
