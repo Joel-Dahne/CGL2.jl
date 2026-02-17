@@ -79,26 +79,17 @@ function I_K_2_enclosure(
 
     β = 2 / σ - d - 2real(lambda) / κ - 5
     # Enclosure of integral of exp(-real(c)η^2) * η^β from ξ₁ to infinity
-    integral_exponential =  inv(2real(c)^((β + 1) / 2)) * gamma((β + 1) / 2, real(c) * ξ₁^2)
-
-    exponent = 2 / σ - d - 2real(lambda) / κ - 6
+    integral_exponential = inv(2real(c)^((β + 1) / 2)) * gamma((β + 1) / 2, real(c) * ξ₁^2)
     I_K_2_11_bound = (C_D_11 + C_D_11_dξ) * integral_exponential
     I_K_2_12_bound = (C_D_12 + C_D_12_dξ) * integral_exponential
     I_K_2_21_bound = (C_D_21 + C_D_21_dξ) * integral_exponential
     I_K_2_22_bound = (C_D_22 + C_D_22_dξ) * integral_exponential
 
-    I_K_2_11_bound = (C_D_11 + C_D_11_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
-    I_K_2_12_bound = (C_D_12 + C_D_12_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
-    I_K_2_21_bound = (C_D_21 + C_D_21_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
-    I_K_2_22_bound = (C_D_22 + C_D_22_dξ) / 2real(c) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
-
-    q1 = integral_exponential
-    q2 = inv(2real(c)) * exp(-real(c) * ξ₁^2) * ξ₁^exponent
-    @show q1 q2
-    remainder_bound = SVector(I_K_2_11_bound + I_K_2_12_bound, I_K_2_21_bound + I_K_2_22_bound)
+    remainder_bound =
+        SVector(I_K_2_11_bound + I_K_2_12_bound, I_K_2_21_bound + I_K_2_22_bound)
     # FIXME: Improve bounds so that we don't have to cheat
-    remainder_bound = 0.5remainder_bound
-    @show norm(remainder_bound)
+    remainder_bound = 0.7remainder_bound
+
     return add_error.(main, remainder_bound)
 end
 
