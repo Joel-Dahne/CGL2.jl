@@ -71,7 +71,16 @@ function eigenvalue_solve(
     verbose && @info "Refining approximation using Newton"
 
     # IMPROVE: Consider running more iterations?
-    H_approx = H(AcbSeries((lambdaF64_approx, 1)), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    H_approx = H(
+        AcbSeries((lambdaF64_approx, 1)),
+        midpoint(Acb, ν),
+        midpoint(Acb, γ₁),
+        midpoint(Acb, γ₂),
+        midpoint(Arb, κ),
+        ϵ,
+        ξ₁,
+        λ,
+    )
     lambda_approx =
         lambdaF64_approx - midpoint(Acf, H_approx[0]) / midpoint(Acf, H_approx[1])
 
