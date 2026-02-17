@@ -33,8 +33,7 @@ function Y_infinity(
 
     # Improve bounds iteratively.
     for _ = 1:5
-        I_K_2 =
-            I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, C_I_K_j, norms_Z)
+        I_K_2 = I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, C_I_K_j, norms_Z)
 
         Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 
@@ -94,7 +93,7 @@ function Y_infinity(
     dZ = zero(Z)
 
     # Improve bounds iteratively.
-    for _ in 1:5
+    for _ = 1:5
         I_K_2 = let H = K2 * IN
             inv(2c) * H * Z
         end
@@ -149,8 +148,7 @@ function Y_infinity_derivative(
 
     # Improve bounds iteratively.
     for _ = 1:5
-        I_K_2 =
-            I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, C_I_K_j, norms_Z)
+        I_K_2 = I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, C_I_K_j, norms_Z)
 
         I_K_2_dλ = I_K_2_dλ_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, C_I_K_j, norms_Z)
 
@@ -229,7 +227,7 @@ function Y_infinity_derivative(
     dZ_dλ = zero(Z)
 
     # Improve bounds iteratively.
-    for _ in 1:5
+    for _ = 1:5
         I_K_2 = let H = K2 * IN
             inv(2c) * H * Z
         end
