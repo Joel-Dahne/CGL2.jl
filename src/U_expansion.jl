@@ -29,6 +29,14 @@ struct UBounds
         z₁ = c * ξ₁^2
         mz₁ = -z₁
 
+        # This condition is from Lemma REF(XXX) and REF(XXX).
+        abs(imag(z₁)) > abs(imag(b - 2a)) ||
+            throw(ArgumentError("must have abs(imag(z₁)) > abs(imag(b - 2a))"))
+
+        # These conditions are from Lemma REF(XXX)
+        0 < real(a) < real(b) || throw(ArgumentError("must have 0 < real(a) < real(b)"))
+        abs(angle(z₁)) < π || throw(ArgumentError("must have abs(angle(z₁)) < π"))
+
         return new(
             C_U(a, b, z₁),
             C_U(a + 1, b + 1, z₁),

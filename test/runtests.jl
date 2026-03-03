@@ -32,6 +32,8 @@ using FiniteDifferences
 
     @testset "Q_hat" begin
         include("Q_hat_zero/Q_hat.jl")
+
+        include("Q_hat_infinity/functions.jl")
     end
 
     @testset "Y" begin

@@ -6,14 +6,42 @@ vector with two complex values, where the first is the value at `ξ₁`
 and the second is the derivative.
 """
 function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    # FIXME: Implement rigorous enclosure
+    (; d, σ) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    v = Arb("0.1")
 
-    # Compute first order approximation of Q_hat
-    Q_hat = γ₁ * P_hat(ξ₁, κ, ϵ, λ) + γ₂ * E_hat(ξ₁, κ, ϵ, λ)
-    dQ_hat = γ₁ * P_hat_dξ(ξ₁, κ, ϵ, λ) + γ₂ * E_hat_dξ(ξ₁, κ, ϵ, λ)
+    # Precompute functions as well as function and norm bounds
+    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
+    C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
 
-    Q_hat = add_error(Q_hat, Mag(1e-8))
-    dQ_hat = add_error(dQ_hat, Mag(1e-8))
+    # Compute zeroth order bounds
+    Q_hat = add_error(zero(γ₁), norms.Q_hat * ξ₁^(-1 / σ + v))
+
+    local dQ_hat
+
+    # Improve the bounds iteratively.
+    # TODO: For now there is no iterative improvements
+    for _ = 1:1
+        # TODO: Work on improving I_E_hat_enclosure
+        I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+        I_E_hat = 1e-3I_E_hat # FIXME: Improve so we don't need to cheat!
+
+        I_P_hat = zero(Acb)
+
+        Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
+
+        I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+        I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
+
+        dQ_hat =
+            γ₁ * F.P_hat_dξ +
+            γ₂ * F.E_hat_dξ +
+            F.P_hat_dξ * I_E_hat +
+            F.P_hat * I_E_hat_dξ +
+            F.E_hat_dξ * I_P_hat +
+            F.E_hat * I_P_hat_dξ
+    end
 
     return SVector(Q_hat, dQ_hat)
 end
@@ -29,8 +57,6 @@ function Q_hat_infinity(
     # Compute first order approximation of Q_hat
     Q_hat = γ₁ * P_hat(ξ₁, κ, ϵ, λ) + γ₂ * E_hat(ξ₁, κ, ϵ, λ)
     dQ_hat = γ₁ * P_hat_dξ(ξ₁, κ, ϵ, λ) + γ₂ * E_hat_dξ(ξ₁, κ, ϵ, λ)
-
-    # TODO: Compute improved approximation
 
     return SVector(Q_hat, dQ_hat)
 end
@@ -49,14 +75,54 @@ function Q_hat_infinity_jacobian(
     ξ₁::Arb,
     λ::CGLParams{Arb},
 )
-    # FIXME: Implement rigorous enclosure
+    (; d, σ) = λ
+    _, _, c = _abc(κ, ϵ, λ)
+    v = Arb("0.1")
 
-    # Compute first order approximation
-    Q_hat_dγ₂ = E_hat(ξ₁, κ, ϵ, λ)
-    dQ_hat_dγ₂ = E_hat_dξ(ξ₁, κ, ϵ, λ)
+    # Precompute functions as well as function and norm bounds
+    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
+    C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C, include_dγ₂ = true)
 
-    Q_hat_dγ₂ = add_error(Q_hat_dγ₂, Mag(1e-8))
-    dQ_hat_dγ₂ = add_error(dQ_hat_dγ₂, Mag(1e-8))
+    # Compute zeroth order bounds
+    Q_hat = add_error(zero(γ₁), norms.Q_hat * ξ₁^(-1 / σ + v))
+    Q_hat_dγ₂ = add_error(zero(γ₁), norms.Q_hat_dγ₂ * ξ₁^(-1 / σ + v))
+
+    local dQ_hat_dγ₂
+
+    # Improve the bounds iteratively.
+    # TODO: For now there is no iterative improvement
+    for _ = 1:1
+        I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+
+        # TODO: Work on improving I_E_hat_enclosure
+        I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+
+        I_P_hat = zero(Acb)
+        I_P_hat_dγ₂ = zero(Acb)
+
+        Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
+        Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
+
+        I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+        I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
+
+        I_E_hat_dξ_dγ₂ =
+            -F.J_E_hat *
+            abs(Q_hat)^(2σ - 2) *
+            (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
+        I_P_hat_dξ_dγ₂ =
+            F.J_P_hat *
+            abs(Q_hat)^(2σ - 2) *
+            (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
+
+        dQ_hat_dγ₂ =
+            F.E_hat_dξ +
+            F.P_hat_dξ * I_E_hat_dγ₂ +
+            F.P_hat * I_E_hat_dξ_dγ₂ +
+            F.E_hat_dξ * I_P_hat_dγ₂ +
+            F.E_hat * I_P_hat_dξ_dγ₂
+    end
 
     return SMatrix{2,1}(Q_hat_dγ₂, dQ_hat_dγ₂)
 end
@@ -72,8 +138,6 @@ function Q_hat_infinity_jacobian(
     # Compute first order approximation
     Q_hat_dγ₂ = E_hat(ξ₁, κ, ϵ, λ)
     dQ_hat_dγ₂ = E_hat_dξ(ξ₁, κ, ϵ, λ)
-
-    # TODO: Compute improved approximation
 
     return SMatrix{2,1}(Q_hat_dγ₂, dQ_hat_dγ₂)
 end
