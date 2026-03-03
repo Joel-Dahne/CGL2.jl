@@ -6,6 +6,7 @@
     ξ₁ = Arb(15)
     λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
     (; d, ω, σ, δ) = λ
+    a, b, c = CGL2._abc(κ, ϵ, λ)
 
     C = CGL2.FunctionBounds_hat(κ, ϵ, ξ₁, λ)
 
@@ -40,5 +41,11 @@
         ######
         @test abs(J_E_hat(ξ, κ, ϵ, λ)) <= C.J_E_hat * ξ^(1 / σ - 1)
         @test abs(J_E_hat(ξ, κ, ϵ, λ)) >= 0.95C.J_E_hat * ξ^(1 / σ - 1)
+
+        @test abs(J_E_hat(ξ, κ, ϵ, λ) - CGL2.B_W_hat(κ, ϵ, λ) * c^(a - b) * ξ^(2a - 1)) <=
+              C.R_J_E_hat * ξ^(1 / σ - 3)
+        # IMPROVE: This bound is very bad
+        @test abs(J_E_hat(ξ, κ, ϵ, λ) - CGL2.B_W_hat(κ, ϵ, λ) * c^(a - b) * ξ^(2a - 1)) >=
+              0.25C.R_J_E_hat * ξ^(1 / σ - 3)
     end
 end

@@ -18,9 +18,15 @@ struct FunctionBounds_hat
     E_hat::Arb
     J_P_hat::Arb
     J_E_hat::Arb
+    R_J_E_hat::Arb
 
-    FunctionBounds_hat() =
-        new(indeterminate(Arb), indeterminate(Arb), indeterminate(Arb), indeterminate(Arb))
+    FunctionBounds_hat() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+    )
 end
 
 function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
@@ -38,6 +44,8 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
     C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, λ, C_hat)
 
+    C_hat.R_J_E_hat[] = C_R_J_E_hat(κ, ϵ, ξ₁, λ)
+
     return C_hat
 end
 
@@ -48,7 +56,6 @@ end
 
 function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
-
     return CU_hat.U_bma_b * abs(c^(a - b))
 end
 
@@ -57,3 +64,10 @@ C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBound
 
 C_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
     abs(B_W_hat(κ, ϵ, λ)) * C_hat.E_hat
+
+function C_R_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, λ)
+    # IMPROVE: This bound can be improved by expanding C_R_U into a
+    # sum and remainder. Similar to how it is done in C_U.
+    return abs(B_W_hat(κ, ϵ, λ)) * abs(c^(a - b - 1)) * C_R_U(1, b - a, b, c * ξ₁^2)
+end

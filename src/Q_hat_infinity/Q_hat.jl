@@ -25,8 +25,6 @@ function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ
     for _ = 1:1
         # TODO: Work on improving I_E_hat_enclosure
         I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
-        I_E_hat = 1e-3I_E_hat # FIXME: Improve so we don't need to cheat!
-
         I_P_hat = zero(Acb)
 
         Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
@@ -54,9 +52,34 @@ function Q_hat_infinity(
     ξ₁::Float64,
     λ::CGLParams{Float64},
 )
-    # Compute first order approximation of Q_hat
-    Q_hat = γ₁ * P_hat(ξ₁, κ, ϵ, λ) + γ₂ * E_hat(ξ₁, κ, ϵ, λ)
-    dQ_hat = γ₁ * P_hat_dξ(ξ₁, κ, ϵ, λ) + γ₂ * E_hat_dξ(ξ₁, κ, ϵ, λ)
+    a, b, c = _abc(κ, ϵ, λ)
+    (; d, σ) = λ
+
+    P_hat, E_hat = CGL2.P_hat(ξ₁, κ, ϵ, λ), CGL2.E_hat(ξ₁, κ, ϵ, λ)
+    P_hat_dξ, E_hat_dξ = CGL2.P_hat_dξ(ξ₁, κ, ϵ, λ), CGL2.E_hat_dξ(ξ₁, κ, ϵ, λ)
+
+    # First order approximations of Q_hat
+    Q_hat = γ₁ * P_hat + γ₂ * E_hat
+
+    # Improved approximation of Q_hat
+    p_Q_hat = CGL2.p_Q_hat(γ₁, κ, ϵ, λ)
+    p_J_E_hat = B_W_hat(κ, ϵ, λ) * c^(a - b) # PROVE: That this is the right one
+    I_E_hat = abs(p_Q_hat)^2 * p_Q_hat * p_J_E_hat / abs(-4real(a)) * ξ₁^(-4real(a))
+    I_P_hat = zero(Q_hat)
+
+    Q_hat = γ₁ * P_hat + γ₂ * E_hat + P_hat * I_E_hat + E_hat * I_P_hat
+
+    # Approximation of dQ_hat
+    I_E_hat_dξ = -J_E_hat(ξ₁, κ, ϵ, λ) * abs(Q_hat)^2σ * Q_hat
+    I_P_hat_dξ = J_P_hat(ξ₁, κ, ϵ, λ) * abs(Q_hat)^2σ * Q_hat
+
+    dQ_hat =
+        γ₁ * P_hat_dξ +
+        γ₂ * E_hat_dξ +
+        P_hat_dξ * I_E_hat +
+        P_hat * I_E_hat_dξ +
+        E_hat_dξ * I_P_hat +
+        E_hat * I_P_hat_dξ
 
     return SVector(Q_hat, dQ_hat)
 end
