@@ -55,17 +55,14 @@ function G_hat_solve(
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb};
-    return_uniqueness::Union{Val{false},Val{true}} = Val{false}(),
-    try_expand_uniqueness = return_uniqueness isa Val{true},
     expansion_rate = 0.05,
     max_iterations = 10,
     verbose = false,
-    extra_verbose = false,
 )
     G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
     dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-    root, root_uniqueness = verify_root_from_approximation(
+    root, _ = verify_root_from_approximation(
         G_hat_x,
         dG_hat_x,
         SVector{2,Acb}(ν, γ₂);
@@ -74,16 +71,12 @@ function G_hat_solve(
         verbose,
     )
 
-    if try_expand_uniqueness
-        verbose && @info "Expanding region for uniqueness"
-        # TODO: Extend this to Acb
-        root_uniqueness =
-            expand_uniqueness(G_hat_x, dG_hat_x, root_uniqueness; verbose, extra_verbose)
+    # Manually perform a couple more Newton iterations. It might be
+    # better to have verify_root_from_approximation do this by itself,
+    # but this is a simple solution.
+    for _ in 1:2
+        root = newton_step(G_hat_x, dG_hat_x, root)
     end
 
-    if return_uniqueness isa Val{true}
-        return root, root_uniqueness
-    else
-        return root
-    end
+    return root
 end
