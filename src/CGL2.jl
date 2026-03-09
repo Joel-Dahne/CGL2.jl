@@ -85,6 +85,7 @@ include("Q_hat_infinity/norm_bounds.jl")
 include("Q_hat_infinity/I_E_hat.jl")
 include("Q_hat_infinity/Q_hat.jl")
 include("Q_hat_infinity/p_Q_hat.jl")
+include("Q_hat_infinity/C_Q_hat.jl")
 
 include("G_hat.jl")
 include("G_hat_solve.jl")

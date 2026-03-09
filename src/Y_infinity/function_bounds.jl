@@ -20,8 +20,6 @@ error. When using this struct the bounds can therefore safely be
 assume to hold.
 """
 struct FunctionBounds_Y
-    J_N::Arb
-    J_N_dξ::Arb
     I_N::Arb
     I_N_dξ::Arb
     E_1::Arb
@@ -93,22 +91,21 @@ struct FunctionBounds_Y
         # Ubounds.
         ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
 
-        # Add checks for the conditions related to C_J_N once it is
-        # fully implemented.
+        # This is the only direct condition for Lemma
+        # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat
+        # and C_Q_hat_dξ and checked by their respective methods.
         isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
         iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
-        Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-        C_Q_hat = 1.1abs(Q_hat) / ξ₁^-1
-        C_Q_hat_dξ = 1.1abs(Q_hat_dξ) / ξ₁^-2
+
+        C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+        C_Q_hat_dξ = CGL2.C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
         CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = include_dλ)
         CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = include_dλ)
 
         C = new(
-            C_J_N(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
-            C_J_N_dξ(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ),
-            C_I_N(lambda, κ, ϵ, ξ₁, λ, C_Q_hat),
-            C_I_N_dξ(lambda, κ, ϵ, ξ₁, λ, C_Q_hat, C_Q_hat_dξ),
+            C_I_N(C_Q_hat),
+            C_I_N_dξ(C_Q_hat, C_Q_hat_dξ),
             C_E_1(lambda, κ, ϵ, ξ₁, λ, CU),
             C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
             C_P_1(lambda, κ, ϵ, ξ₁, λ, CU),
@@ -217,63 +214,9 @@ struct FunctionBounds_Y
     end
 end
 
-function C_J_N(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    (; σ, δ) = λ
+C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
 
-    # FIXME
-    Q_hat, _ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    a, b = reim(Q_hat)
-    C_ab = 1.1max(abs(a), abs(b)) / ξ₁^(-1 / σ)
-
-    return 2^(σ - 1) *
-           C_ab^2σ *
-           (
-               1 +
-               abs(δ) * (1 + 2σ) +
-               2σ * (1 + abs(δ)) +
-               max(1 + 2σ * abs(δ), 1 + abs(δ) * (1 + 2σ))
-           )
-end
-
-function C_J_N_dξ(lambda::Acb, γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    (; σ, δ) = λ
-    # TODO: If we assume that σ is one then the factor
-    # abs2(Q_hat_ξ)^(σ - 1) doesn't play a role and the derivative is
-    # much simpler. Do we need to care about the general case?
-    @assert isone(σ)
-
-    # FIXME
-    Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    a, b = reim(Q_hat)
-    a_dξ, b_dξ = reim(Q_hat_dξ)
-    C_ab = 1.1max(abs(a), abs(b)) / ξ₁^(-1 / σ)
-    C_ab_dξ = 1.1max(abs(a_dξ), abs(b_dξ)) / ξ₁^(-1 / σ - 1)
-
-    return 2C_ab *
-           C_ab_dξ *
-           (
-               1 +
-               abs(δ) * (1 + 2σ) +
-               2σ * (1 + abs(δ)) +
-               max(1 + 2σ * abs(δ), 1 + abs(δ) * (1 + 2σ))
-           )
-end
-
-function C_I_N(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_Q_hat::Arb)
-    return 3C_Q_hat^2
-end
-
-function C_I_N_dξ(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    λ::CGLParams{Arb},
-    C_Q_hat::Arb,
-    C_Q_hat_dξ::Arb,
-)
-    return 6C_Q_hat * C_Q_hat_dξ
-end
+C_I_N_dξ(C_Q_hat::Arb, C_Q_hat_dξ::Arb) = 6C_Q_hat * C_Q_hat_dξ
 
 function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
