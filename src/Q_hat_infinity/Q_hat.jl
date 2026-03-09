@@ -15,31 +15,23 @@ function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ
     C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
 
-    # Compute zeroth order bounds
-    Q_hat = add_error(zero(γ₁), norms.Q_hat * ξ₁^(-1 / σ + v))
+    # Enclosure of Q_hat
+    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+    I_P_hat = zero(Acb)
 
-    local dQ_hat
+    Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
 
-    # Improve the bounds iteratively.
-    # TODO: For now there is no iterative improvements
-    for _ = 1:1
-        # TODO: Work on improving I_E_hat_enclosure
-        I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
-        I_P_hat = zero(Acb)
+    # Enclosure of dQ_hat
+    I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+    I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
 
-        Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
-
-        I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
-        I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
-
-        dQ_hat =
-            γ₁ * F.P_hat_dξ +
-            γ₂ * F.E_hat_dξ +
-            F.P_hat_dξ * I_E_hat +
-            F.P_hat * I_E_hat_dξ +
-            F.E_hat_dξ * I_P_hat +
-            F.E_hat * I_P_hat_dξ
-    end
+    dQ_hat =
+        γ₁ * F.P_hat_dξ +
+        γ₂ * F.E_hat_dξ +
+        F.P_hat_dξ * I_E_hat +
+        F.P_hat * I_E_hat_dξ +
+        F.E_hat_dξ * I_P_hat +
+        F.E_hat * I_P_hat_dξ
 
     return SVector(Q_hat, dQ_hat)
 end
@@ -58,14 +50,11 @@ function Q_hat_infinity(
     P_hat, E_hat = CGL2.P_hat(ξ₁, κ, ϵ, λ), CGL2.E_hat(ξ₁, κ, ϵ, λ)
     P_hat_dξ, E_hat_dξ = CGL2.P_hat_dξ(ξ₁, κ, ϵ, λ), CGL2.E_hat_dξ(ξ₁, κ, ϵ, λ)
 
-    # First order approximations of Q_hat
-    Q_hat = γ₁ * P_hat + γ₂ * E_hat
-
-    # Improved approximation of Q_hat
+    # Approximation of Q_hat
     p_Q_hat = CGL2.p_Q_hat(γ₁, κ, ϵ, λ)
-    p_J_E_hat = B_W_hat(κ, ϵ, λ) * c^(a - b) # PROVE: That this is the right one
+    p_J_E_hat = B_W_hat(κ, ϵ, λ) * c^(a - b)
     I_E_hat = abs(p_Q_hat)^2 * p_Q_hat * p_J_E_hat / abs(-4real(a)) * ξ₁^(-4real(a))
-    I_P_hat = zero(Q_hat)
+    I_P_hat = zero(I_E_hat)
 
     Q_hat = γ₁ * P_hat + γ₂ * E_hat + P_hat * I_E_hat + E_hat * I_P_hat
 
@@ -107,45 +96,35 @@ function Q_hat_infinity_jacobian(
     C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C, include_dγ₂ = true)
 
-    # Compute zeroth order bounds
-    Q_hat = add_error(zero(γ₁), norms.Q_hat * ξ₁^(-1 / σ + v))
-    Q_hat_dγ₂ = add_error(zero(γ₁), norms.Q_hat_dγ₂ * ξ₁^(-1 / σ + v))
+    # Enclosure of Q_hat and Q_hat_dγ₂
+    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+    I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
 
-    local dQ_hat_dγ₂
+    I_P_hat = zero(Acb)
+    I_P_hat_dγ₂ = zero(Acb)
 
-    # Improve the bounds iteratively.
-    # TODO: For now there is no iterative improvement
-    for _ = 1:1
-        I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+    Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
+    Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
 
-        # TODO: Work on improving I_E_hat_enclosure
-        I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+    I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+    I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
 
-        I_P_hat = zero(Acb)
-        I_P_hat_dγ₂ = zero(Acb)
+    # Enclosure of dQ_hat_dγ₂
+    I_E_hat_dξ_dγ₂ =
+        -F.J_E_hat *
+        abs(Q_hat)^(2σ - 2) *
+        (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
+    I_P_hat_dξ_dγ₂ =
+        F.J_P_hat *
+        abs(Q_hat)^(2σ - 2) *
+        (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
 
-        Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
-        Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
-
-        I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
-        I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
-
-        I_E_hat_dξ_dγ₂ =
-            -F.J_E_hat *
-            abs(Q_hat)^(2σ - 2) *
-            (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
-        I_P_hat_dξ_dγ₂ =
-            F.J_P_hat *
-            abs(Q_hat)^(2σ - 2) *
-            (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
-
-        dQ_hat_dγ₂ =
-            F.E_hat_dξ +
-            F.P_hat_dξ * I_E_hat_dγ₂ +
-            F.P_hat * I_E_hat_dξ_dγ₂ +
-            F.E_hat_dξ * I_P_hat_dγ₂ +
-            F.E_hat * I_P_hat_dξ_dγ₂
-    end
+    dQ_hat_dγ₂ =
+        F.E_hat_dξ +
+        F.P_hat_dξ * I_E_hat_dγ₂ +
+        F.P_hat * I_E_hat_dξ_dγ₂ +
+        F.E_hat_dξ * I_P_hat_dγ₂ +
+        F.E_hat * I_P_hat_dξ_dγ₂
 
     return SMatrix{2,1}(Q_hat_dγ₂, dQ_hat_dγ₂)
 end
