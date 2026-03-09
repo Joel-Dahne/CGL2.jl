@@ -22,6 +22,10 @@
         @test abs(P_hat(ξ, κ, ϵ, λ)) <= C.P_hat * ξ^(-1 / σ)
         @test abs(P_hat(ξ, κ, ϵ, λ)) >= 0.99C.P_hat * ξ^(-1 / σ)
 
+        @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^(-a) * ξ^-2a) <= C.R_P_hat * ξ^(-1 / σ - 2)
+        # IMPROVE: This bound is very bad
+        @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^-a * ξ^-2a) >= 0.3C.R_P_hat * ξ^(-1 / σ - 2)
+
         ####
         ## E_hat
         ####

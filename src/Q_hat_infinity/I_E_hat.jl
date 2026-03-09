@@ -14,45 +14,34 @@ function I_E_hat_enclosure(
     (; d, σ) = λ
 
     @assert v > 0
-
-    C_I_E_hat = C.J_E_hat / abs((2σ + 1) * v - 2)
-
-    exponent = (2σ + 1) * v - 2
-
-    I_E_hat_bound = C_I_E_hat * ξ₁^exponent * norms.Q_hat^(2σ + 1)
-
-    # FIXME: Don't cheat
-    #I_E_hat_bound = 1e-3 * I_E_hat_bound
-    #return add_error(zero(Acb), I_E_hat_bound)
-
-    # Improved version
-
     @assert isone(σ)
+    @assert -2 / σ + (2σ + 1) * v + d - 2 < 0
 
     p_Q_hat = CGL2.p_Q_hat(γ₁, κ, ϵ, λ)
-    p_J_E_hat = B_W_hat(κ, ϵ, λ) * c^(a - b) # PROVE: That this is the right one
-
-    q1 = J_E_hat(ξ₁, κ, ϵ, λ) / ξ₁^(2a - 1)
-    q2 = B_W_hat(κ, ϵ, λ) * c^(a - b)
-    w1 = J_E_hat(ξ₁, κ, ϵ, λ)
-    w2 = J_E_hat(ξ₁, κ, ϵ, λ) - B_W_hat(κ, ϵ, λ) * c^(a - b) * ξ₁^(2a - 1)
-    #@show abs(w1) abs(w2)
+    p_J_E_hat = B_W_hat(κ, ϵ, λ) * c^(a - b)
 
     I_E_hat_main = abs(p_Q_hat)^2 * p_Q_hat * p_J_E_hat * σ / 2 * ξ₁^(-2 / σ)
 
     I_E_hat_remainder_1_bound = C.R_J_E_hat / abs(-2 / σ - 2) * ξ₁^(-2 / σ - 2)
     I_E_hat_remainder_1 = add_error(zero(Acb), I_E_hat_remainder_1_bound)
 
-    C_R_Q_hat = Arb(1) # FIXME: Implement this bound
+    C_I_E_hat = C.J_P_hat / abs((2σ + 1) * v - 2)
+    C_I_P_hat = C.J_P_hat / abs((2σ + 1) * v - 2 / σ + d - 2)
+    C_R_Q_hat =
+        abs(γ₁) * C.R_P_hat * ξ₁^(-2 / σ + d - 2) +
+        abs(γ₂) * C.E_hat * exp(-real(c) * ξ₁^2) +
+        (C.P_hat * C_I_E_hat + C.E_hat * C_I_P_hat) *
+        ξ₁^(-2 / σ + (2σ + 1) * v + d - 2) *
+        norms.Q_hat^(2σ + 1)
+
     I_E_hat_remainder_2_bound =
         C.J_E_hat *
         (
-            3abs(p_Q_hat)^2 * C_R_Q_hat / abs(-2 / σ + (2σ + 1) * v - 3) +
-            3abs(p_Q_hat) * C_R_Q_hat^2 / abs(-2 / σ + 2(2σ + 1) * v - 6) *
-            ξ₁^((2σ + 1) * v - 3) +
-            C_R_Q_hat^3 / abs(-2 / σ + 3(2σ + 1) * v - 9) * ξ₁^(2(2σ + 1) * v - 6)
+            3abs(p_Q_hat)^2 * C_R_Q_hat / d +
+            3abs(p_Q_hat) * C_R_Q_hat^2 / abs(2 / σ - 2d) * ξ₁^(2 / σ - d) +
+            C_R_Q_hat^3 / abs(4 / σ - 3d) * ξ₁^(2 / σ - 2d)
         ) *
-        ξ₁^(-2 / σ + (2σ + 1) * v - 3)
+        ξ₁^-d
     I_E_hat_remainder_2 = add_error(zero(Acb), I_E_hat_remainder_2_bound)
 
     return I_E_hat_main +
