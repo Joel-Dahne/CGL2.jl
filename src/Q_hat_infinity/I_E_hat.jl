@@ -26,11 +26,11 @@ function I_E_hat_enclosure(
     I_E_hat_remainder_1 = add_error(zero(Acb), I_E_hat_remainder_1_bound)
 
     C_I_E_hat = C.J_P_hat / abs((2σ + 1) * v - 2)
-    C_I_P_hat = C.J_P_hat / abs((2σ + 1) * v - 2 / σ + d - 2)
+    C_I_P_hat = C.J_P_hat / 2real(c)
     C_R_Q_hat =
         abs(γ₁) * C.R_P_hat * ξ₁^(-2 / σ + d - 2) +
         abs(γ₂) * C.E_hat * exp(-real(c) * ξ₁^2) +
-        (C.P_hat * C_I_E_hat + C.E_hat * C_I_P_hat) *
+        (C.P_hat * C_I_E_hat + C.E_hat * C_I_P_hat * ξ₁^-2) *
         ξ₁^(-2 / σ + (2σ + 1) * v + d - 2) *
         norms.Q_hat^(2σ + 1)
 
