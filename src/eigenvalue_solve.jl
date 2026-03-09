@@ -94,7 +94,7 @@ function eigenvalue_solve(
     lambda_mid = H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # FIXME: Improve enclosures so that we don't need this scaling
-    ν_radius_scaling = Mag(1e-4)
+    ν_radius_scaling = Mag(1e-5)
     verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
     Arblib.mul!(Arblib.radref(Arblib.realref(ν)), radius(real(ν)), ν_radius_scaling)
     Arblib.mul!(Arblib.radref(Arblib.imagref(ν)), radius(imag(ν)), ν_radius_scaling)
