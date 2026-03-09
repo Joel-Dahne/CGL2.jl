@@ -74,7 +74,7 @@ function G_hat_solve(
     # Manually perform a couple more Newton iterations. It might be
     # better to have verify_root_from_approximation do this by itself,
     # but this is a simple solution.
-    for _ in 1:2
+    for _ = 1:2
         root = newton_step(G_hat_x, dG_hat_x, root)
     end
 
