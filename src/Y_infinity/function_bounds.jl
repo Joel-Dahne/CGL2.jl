@@ -645,7 +645,7 @@ function C_H_11(
     C::FunctionBounds_Y,
     C_Q_hat::Arb,
 )
-    return 2inv(sqrt(1 + ϵ)) * C.J_E_1 * C_Q_hat^2
+    return 2inv(sqrt(1 + ϵ^2)) * C.J_E_1 * C_Q_hat^2
 end
 
 function C_H_12(
@@ -657,7 +657,7 @@ function C_H_12(
     C::FunctionBounds_Y,
     C_Q_hat::Arb,
 )
-    return inv(sqrt(1 + ϵ)) * C.J_E_1 * C_Q_hat^2
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_1 * C_Q_hat^2
 end
 
 function C_H_21(
@@ -669,7 +669,7 @@ function C_H_21(
     C::FunctionBounds_Y,
     C_Q_hat::Arb,
 )
-    return inv(sqrt(1 + ϵ)) * C.J_E_2 * C_Q_hat^2
+    return inv(sqrt(1 + ϵ^2)) * C.J_E_2 * C_Q_hat^2
 end
 
 function C_H_22(
@@ -681,7 +681,7 @@ function C_H_22(
     C::FunctionBounds_Y,
     C_Q_hat::Arb,
 )
-    return 2inv(sqrt(1 + ϵ)) * C.J_E_2 * C_Q_hat^2
+    return 2inv(sqrt(1 + ϵ^2)) * C.J_E_2 * C_Q_hat^2
 end
 
 function C_H_11_dξ(
@@ -694,7 +694,7 @@ function C_H_11_dξ(
     C_Q_hat::Arb,
     C_Q_hat_dξ::Arb,
 )
-    return 2inv(sqrt(1 + ϵ)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
+    return 2inv(sqrt(1 + ϵ^2)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
 end
 
 function C_H_12_dξ(
@@ -707,7 +707,7 @@ function C_H_12_dξ(
     C_Q_hat::Arb,
     C_Q_hat_dξ::Arb,
 )
-    return inv(sqrt(1 + ϵ)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
+    return inv(sqrt(1 + ϵ^2)) * (C.J_E_1_dξ * C_Q_hat^2 + 2C.J_E_1 * C_Q_hat_dξ * C_Q_hat)
 end
 
 function C_H_21_dξ(
@@ -720,7 +720,7 @@ function C_H_21_dξ(
     C_Q_hat::Arb,
     C_Q_hat_dξ::Arb,
 )
-    return inv(sqrt(1 + ϵ)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
+    return inv(sqrt(1 + ϵ^2)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
 end
 
 function C_H_22_dξ(
@@ -733,5 +733,5 @@ function C_H_22_dξ(
     C_Q_hat::Arb,
     C_Q_hat_dξ::Arb,
 )
-    return 2inv(sqrt(1 + ϵ)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
+    return 2inv(sqrt(1 + ϵ^2)) * (C.J_E_2_dξ * C_Q_hat^2 + 2C.J_E_2 * C_Q_hat_dξ * C_Q_hat)
 end
