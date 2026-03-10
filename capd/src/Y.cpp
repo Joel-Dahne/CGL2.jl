@@ -340,14 +340,14 @@ void vectorField_optimized_d3(Node xi, Node in[], int /*dimIn*/, Node out[], int
   Node M1_12_imag = lambda_imag / one_p_epsilon2;
 
   Node M1_21_real = (kappa - epsilon * (N2_a + 1) + N1_a - lambda_real) / one_p_epsilon2;
-  Node M1_21_imag = -lambda_imag / one_p_epsilon2;
+  Node M1_21_imag = -M1_12_imag;
 
   Node M1_22_real = (-epsilon * (kappa + N2_b - lambda_real) + N1_b - 1) / one_p_epsilon2;
-  Node M1_22_imag = (epsilon * lambda_imag) / one_p_epsilon2;
+  Node M1_22_imag = M1_11_imag;
 
   // M2
-  Node M2_11 = kappa / one_p_epsilon2 * (-epsilon) * xi - 2 / xi;
-  Node M2_12 = kappa / one_p_epsilon2 * (-1) * xi;
+  Node M2_11 = -kappa / one_p_epsilon2 * epsilon * xi - 2 / xi;
+  Node M2_12 = -kappa / one_p_epsilon2 * xi;
   Node M2_21 = -M2_12;
   Node M2_22 = M2_11;
 
