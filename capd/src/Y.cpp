@@ -367,6 +367,97 @@ void vectorField_optimized_d3(Node xi, Node in[], int /*dimIn*/, Node out[], int
   out[15] = 0 * epsilon;
 }
 
+// Vector field specialized for d = 3, sigma = 1, delta = 0, omega = 1
+void vectorField_optimized_d3_fixed_epsilon(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
+{
+  Node epsilon = params[0];
+
+  Node a = in[0];
+  Node b = in[1];
+  Node alpha = in[2];
+  Node beta = in[3];
+
+  Node Y_r_1 = in[4];
+  Node Y_r_2 = in[5];
+  Node Y_i_1 = in[6];
+  Node Y_i_2 = in[7];
+  Node Z_r_1 = in[8];
+  Node Z_r_2 = in[9];
+  Node Z_i_1 = in[10];
+  Node Z_i_2 = in[11];
+
+  Node lambda_real = in[12];
+  Node lambda_imag = in[13];
+  Node kappa = in[14];
+
+  Node a2 = (a^2);
+  Node b2 = (b^2);
+  Node a2b2 = a2 + b2;
+
+  // Compute forward ODE
+  Node F1 = -2 / xi * (alpha + epsilon * beta) -
+      kappa * xi * beta -
+      kappa * b -
+      a -
+      a2b2 * a;
+
+  Node F2 = -2 / xi * (beta - epsilon * alpha) +
+      kappa * xi * alpha +
+      kappa * a -
+      b -
+      a2b2 * b;
+
+  Node one_p_epsilon2 = 1 + (epsilon^2);
+
+  out[0] = alpha;
+  out[1] = beta;
+  out[2] = (F1 - epsilon * F2) / one_p_epsilon2;
+  out[3] = (epsilon * F1 + F2) / one_p_epsilon2;
+
+  // Compute linearized ODE
+
+  // Compute J_N
+  Node N1_a = -2 * a * b;
+  Node N1_b = -(a2 + 3 * b2);
+  Node N2_a = 3 * a2 + b2;
+  Node N2_b = -N1_a;
+
+  // The indexing notation _ij corresponds to the Julia indexing convention.
+
+  // M1
+  Node M1_11_real = (-epsilon * (kappa + N1_a - lambda_real) - N2_a - 1) / one_p_epsilon2;
+  Node M1_11_imag = (epsilon * lambda_imag) / one_p_epsilon2;
+
+  Node M1_12_real = (-kappa - epsilon * (N1_b - 1) - N2_b + lambda_real) / one_p_epsilon2;
+  Node M1_12_imag = lambda_imag / one_p_epsilon2;
+
+  Node M1_21_real = (kappa - epsilon * (N2_a + 1) + N1_a - lambda_real) / one_p_epsilon2;
+  Node M1_21_imag = -M1_12_imag;
+
+  Node M1_22_real = (-epsilon * (kappa + N2_b - lambda_real) + N1_b - 1) / one_p_epsilon2;
+  Node M1_22_imag = M1_11_imag;
+
+  // M2
+  Node M2_11 = -kappa / one_p_epsilon2 * epsilon * xi - 2 / xi;
+  Node M2_12 = -kappa / one_p_epsilon2 * xi;
+  Node M2_21 = -M2_12;
+  Node M2_22 = M2_11;
+
+  out[4] = Z_r_1;
+  out[5] = Z_r_2;
+  out[6] = Z_i_1;
+  out[7] = Z_i_2;
+
+  out[8] = M1_11_real * Y_r_1 + M1_12_real * Y_r_2 - (M1_11_imag * Y_i_1 + M1_12_imag * Y_i_2) + M2_11 * Z_r_1 + M2_12 * Z_r_2;
+  out[9] = M1_21_real * Y_r_1 + M1_22_real * Y_r_2 - (M1_21_imag * Y_i_1 + M1_22_imag * Y_i_2) + M2_21 * Z_r_1 + M2_22 * Z_r_2;
+  out[10] = M1_11_imag * Y_r_1 + M1_12_imag * Y_r_2 + M1_11_real * Y_i_1 + M1_12_real * Y_i_2 + M2_11 * Z_i_1 + M2_12 * Z_i_2;
+  out[11] = M1_21_imag * Y_r_1 + M1_22_imag * Y_r_2 + M1_21_real * Y_i_1 + M1_22_real * Y_i_2 + M2_21 * Z_i_1 + M2_22 * Z_i_2;
+
+  out[12] = 0 * lambda_real;
+  out[13] = 0 * lambda_imag;
+  out[14] = 0 * kappa;
+}
+
 int main()
 {
   cout.precision(17); // Enough to exactly recover Float64 values
@@ -374,7 +465,7 @@ int main()
 
   // Read initial value
   // 4 for Q_hat initial data, 8 for Y initial data, 2 for lambda, 2 for kappa and epsilon
-  IVector u0(16);
+  IVector u0(15);
 
   // Read Q_hat initial data
   cin >> u0[0] >> u0[1] >> u0[2] >> u0[3];
@@ -396,7 +487,7 @@ int main()
   u0[12] = lambda_real;
   u0[13] = lambda_imag;
   u0[14] = kappa;
-  u0[15] = epsilon;
+  //u0[15] = epsilon;
 
   // Read time span
   interval T0, T1;
@@ -414,26 +505,34 @@ int main()
   int dim = 16;
   IMap vf;
 
-  // TODO: Implement optimized versions
+  // TODO: The old versions take epsilon as a variable to the ODE, the
+  // new optimized version takes epsilon as a parameter. We should
+  // update this to only work with epsilon as a parameter in all
+  // cases.
    if (d == 1) {
     vf = IMap(vectorField_d1, dim, dim, 3);
     vf.setParameter(0, omega);
     vf.setParameter(1, sigma);
     vf.setParameter(2, delta);
+    cout << "\n\nException caught!\n" << e.what() << endl << endl;
    } else if (d == 3 && sigma == 1 && delta == 0 && omega == 1) {
-    vf = IMap(vectorField_optimized_d3, dim, dim, 4);
+    //vf = IMap(vectorField_optimized_d3, dim, dim, 0);
+    vf = IMap(vectorField_optimized_d3_fixed_epsilon, dim - 1, dim - 1, 1);
+    vf.setParameter(0, epsilon);
    } else if (sigma == 1) {
     vf = IMap(vectorField_sigma1, dim, dim, 4);
     vf.setParameter(0, omega);
     vf.setParameter(1, sigma);
     vf.setParameter(2, delta);
     vf.setParameter(3, interval(d));
+    cout << "\n\nException caught!\n" << e.what() << endl << endl;
    } else {
     vf = IMap(vectorField, dim, dim, 4);
     vf.setParameter(0, omega);
     vf.setParameter(1, sigma);
     vf.setParameter(2, delta);
     vf.setParameter(3, interval(d));
+    cout << "\n\nException caught!\n" << e.what() << endl << endl;
   }
 
   // Create the solver and the time map
