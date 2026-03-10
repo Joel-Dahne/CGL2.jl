@@ -26,11 +26,17 @@
         # IMPROVE: This bound is very bad
         @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^-a * ξ^-2a) >= 0.3C.R_P_hat * ξ^(-1 / σ - 2)
 
+        @test abs(P_hat_dξ(ξ, κ, ϵ, λ)) <= C.P_hat_dξ * ξ^(-1 / σ - 1)
+        @test abs(P_hat_dξ(ξ, κ, ϵ, λ)) >= 0.95C.P_hat_dξ * ξ^(-1 / σ - 1)
+
         ####
         ## E_hat
         ####
         @test abs(E_hat(ξ, κ, ϵ, λ)) <= C.E_hat * exp(-real(c) * ξ^2) * ξ^(1 / σ - d)
         @test abs(E_hat(ξ, κ, ϵ, λ)) >= 0.95C.E_hat * exp(-real(c) * ξ^2) * ξ^(1 / σ - d)
+
+        @test abs(E_hat_dξ(ξ, κ, ϵ, λ)) <= C.E_hat_dξ * exp(-real(c) * ξ^2) * ξ^(1 / σ - d + 1)
+        @test abs(E_hat_dξ(ξ, κ, ϵ, λ)) >= 0.95C.E_hat_dξ * exp(-real(c) * ξ^2) * ξ^(1 / σ - d + 1)
 
         ######
         ## J_P_hat

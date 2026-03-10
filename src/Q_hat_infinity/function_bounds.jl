@@ -16,12 +16,16 @@ assume to hold.
 struct FunctionBounds_hat
     P_hat::Arb
     E_hat::Arb
+    P_hat_dξ::Arb
+    E_hat_dξ::Arb
     J_P_hat::Arb
     J_E_hat::Arb
     R_P_hat::Arb
     R_J_E_hat::Arb
 
     FunctionBounds_hat() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
@@ -40,8 +44,10 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     C_hat = FunctionBounds_hat()
 
     C_hat.P_hat[] = C_P_hat(κ, ϵ, ξ₁, λ, CU_hat)
-
     C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, λ, CU_hat)
+
+    C_hat.P_hat_dξ[] = C_P_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
+    C_hat.E_hat_dξ[] = C_E_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
 
     C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
     C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, λ, C_hat)
@@ -60,6 +66,20 @@ end
 function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
     return CU_hat.U_bma_b * abs(c^(a - b))
+end
+
+function C_P_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, λ)
+    return CU_hat.U_dz_a_b * abs(2(-c)^-a)
+end
+
+function C_E_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, λ)
+
+    C1 = abs(c^(a - b)) * CU_hat.U_bma_b
+    C2 = abs(c^(a - b - 1)) * CU_hat.U_dz_bma_b
+
+    return abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2
 end
 
 C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
