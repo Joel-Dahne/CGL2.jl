@@ -51,5 +51,7 @@ function C_Q_hat_dξ(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::C
                C.P_hat * C.J_E_hat +
                C.E_hat_dξ * C_I_P_hat +
                C.E_hat * C.J_P_hat
-           ) * ξ₁^((2σ + 1) * v - 2) * norms.Q_hat^(2σ + 1)
+           ) *
+           ξ₁^((2σ + 1) * v - 2) *
+           norms.Q_hat^(2σ + 1)
 end
