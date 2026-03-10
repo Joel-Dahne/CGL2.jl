@@ -69,22 +69,6 @@
 
     for ξ in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* ξ₁
         ####
-        ## J_N
-        ####
-
-        # TODO: This is not quite correct since γ₁ and γ₂ only
-        # parametrize Q_hat_infinity at ξ₁ and not at ξ > ξ₁. The
-        # difference should however be of lower order and it still
-        # gives some information as a test.
-        Q_hat, Q_hat_dξ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
-
-        # IMPROVE: We could maybe improve on this bound?
-        @test norm_inf(CGL2.J_N(Q_hat, λ)) <= C_Y.J_N * ξ^-2
-        @test norm_inf(CGL2.J_N(Q_hat, λ)) >= 0.6C_Y.J_N * ξ^-2
-        @test norm_inf(CGL2.J_N_dξ(Q_hat, Q_hat_dξ, λ)) <= C_Y.J_N_dξ * ξ^-3
-        @test norm_inf(CGL2.J_N_dξ(Q_hat, Q_hat_dξ, λ)) >= 0.6C_Y.J_N_dξ * ξ^-3
-
-        ####
         ## I_N
         ####
 

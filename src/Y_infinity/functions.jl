@@ -7,8 +7,7 @@ struct FunctionEnclosures_Y
     K_2::Diagonal{Acb,SVector{2,Acb}}
     K_1_dξ::Diagonal{Acb,SVector{2,Acb}}
     K_2_dξ::Diagonal{Acb,SVector{2,Acb}}
-    J_N::SMatrix{2,2,Arb}
-    J_N_dξ::SMatrix{2,2,Arb}
+
     I_N::SMatrix{2,2,Acb}
     I_N_dξ::SMatrix{2,2,Acb}
 
@@ -35,8 +34,6 @@ struct FunctionEnclosures_Y
 
         # Compute enclosure of forward solution
         Q_hat_ξ₁, dQ_hat_ξ₁ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-        JN = J_N(Q_hat_ξ₁, λ)
-        JN_dξ = J_N_dξ(Q_hat_ξ₁, dQ_hat_ξ₁, λ)
         IN = I_N(Q_hat_ξ₁, λ)
         IN_dξ = I_N_dξ(Q_hat_ξ₁, dQ_hat_ξ₁, λ)
 
@@ -49,8 +46,6 @@ struct FunctionEnclosures_Y
             K2,
             K1_dξ,
             K2_dξ,
-            JN,
-            JN_dξ,
             IN,
             IN_dξ,
             Diagonal(SVector(E_1_dλ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ(ξ₁, lambda, κ, ϵ, λ))),
@@ -67,27 +62,6 @@ struct FunctionEnclosures_Y
 
         return F
     end
-end
-
-function J_N(Q_hat_ξ, λ::CGLParams{T}) where {T}
-    (; σ) = λ
-    a, b = reim(Q_hat_ξ)
-    (; M1, M2, M3) = J_N_coeff_matrices(λ)
-
-    return -abs2(Q_hat_ξ)^(σ - 1) * (a^2 * M1 + 2σ * a * b * M2 + b^2 * M3)
-end
-
-function J_N_dξ(Q_hat_ξ, dQ_hat_ξ, λ::CGLParams{T}) where {T}
-    (; σ) = λ
-    a, b = reim(Q_hat_ξ)
-    a_dξ, b_dξ = reim(dQ_hat_ξ)
-    (; M1, M2, M3) = J_N_coeff_matrices(λ)
-    # TODO: If we assume that σ is one then the factor
-    # abs2(Q_hat_ξ)^(σ - 1) doesn't play a role and the derivative is
-    # much simpler. Do we need to care about the general case?
-    @assert isone(σ)
-    # TODO: Check that this is correct
-    return -(2a * a_dξ * M1 + 2σ * (a_dξ * b + a * b_dξ) * M2 + 2b * b_dξ * M3)
 end
 
 function I_N(Q_hat_ξ, λ::CGLParams{T}) where {T}

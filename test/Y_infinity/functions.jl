@@ -323,35 +323,6 @@
         @test ComplexF64.(F_Y.K_2_dλ) ≈ K2_dλ_fdm rtol = 1e-12
     end
 
-    @testset "J_N" begin
-        # The precise value for a and b should not play any role in
-        # the correctness, we just compute some approximation here.
-        νF64 = 1.9261384880241954 + 3.0638598354170337im
-        a, b, a_dξ, b_dξ =
-            Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, λF64))
-
-        # Compute Jacobian by going through ArbSeries
-        N = (a, b) -> (a^2 + b^2)^λ.σ * SVector(-λ.δ * a - b, a - λ.δ * b)
-        N_a = getindex.(N(ArbSeries((a, 1)), b), 1)
-        N_b = getindex.(N(a, ArbSeries((b, 1))), 1)
-        JN_direct = [N_a N_b]
-
-        @test all(Arblib.overlaps.(JN_direct, CGL2.J_N(Acb(a, b), λ)))
-
-        # Compute derivative w.r.t. ξ using formula for Jacobian plus ArbSeries
-        @assert isone(λ.σ) # This formula is only correct when σ is one
-        (; M1, M2, M3) = CGL2.J_N_coeff_matrices(λ)
-        JN(a, b) = -(a^2 * M1 + 2a * b * M2 + b^2 * M3)
-
-        # Check that the above implementation agrees with previous one
-        @test all(Arblib.overlaps.(JN_direct, JN(a, b)))
-
-        # Compute derivative w.r.t. ξ
-        JN_dξ = getindex.(JN(ArbSeries((a, a_dξ)), ArbSeries((b, b_dξ))), 1)
-
-        @test all(Arblib.overlaps.(JN_dξ, CGL2.J_N_dξ(Acb(a, b), Acb(a_dξ, b_dξ), λ)))
-    end
-
     @testset "I_N" begin
         P = SMatrix{2,2,Acb}(im, 1, -im, 1)
 

@@ -8,7 +8,7 @@ More precisely it contains the bounds from
 
 - Lemma REF(lemma:P_i_E_i-bounds)
 - Lemma REF(lemma:I_K_1-I_K_2-bounds)
-- Lemma REF(lemma:bound-J_N)
+- Lemma REF(lemma:bound-I_N)
 - Lemma REF(lemma:H-bounds)
 
 If `include_dλ = false` it doesn't include the bounds corresponding to
