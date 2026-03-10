@@ -36,6 +36,7 @@ function H(
     λ::CGLParams{T},
 ) where {T}
     lambda₀ = lambda[0]
+    # IMPROVE: Compute Y_0_1 and Y_0_1_derivative together
     Y_0_1 = Y_zero(SVector{2,Acb}(1, 0), lambda₀, ν, κ, ϵ, ξ₁, λ)
     Y_0_2 = Y_zero(SVector{2,Acb}(0, 1), lambda₀, ν, κ, ϵ, ξ₁, λ)
     Y_inf_1 = Y_infinity(SVector{2,Acb}(1, 0), lambda₀, γ₁, γ₂, κ, ϵ, ξ₁, λ)
