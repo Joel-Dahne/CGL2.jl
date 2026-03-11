@@ -41,12 +41,7 @@ function norm_bound_Q_hat(
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    @assert -((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2 < 2real(c)
-
-    C_I_E_hat = C.J_P_hat / abs((2σ + 1) * v - 2)
-    C_I_P_hat = C.J_P_hat / (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2)
-
-    C_T_hat = C.P_hat * C_I_E_hat + C.E_hat * C_I_P_hat * ξ₁^-2
+    C_T_hat = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
 
     # Upper bounds from second inequality
     ρ_bound = (2C_T_hat * M(σ) * ξ₁^(-2 + 2σ * v))^(-1 / 2σ)
@@ -90,12 +85,7 @@ function norm_bound_Q_hat_dγ₂(
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    @assert -((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2 < 2real(c)
-
-    C_I_E_hat = C.J_P_hat / abs((2σ + 1) * v - 2)
-    C_I_P_hat = C.J_P_hat / (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2)
-
-    C_T_hat = C.P_hat * C_I_E_hat + C.E_hat * C_I_P_hat * ξ₁^-2
+    C_T_hat = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
 
     num = C.E_hat * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d - v)
     den = 1 - (2σ + 1) * C_T_hat * ξ₁^(-2 + 2σ * v) * norms.Q_hat^2σ

@@ -7,6 +7,7 @@ enclosure asymptotic expansion of `Q_hat` at infinity.
 More precisely it contains the bounds from
 
 - Lemma REF(lemma:P_hat-E_hat-bounds)
+- Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
 
 It checks all the conditions on the parameters that these lemmas
 assume. If any of these conditions are not satisfied it will throw an
@@ -14,6 +15,7 @@ error. When using this struct the bounds can therefore safely be
 assume to hold.
 """
 struct FunctionBounds_hat
+    # Lemma REF(lemma:P_hat-E_hat-bounds)
     P_hat::Arb
     P_hat_dξ::Arb
     E_hat::Arb
@@ -22,8 +24,13 @@ struct FunctionBounds_hat
     R_P_hat::Arb
     J_E_hat::Arb
     R_J_E_hat::Arb
+    # Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    I_E_hat::Arb
+    I_P_hat::Arb
 
     FunctionBounds_hat() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
@@ -35,11 +42,21 @@ struct FunctionBounds_hat
     )
 end
 
-function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+    (; d, σ) = λ
+    a, b, c = _abc(κ, ϵ, λ)
+
     # Requirement of Lemma REF(lemma:P_hat-E_hat-bounds)
     @assert ξ₁ > 1
 
-    a, b, c = _abc(κ, ϵ, λ)
+    # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    @assert ξ₁ > 1
+    @assert v >= 0
+    @assert real(c) > 0
+    @assert (2σ + 1) * v - 2 < 0
+    @assert (2σ + 1) * v - 2 / σ + d - 4 < 0
+    @assert -((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2 < 2real(c)
+
     CU_hat = UBounds(a, b, -c, ξ₁)
 
     C_hat = FunctionBounds_hat()
@@ -55,6 +72,9 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
 
     C_hat.R_P_hat[] = C_R_P_hat(κ, ϵ, ξ₁, λ)
     C_hat.R_J_E_hat[] = C_R_J_E_hat(κ, ϵ, ξ₁, λ)
+
+    C_hat.I_E_hat[] = C_I_E_hat(v, λ, C_hat)
+    C_hat.I_P_hat[] = C_I_P_hat(v, κ, ϵ, ξ₁, λ, C_hat)
 
     return C_hat
 end
@@ -113,4 +133,21 @@ function C_R_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     return abs(B_W_hat(κ, ϵ, λ)) *
            abs(c^(a - b - 1)) *
            (S + C_R_U(n, b - a, b, z₁) * abs(z₁)^(-n + 1))
+end
+
+C_I_E_hat(v::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
+    C_hat.J_E_hat / abs((2λ.σ + 1) * v - 2)
+
+function C_I_P_hat(
+    v::Arb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb},
+    C_hat::FunctionBounds_hat,
+)
+    (; d, σ) = λ
+    a, b, c = _abc(κ, ϵ, λ)
+    @assert (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2) > 0
+    return C_hat.J_P_hat / (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2)
 end
