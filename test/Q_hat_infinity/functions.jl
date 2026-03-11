@@ -15,15 +15,13 @@
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
-    fdm2 = central_fdm(5, 2)
-    fdm3 = central_fdm(5, 3)
 
     P_hat, P_hat_dξ = CGL2.P_hat, CGL2.P_hat_dξ
     E_hat, E_hat_dξ = CGL2.E_hat, CGL2.E_hat_dξ
     W_hat = CGL2.W_hat
     B_W_hat = CGL2.B_W_hat
-    J_P_hat = CGL2.J_P_hat
     J_E_hat = CGL2.J_E_hat
+    J_P_hat = CGL2.J_P_hat
 
     @testset "P_hat" begin
         @test Arblib.overlaps(P_hat(ArbSeries((ξ, 1)), κ, ϵ, λ)[1], P_hat_dξ(ξ, κ, ϵ, λ))
@@ -45,18 +43,6 @@
         )
     end
 
-    @testset "J_P_hat" begin
-        @test Arblib.overlaps(
-            J_P_hat(ξ, κ, ϵ, λ),
-            (1 + im * δ) / (1 - im * ϵ) * P_hat(ξ, κ, ϵ, λ) / W_hat(ξ, κ, ϵ, λ),
-        )
-
-        @test Arblib.overlaps(
-            J_P_hat(ξ, κ, ϵ, λ),
-            B_W_hat(κ, ϵ, λ) * P_hat(ξ, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(λ.d - 1),
-        )
-    end
-
     @testset "J_E_hat" begin
         @test Arblib.overlaps(
             J_E_hat(ξ, κ, ϵ, λ),
@@ -66,6 +52,18 @@
         @test Arblib.overlaps(
             J_E_hat(ξ, κ, ϵ, λ),
             B_W_hat(κ, ϵ, λ) * E_hat(ξ, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(λ.d - 1),
+        )
+    end
+
+    @testset "J_P_hat" begin
+        @test Arblib.overlaps(
+            J_P_hat(ξ, κ, ϵ, λ),
+            (1 + im * δ) / (1 - im * ϵ) * P_hat(ξ, κ, ϵ, λ) / W_hat(ξ, κ, ϵ, λ),
+        )
+
+        @test Arblib.overlaps(
+            J_P_hat(ξ, κ, ϵ, λ),
+            B_W_hat(κ, ϵ, λ) * P_hat(ξ, κ, ϵ, λ) * exp(c * ξ^2) * ξ^(λ.d - 1),
         )
     end
 end
