@@ -94,7 +94,7 @@ function Q_hat_infinity_jacobian(
     # Precompute functions as well as function and norm bounds
     F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
     C = FunctionBounds_hat(v, κ, ϵ, ξ₁, λ)
-    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C, include_dγ₂ = true)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
 
     # Enclosure of Q_hat and Q_hat_dγ₂
     I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)

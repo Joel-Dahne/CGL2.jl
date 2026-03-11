@@ -1,3 +1,17 @@
+"""
+    NormBounds_hat(...)
+
+Contains bounds for the norms of `Q_hat` and `Q_hat_dγ₂`.
+
+The bound for `Q_hat` is based on Lemmas REF(lemma:fixed-point-bounds)
+and REF(prop:fixed-point). The bound for `Q_hat_dγ₂` is based on Lemma
+REF(lemma:Q-hat-dgamma-bound).
+
+It checks all the conditions on the parameters that these lemmas
+assume. If any of these conditions are not satisfied it will throw an
+error. When using this struct the bounds can therefore safely be
+assume to hold.
+"""
 struct NormBounds_hat
     Q_hat::Arb
     Q_hat_dγ₂::Arb
@@ -13,12 +27,20 @@ function NormBounds_hat(
     ξ₁::Arb,
     v::Arb,
     λ::CGLParams{Arb},
-    C::FunctionBounds_hat;
-    include_dγ₂::Bool = false,
+    C::FunctionBounds_hat,
 )
     norms = NormBounds_hat()
 
-    # TODO: Add check for lemma requirements
+    # The requirements for Lemma REF(lemma:fixed-point-bounds) are
+    # checked in the computation of `C`, where the associated
+    # constants are computed.
+
+    # The requirements for the fixed point in Lemma
+    # REF(prop:fixed-point) are checked by the norm_bound_Q_hat
+    # function.
+
+    # The requirements for Lemma REF(lemma:Q-hat-dgamma-bound) are
+    # checked by the norm_bound_Q_hat_dγ₂ function.
 
     norms.Q_hat[] = norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
     norms.Q_hat_dγ₂[] = norm_bound_Q_hat_dγ₂(κ, ϵ, ξ₁, v, λ, C, norms)
@@ -26,8 +48,7 @@ function NormBounds_hat(
     return norms
 end
 
-# IMPROVE: Add documentation and update so that constants are computed
-# elsewhere.
+# IMPROVE: Add documentation
 function norm_bound_Q_hat(
     γ₁::Acb,
     γ₂::Acb,
@@ -41,17 +62,15 @@ function norm_bound_Q_hat(
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    C_T_hat = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
-
     # Upper bounds from second inequality
-    ρ_bound = (2C_T_hat * M(σ) * ξ₁^(-2 + 2σ * v))^(-1 / 2σ)
+    ρ_bound = (2C.T_hat * M(σ) * ξ₁^(-2 + 2σ * v))^(-1 / 2σ)
 
-    isfinite(ρ_bound) || return indeterminate(ρ_bound)
+    isfinite(ρ_bound) || throw(ErrorException("could not compute bound for norm of Q_hat"))
 
     f(ρ) =
         C.P_hat * abs(γ₁) * ξ₁^-v +
         C.E_hat * abs(γ₂) * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d - v) +
-        C_T_hat * ξ₁^(-2 + 2σ * v) * abspow(ρ, 2σ + 1) - ρ
+        C.T_hat * ξ₁^(-2 + 2σ * v) * abspow(ρ, 2σ + 1) - ρ
 
     # Isolate roots
     roots, flags = ArbExtras.isolate_roots(f, Arf(0), ubound(ρ_bound))
@@ -67,12 +86,11 @@ function norm_bound_Q_hat(
 
         return ArbExtras.refine_root(f, Arb(ρ_l_initial), strict = false)
     else
-        return indeterminate(ρ_bound)
+        throw(ErrorException("could not compute bound for norm of Q_hat"))
     end
 end
 
-# IMPROVE: Add documentation and update so that constants are computed
-# elsewhere.
+# IMPROVE: Add documentation
 function norm_bound_Q_hat_dγ₂(
     κ::Arb,
     ϵ::Arb,
@@ -85,10 +103,12 @@ function norm_bound_Q_hat_dγ₂(
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    C_T_hat = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
-
     num = C.E_hat * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d - v)
-    den = 1 - (2σ + 1) * C_T_hat * ξ₁^(-2 + 2σ * v) * norms.Q_hat^2σ
+    den = 1 - (2σ + 1) * C.T_hat * ξ₁^(-2 + 2σ * v) * norms.Q_hat^2σ
 
-    return Arblib.ispositive(den) ? num / den : indeterminate(num)
+    if den > 0
+        return num / den
+    else
+        throw(ErrorException("could not compute bound for norm of Q_hat_dγ₂"))
+    end
 end

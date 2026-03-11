@@ -1,13 +1,15 @@
 """
     FunctionBounds_hat(κ, ϵ, ξ₁, λ)
 
-This contains all the bounds of functions that are needed in the
-enclosure asymptotic expansion of `Q_hat` at infinity.
+Contains the constants involved in asymptotic bounds for functions
+that are needed in the enclosure asymptotic expansion of `Q_hat` at
+infinity.
 
 More precisely it contains the bounds from
 
 - Lemma REF(lemma:P_hat-E_hat-bounds)
 - Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+- Lemma REF(lemma:fixed-point-bounds)
 
 It checks all the conditions on the parameters that these lemmas
 assume. If any of these conditions are not satisfied it will throw an
@@ -27,8 +29,11 @@ struct FunctionBounds_hat
     # Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
     I_E_hat::Arb
     I_P_hat::Arb
+    # Lemma REF(lemma:fixed-point-bounds)
+    T_hat::Arb
 
     FunctionBounds_hat() = new(
+        indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
@@ -57,6 +62,9 @@ function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{
     @assert (2σ + 1) * v - 2 / σ + d - 4 < 0
     @assert -((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2 < 2real(c)
 
+    # Requirements of Lemma REF(lemma:fixed-point-bounds) are the same
+    # as for Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+
     CU_hat = UBounds(a, b, -c, ξ₁)
 
     C_hat = FunctionBounds_hat()
@@ -75,6 +83,8 @@ function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{
 
     C_hat.I_E_hat[] = C_I_E_hat(v, λ, C_hat)
     C_hat.I_P_hat[] = C_I_P_hat(v, κ, ϵ, ξ₁, λ, C_hat)
+
+    C_hat.T_hat[] = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
 
     return C_hat
 end
