@@ -23,8 +23,7 @@
         @test abs(P_hat(ξ, κ, ϵ, λ)) >= 0.99C.P_hat * ξ^(-1 / σ)
 
         @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^(-a) * ξ^-2a) <= C.R_P_hat * ξ^(-1 / σ - 2)
-        # IMPROVE: This bound is very bad
-        @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^-a * ξ^-2a) >= 0.3C.R_P_hat * ξ^(-1 / σ - 2)
+        @test abs(P_hat(ξ, κ, ϵ, λ) - (-c)^-a * ξ^-2a) >= 0.98C.R_P_hat * ξ^(-1 / σ - 2)
 
         @test abs(P_hat_dξ(ξ, κ, ϵ, λ)) <= C.P_hat_dξ * ξ^(-1 / σ - 1)
         @test abs(P_hat_dξ(ξ, κ, ϵ, λ)) >= 0.95C.P_hat_dξ * ξ^(-1 / σ - 1)
@@ -56,8 +55,7 @@
 
         @test abs(J_E_hat(ξ, κ, ϵ, λ) - CGL2.B_W_hat(κ, ϵ, λ) * c^(a - b) * ξ^(2a - 1)) <=
               C.R_J_E_hat * ξ^(1 / σ - 3)
-        # IMPROVE: This bound is very bad
         @test abs(J_E_hat(ξ, κ, ϵ, λ) - CGL2.B_W_hat(κ, ϵ, λ) * c^(a - b) * ξ^(2a - 1)) >=
-              0.25C.R_J_E_hat * ξ^(1 / σ - 3)
+              0.95C.R_J_E_hat * ξ^(1 / σ - 3)
     end
 end

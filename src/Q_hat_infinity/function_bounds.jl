@@ -15,12 +15,12 @@ assume to hold.
 """
 struct FunctionBounds_hat
     P_hat::Arb
-    E_hat::Arb
     P_hat_dξ::Arb
+    E_hat::Arb
     E_hat_dξ::Arb
     J_P_hat::Arb
-    J_E_hat::Arb
     R_P_hat::Arb
+    J_E_hat::Arb
     R_J_E_hat::Arb
 
     FunctionBounds_hat() = new(
@@ -36,7 +36,8 @@ struct FunctionBounds_hat
 end
 
 function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    # TODO: Add checks for conditions
+    # Requirement of Lemma REF(lemma:P_hat-E_hat-bounds)
+    @assert ξ₁ > 1
 
     a, b, c = _abc(κ, ϵ, λ)
     CU_hat = UBounds(a, b, -c, ξ₁)
@@ -44,13 +45,13 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     C_hat = FunctionBounds_hat()
 
     C_hat.P_hat[] = C_P_hat(κ, ϵ, ξ₁, λ, CU_hat)
-    C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, λ, CU_hat)
-
     C_hat.P_hat_dξ[] = C_P_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
+
+    C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, λ, CU_hat)
     C_hat.E_hat_dξ[] = C_E_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
 
-    C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
     C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, λ, C_hat)
+    C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
 
     C_hat.R_P_hat[] = C_R_P_hat(κ, ϵ, ξ₁, λ)
     C_hat.R_J_E_hat[] = C_R_J_E_hat(κ, ϵ, ξ₁, λ)
@@ -63,23 +64,19 @@ function C_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBoun
     return CU_hat.U_a_b * abs((-c)^-a)
 end
 
-function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
-    return CU_hat.U_bma_b * abs(c^(a - b))
-end
-
 function C_P_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
     return CU_hat.U_dz_a_b * abs(2(-c)^-a)
 end
 
+function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, λ)
+    return CU_hat.U_bma_b * abs(c^(a - b))
+end
+
 function C_E_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
-
-    C1 = abs(c^(a - b)) * CU_hat.U_bma_b
-    C2 = abs(c^(a - b - 1)) * CU_hat.U_dz_bma_b
-
-    return abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2
+    return 2(CU_hat.U_bma_b * abs(c) + CU_hat.U_dz_bma_b * ξ₁^-2) * abs(c^(a - b))
 end
 
 C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
@@ -90,14 +87,30 @@ C_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBound
 
 function C_R_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, λ)
-    # IMPROVE: This bound can be improved by expanding C_R_U into a
-    # sum and remainder. Similar to how it is done in C_U.
-    return abs((-c)^(-a - 1)) * C_R_U(1, a, b, -c * ξ₁^2)
+
+    z₁ = -c * ξ₁^2
+    n = 20
+    S = sum(1:(n-1)) do k
+        # p_U(k, a, b, z₁) gives us coefficient with (-z₁)^k in
+        # denominator, we want (-z₁)^(k - 1) so multiply by -z₁
+        abs(p_U(k, a, b, z₁) * (-z₁))
+    end
+
+    return (S + C_R_U(n, a, b, z₁) * abs(z₁)^(-n + 1)) * abs((-c)^(-a - 1))
 end
 
 function C_R_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, λ)
-    # IMPROVE: This bound can be improved by expanding C_R_U into a
-    # sum and remainder. Similar to how it is done in C_U.
-    return abs(B_W_hat(κ, ϵ, λ)) * abs(c^(a - b - 1)) * C_R_U(1, b - a, b, c * ξ₁^2)
+
+    z₁ = c * ξ₁^2
+    n = 20
+    S = sum(1:(n-1)) do k
+        # p_U(k, b - a, b, z₁) gives us coefficient with (-z₁)^k in
+        # denominator, we want (-z₁)^(k - 1) so multiply by -z₁
+        abs(p_U(k, b - a, b, z₁) * (-z₁))
+    end
+
+    return abs(B_W_hat(κ, ϵ, λ)) *
+           abs(c^(a - b - 1)) *
+           (S + C_R_U(n, b - a, b, z₁) * abs(z₁)^(-n + 1))
 end
