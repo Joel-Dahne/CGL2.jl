@@ -84,7 +84,7 @@ function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{
     C_hat.I_E_hat[] = C_I_E_hat(v, λ, C_hat)
     C_hat.I_P_hat[] = C_I_P_hat(v, κ, ϵ, ξ₁, λ, C_hat)
 
-    C_hat.T_hat[] = C.P_hat * C.I_E_hat + C.E_hat * C.I_P_hat * ξ₁^-2
+    C_hat.T_hat[] = C_hat.P_hat * C_hat.I_E_hat + C_hat.E_hat * C_hat.I_P_hat * ξ₁^-2
 
     return C_hat
 end
