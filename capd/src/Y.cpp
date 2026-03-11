@@ -277,7 +277,7 @@ void vectorField_sigma1(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dim
 }
 
 // Vector field specialized for d = 3, sigma = 1, delta = 0, omega = 1
-void vectorField_optimized_d3(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
+void vectorField_optimized_d3(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node /*params[]*/, int /*noParams*/)
 {
   Node a = in[0];
   Node b = in[1];
@@ -458,93 +458,107 @@ void vectorField_optimized_d3_fixed_epsilon(Node xi, Node in[], int /*dimIn*/, N
   out[14] = 0 * kappa;
 }
 
-int main()
-{
-  cout.precision(17); // Enough to exactly recover Float64 values
-  cerr.precision(17); // Enough to exactly recover Float64 values
+void Y_optimized_d3_fixed_epsilon(
+    IVector Q_hat_0,
+    IVector Y_0,
+    interval lambda_real,
+    interval lambda_imag,
+    interval kappa,
+    interval epsilon,
+    interval T0,
+    interval T1,
+    double tol
+) {
+    IVector u0(15);
 
-  // Read initial value
-  // 4 for Q_hat initial data, 8 for Y initial data, 2 for lambda, 2 for kappa and epsilon
-  IVector u0(15);
+    u0[0] = Q_hat_0[0];
+    u0[1] = Q_hat_0[1];
+    u0[2] = Q_hat_0[2];
+    u0[3] = Q_hat_0[3];
 
-  // Read Q_hat initial data
-  cin >> u0[0] >> u0[1] >> u0[2] >> u0[3];
-  // Read Y initial data
-  cin >> u0[4] >> u0[5] >> u0[6] >> u0[7] >> u0[8] >> u0[9] >> u0[10] >> u0[11];
+    u0[4] = Y_0[0];
+    u0[5] = Y_0[1];
+    u0[6] = Y_0[2];
+    u0[7] = Y_0[3];
+    u0[8] = Y_0[4];
+    u0[9] = Y_0[5];
+    u0[10] = Y_0[6];
+    u0[11] = Y_0[7];
 
-  // Read parameter values
-  int d;
-  interval lambda_real, lambda_imag, kappa, epsilon, omega, sigma, delta;
-  cin >> d;
-  cin >> lambda_real;
-  cin >> lambda_imag;
-  cin >> kappa;
-  cin >> epsilon;
-  cin >> omega;
-  cin >> sigma;
-  cin >> delta;
+    u0[12] = lambda_real;
+    u0[13] = lambda_imag;
+    u0[14] = kappa;
 
-  u0[12] = lambda_real;
-  u0[13] = lambda_imag;
-  u0[14] = kappa;
-  //u0[15] = epsilon;
-
-  // Read time span
-  interval T0, T1;
-  cin >> T0 >> T1;
-
-  // Read flag for if to output Jacobian
-  int output_jacobian;
-  cin >> output_jacobian;
-
-  // Read tolerance to use
-  double tol;
-  cin >> tol;
-
-  // Create the vector field and the parameters
-  int dim = 16;
-  IMap vf;
-
-  // TODO: The old versions take epsilon as a variable to the ODE, the
-  // new optimized version takes epsilon as a parameter. We should
-  // update this to only work with epsilon as a parameter in all
-  // cases.
-   if (d == 1) {
-    vf = IMap(vectorField_d1, dim, dim, 3);
-    vf.setParameter(0, omega);
-    vf.setParameter(1, sigma);
-    vf.setParameter(2, delta);
-    cout << "\n\nException caught!\n" << e.what() << endl << endl;
-   } else if (d == 3 && sigma == 1 && delta == 0 && omega == 1) {
-    //vf = IMap(vectorField_optimized_d3, dim, dim, 0);
-    vf = IMap(vectorField_optimized_d3_fixed_epsilon, dim - 1, dim - 1, 1);
+    int dim = 15;
+    IMap vf = IMap(vectorField_optimized_d3_fixed_epsilon, dim, dim, 1);
     vf.setParameter(0, epsilon);
-   } else if (sigma == 1) {
-    vf = IMap(vectorField_sigma1, dim, dim, 4);
-    vf.setParameter(0, omega);
-    vf.setParameter(1, sigma);
-    vf.setParameter(2, delta);
-    vf.setParameter(3, interval(d));
-    cout << "\n\nException caught!\n" << e.what() << endl << endl;
-   } else {
-    vf = IMap(vectorField, dim, dim, 4);
-    vf.setParameter(0, omega);
-    vf.setParameter(1, sigma);
-    vf.setParameter(2, delta);
-    vf.setParameter(3, interval(d));
-    cout << "\n\nException caught!\n" << e.what() << endl << endl;
-  }
 
-  // Create the solver and the time map
-  IOdeSolver solver(vf, 20);
+    // Create the solver and the time map
+    IOdeSolver solver(vf, 20);
 
-  solver.setAbsoluteTolerance(tol);
-  solver.setRelativeTolerance(tol);
+    solver.setAbsoluteTolerance(tol);
+    solver.setRelativeTolerance(tol);
 
-  ITimeMap timeMap(solver);
+    ITimeMap timeMap(solver);
 
   try {
-    if (output_jacobian) {
+      // Define a doubleton representation of the initial value
+      C0HORect2Set s(u0, T0);
+
+      // Solve the system
+      IVector result = timeMap(T1, s);
+
+      for (int i = 4; i < 12; i++)
+          cout << result[i] << endl;
+  } catch(exception& e) {
+    cout << "\n\nException caught!\n" << e.what() << endl << endl;
+  }
+}
+
+void Y_optimized_d3_fixed_epsilon_jacobian(
+    IVector Q_hat_0,
+    IVector Y_0,
+    interval lambda_real,
+    interval lambda_imag,
+    interval kappa,
+    interval epsilon,
+    interval T0,
+    interval T1,
+    double tol
+) {
+    IVector u0(15);
+
+    u0[0] = Q_hat_0[0];
+    u0[1] = Q_hat_0[1];
+    u0[2] = Q_hat_0[2];
+    u0[3] = Q_hat_0[3];
+
+    u0[4] = Y_0[0];
+    u0[5] = Y_0[1];
+    u0[6] = Y_0[2];
+    u0[7] = Y_0[3];
+    u0[8] = Y_0[4];
+    u0[9] = Y_0[5];
+    u0[10] = Y_0[6];
+    u0[11] = Y_0[7];
+
+    u0[12] = lambda_real;
+    u0[13] = lambda_imag;
+    u0[14] = kappa;
+
+    int dim = 15;
+    IMap vf = IMap(vectorField_optimized_d3_fixed_epsilon, dim, dim, 1);
+    vf.setParameter(0, epsilon);
+
+    // Create the solver and the time map
+    IOdeSolver solver(vf, 20);
+
+    solver.setAbsoluteTolerance(tol);
+    solver.setRelativeTolerance(tol);
+
+    ITimeMap timeMap(solver);
+
+  try {
       // Define a representation of the initial value
       C1HORect2Set s(u0, T0);
 
@@ -565,17 +579,56 @@ int main()
       // Derivative w.r.t. lambda_imag
       for (int j = 4; j < 12; j++)
 	  cout << m[j][13] << endl;
-    } else {
-      // Define a doubleton representation of the initial value
-      C0HORect2Set s(u0, T0);
-
-      // Solve the system
-      IVector result = timeMap(T1, s);
-
-      for (int i = 4; i < 12; i++)
-        cout << result[i] << endl;
-    }
   } catch(exception& e) {
     cout << "\n\nException caught!\n" << e.what() << endl << endl;
   }
-} // END
+}
+
+int main()
+{
+  // Enough to exactly recover Float64 values
+  cout.precision(17);
+  cerr.precision(17);
+
+  // Read initial data
+  IVector Q_hat_0(4), Y_0(8);
+  // Read Q_hat initial data
+  cin >> Q_hat_0[0] >> Q_hat_0[1] >> Q_hat_0[2] >> Q_hat_0[3];
+  // Read Y initial data
+  cin >> Y_0[0] >> Y_0[1] >> Y_0[2] >> Y_0[3] >> Y_0[4] >> Y_0[5] >> Y_0[6] >> Y_0[7];
+
+  // Read parameter values
+  int d;
+  interval lambda_real, lambda_imag, kappa, epsilon, omega, sigma, delta;
+  cin >> d;
+  cin >> lambda_real;
+  cin >> lambda_imag;
+  cin >> kappa;
+  cin >> epsilon;
+  cin >> omega;
+  cin >> sigma;
+  cin >> delta;
+
+  // Read time span
+  interval T0, T1;
+  cin >> T0 >> T1;
+
+  // Read flag for if to output Jacobian
+  int output_jacobian;
+  cin >> output_jacobian;
+
+  // Read tolerance to use
+  double tol;
+  cin >> tol;
+
+  if (d == 3 && sigma == 1 && delta == 0 && omega == 1) {
+      if (output_jacobian) {
+          Y_optimized_d3_fixed_epsilon_jacobian(Q_hat_0, Y_0, lambda_real, lambda_imag, kappa, epsilon, T0, T1, tol);
+      } else {
+          Y_optimized_d3_fixed_epsilon(Q_hat_0, Y_0, lambda_real, lambda_imag, kappa, epsilon, T0, T1, tol);
+      }
+  } else {
+      // TODO: Do we need to implement any other versions?
+      cout << "Exception: Got unsupported parameters" << endl;
+  }
+}
