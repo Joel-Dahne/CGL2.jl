@@ -1,5 +1,5 @@
 CXX ?= g++
-CFLAGS = -Wall -Wextra -O2
+CFLAGS = -Wall -Wextra -O2 -Wno-deprecated-declarations -Wno-overloaded-virtual
 
 BUILD_DIR = build
 
