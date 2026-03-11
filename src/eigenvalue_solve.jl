@@ -45,6 +45,9 @@ function eigenvalue_solve(
 
     verbose && @info "Got" ν γ₂
 
+    # Return ν and γ₂
+    #return ν, γ₂
+
     ###
     # Step 3.1: Find approximate eigenvalue
     ###
@@ -93,11 +96,16 @@ function eigenvalue_solve(
     verbose && @info "Solving for λ using midpoint of ν"
     lambda_mid = H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
+    # Return parameters
+    #return lambda_approx, ν, γ₁, γ₂
+
     # FIXME: Improve enclosures so that we don't need this scaling
-    ν_radius_scaling = Mag(1e-5)
+    ν_radius_scaling = Mag(1.5e-4)
     verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
-    Arblib.mul!(Arblib.radref(Arblib.realref(ν)), radius(real(ν)), ν_radius_scaling)
-    Arblib.mul!(Arblib.radref(Arblib.imagref(ν)), radius(imag(ν)), ν_radius_scaling)
+    ν = Acb(
+        setball(Arb, midpoint(real(ν)), ν_radius_scaling * Arblib.radius(real(ν))),
+        setball(Arb, midpoint(imag(ν)), ν_radius_scaling * Arblib.radius(imag(ν))),
+    )
     lambda = H_solve(lambda_approx, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # Note that the finite difference approximation is quite bad
