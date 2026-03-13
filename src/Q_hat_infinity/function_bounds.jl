@@ -158,6 +158,5 @@ function C_I_P_hat(
 )
     (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
-    @assert (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2) > 0
     return C_hat.J_P_hat / (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2)
 end
