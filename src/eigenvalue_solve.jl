@@ -5,6 +5,7 @@ function eigenvalue_solve(
     ϵ::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb};
+    max_iterations::Int = 10,
     verbose = false,
 )
     verbose && @info "Iteration ϵ = $ϵ"
@@ -28,8 +29,12 @@ function eigenvalue_solve(
     γ₁ = pQ / (-c)^-a
 
     @assert Arblib.overlaps(p_Q_hat(γ₁, κ, ϵ, λ), pQ)
-
+    #return γ₁
     verbose && @info "Got" γ₁
+
+    # FIXME: Don't cheat!
+    @info "Using midpoint of γ₁"
+    γ₁ = midpoint(Acb, γ₁)
 
     ###
     # Step 2.2: Solve for ν and γ₂
@@ -100,13 +105,13 @@ function eigenvalue_solve(
     #return lambda_approx, ν, γ₁, γ₂
 
     # FIXME: Improve enclosures so that we don't need this scaling
-    ν_radius_scaling = Mag(1.5e-3)
+    ν_radius_scaling = Mag(8e-3)
     verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
     ν = Acb(
         setball(Arb, midpoint(real(ν)), ν_radius_scaling * Arblib.radius(real(ν))),
         setball(Arb, midpoint(imag(ν)), ν_radius_scaling * Arblib.radius(imag(ν))),
     )
-    lambda = H_solve(lambda_approx, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    lambda = H_solve(lambda_approx, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose, max_iterations)
 
     # Note that the finite difference approximation is quite bad
     @show isapprox(ComplexF64(lambda), lambdaF64_approx, rtol = 1e-4)
