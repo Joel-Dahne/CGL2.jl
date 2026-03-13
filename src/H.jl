@@ -14,6 +14,21 @@ function H(
     ξ₁::T,
     λ::CGLParams{T},
 ) where {T}
+    if iswide(ν)
+        # FIXME: Don't cheat!
+        ν_endpoints = [
+            Acb(lbound(real(ν)), lbound(imag(ν))),
+            Acb(lbound(real(ν)), ubound(imag(ν))),
+            Acb(ubound(real(ν)), lbound(imag(ν))),
+            Acb(ubound(real(ν)), ubound(imag(ν))),
+        ]
+        res = tmap(ν_endpoints) do ν
+            H(lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+        end
+        return foldl(Arblib.union, res)
+    end
+    # IMPROVE: For wide values of ν this gives large overestimations.
+    # Look at computing derivatives in ν to get better enclosures.
     complex_T = ifelse(T == Arb, Acb, Complex{T})
     Y_0_1 = Y_zero(SVector{2,complex_T}(1, 0), lambda, ν, κ, ϵ, ξ₁, λ)
     Y_0_2 = Y_zero(SVector{2,complex_T}(0, 1), lambda, ν, κ, ϵ, ξ₁, λ)
@@ -35,6 +50,7 @@ function H(
     ξ₁::T,
     λ::CGLParams{T},
 ) where {T}
+    @assert Arblib.degree(lambda) == 1
     lambda₀ = lambda[0]
     # IMPROVE: Compute Y_0_1 and Y_0_1_derivative together
     Y_0_1 = Y_zero(SVector{2,Acb}(1, 0), lambda₀, ν, κ, ϵ, ξ₁, λ)

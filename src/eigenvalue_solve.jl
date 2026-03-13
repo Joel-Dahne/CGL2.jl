@@ -93,14 +93,14 @@ function eigenvalue_solve(
     ###
     verbose && @info "Solving for λ"
 
-    verbose && @info "Solving for λ using midpoint of ν"
-    lambda_mid = H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
+    #verbose && @info "Solving for λ using midpoint of ν"
+    #lambda_mid = H_solve(lambda_approx, midpoint(Acb, ν), γ₁, γ₂, κ, ϵ, ξ₁, λ; verbose)
 
     # Return parameters
     #return lambda_approx, ν, γ₁, γ₂
 
     # FIXME: Improve enclosures so that we don't need this scaling
-    ν_radius_scaling = Mag(1.5e-4)
+    ν_radius_scaling = Mag(1.5e-3)
     verbose && @info "Solving for λ using ν with radius scaled by" ν_radius_scaling
     ν = Acb(
         setball(Arb, midpoint(real(ν)), ν_radius_scaling * Arblib.radius(real(ν))),
