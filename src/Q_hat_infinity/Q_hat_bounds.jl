@@ -53,8 +53,7 @@ function C_Q_hat(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLPa
     a, b, c = _abc(κ, ϵ, λ)
     (; d, σ, δ) = λ
 
-    #TODO: Can we take this to be zero?
-    v = Arb("0.0")
+    v = Arb("0") # TODO: Prove that we can take v = 0
 
     C = FunctionBounds_hat(v, κ, ϵ, ξ₁, λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
@@ -81,8 +80,7 @@ function C_Q_hat_dξ(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::C
     a, b, c = _abc(κ, ϵ, λ)
     (; d, σ) = λ
 
-    #TODO: Can we take this to be zero?
-    v = Arb("0.0")
+    v = Arb("0") # TODO: Prove that we can take v = 0
 
     C = FunctionBounds_hat(v, κ, ϵ, ξ₁, λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)

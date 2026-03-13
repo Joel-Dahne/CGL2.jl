@@ -8,7 +8,7 @@ and the second is the derivative.
 function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     (; d, σ) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    v = Arb("0.01")
+    v = Arb("0") # TODO: Prove that we can take v = 0
 
     # Precompute functions as well as function and norm bounds
     F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
@@ -89,7 +89,7 @@ function Q_hat_infinity_jacobian(
 )
     (; d, σ) = λ
     _, _, c = _abc(κ, ϵ, λ)
-    v = Arb("0.1")
+    v = Arb("0") # TODO: Prove that we can take v = 0
 
     # Precompute functions as well as function and norm bounds
     F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
