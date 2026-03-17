@@ -5,28 +5,21 @@ end
 
 # This is used by Y_infinity, so doesn't take any precomputed values.
 function C_Q_hat(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    # TODO: Add checks for parameters
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d, σ, δ) = λ
-
-    v = Arb("0") # TODO: Prove that we can take v = 0
-
     C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
-    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
 
     return norms.Q_hat
 end
 
 # This is used by Y_infinity, so doesn't take any precomputed values.
 function C_Q_hat_dξ(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    # TODO: Add checks for parameters
-    a, b, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    v = Arb("0") # TODO: Prove that we can take v = 0
+    @assert -2real(c) + (2 / σ - d + 2) * ξ₁ < 0
 
     C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
-    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, C)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
 
     return abs(γ₁) * C.P_hat_dξ +
            abs(γ₂) * C.E_hat_dξ * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d + 2) +
@@ -36,6 +29,6 @@ function C_Q_hat_dξ(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::C
                C.E_hat_dξ * C.I_P_hat +
                C.E_hat * C.J_P_hat
            ) *
-           ξ₁^((2σ + 1) * v - 2) *
+           ξ₁^-2 *
            norms.Q_hat^(2σ + 1)
 end
