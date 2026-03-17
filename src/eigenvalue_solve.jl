@@ -16,25 +16,21 @@ function eigenvalue_solve(
     λF64 = CGLParams{Float64}(λ)
 
     ###
-    # Step 1: Compute p_Q
+    # Step 1: Compute p_Q_0
     ###
-    pQ = p_Q(γ, κ, ϵ, ξ₁, λ)
-
+    pQ0 = p_Q_0(γ, κ, ϵ, ξ₁, λ)
+    #return pQ0
     ###
     # Step 2.1: Solve for γ₁, giving asymptotic behavior of Q_hat at infinity
     ###
     verbose && @info "Solving for γ₁"
 
     a, b, c = _abc(κ, ϵ, λ)
-    γ₁ = pQ / (-c)^-a
+    γ₁ = pQ0 / (-c)^-a
 
-    @assert Arblib.overlaps(p_Q_hat(γ₁, κ, ϵ, λ), pQ)
+    @assert Arblib.overlaps(p_Q_hat(γ₁, κ, ϵ, λ), pQ0)
     #return γ₁
     verbose && @info "Got" γ₁
-
-    # FIXME: Don't cheat!
-    @info "Using midpoint of γ₁"
-    γ₁ = midpoint(Acb, γ₁)
 
     ###
     # Step 2.2: Solve for ν and γ₂

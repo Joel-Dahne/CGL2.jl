@@ -11,17 +11,17 @@ function branch_eigenvalue_approximation(
         verbose && @info "Iteration ϵ = $ϵ"
 
         ###
-        # Step 1: Compute p_Q
+        # Step 1: Compute p_Q_0
         ###
-        pQ = p_Q(γ, κ, ϵ, ξ₁, λ)
+        pQ0 = p_Q_0(γ, κ, ϵ, ξ₁, λ)
 
         ###
         # Step 2.1: Solve for γ₁, giving asymptotic behavior of Q_hat at infinity
         ###
         a, b, c = _abc(κ, ϵ, λ)
-        γ₁ = pQ / (-c)^-a
+        γ₁ = pQ0 / (-c)^-a
 
-        @assert p_Q_hat(γ₁, κ, ϵ, λ) ≈ pQ
+        @assert p_Q_hat(γ₁, κ, ϵ, λ) ≈ pQ0
 
         ###
         # Step 2.2: Solve for ν and γ₂

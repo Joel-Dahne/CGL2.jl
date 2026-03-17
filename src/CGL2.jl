@@ -52,7 +52,7 @@ include("Q_infinity/I.jl")
 include("Q_infinity/check_existence.jl")
 include("Q_infinity/Q.jl")
 include("Q_infinity/verify_monotonicity.jl")
-include("Q_infinity/p_Q.jl")
+include("Q_infinity/p_Q_0.jl")
 
 include("refine_approximation.jl")
 include("G.jl")
