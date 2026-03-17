@@ -3,12 +3,12 @@
 
 Contains enclosures of the functions
 
-- `P_hat`
-- `P_hat_dξ`
-- `E_hat`
-- `E_hat_dξ`
-- `J_E_hat`
-- `J_P_hat`
+- [`P_hat`](@ref)
+- [`P_hat_dξ`](@ref)
+- [`E_hat`](@ref)
+- [`E_hat_dξ`](@ref)
+- [`J_E_hat`](@ref)
+- [`J_P_hat`](@ref)
 
 when evaluated at `ξ₁`.
 """

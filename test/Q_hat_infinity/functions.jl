@@ -1,9 +1,8 @@
 @testset "functions" begin
-    # IMPROVE: Test for more parameters
     ξ = Arb(30)
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
-    λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
+    λ = CGLParams{Arb}(3, 1, 1, 0.0)
     (; d, ω, σ, δ) = λ
 
     c = CGL2._c(κ, ϵ, λ)
