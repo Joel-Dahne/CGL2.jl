@@ -117,7 +117,7 @@ function norm_bound_Q_hat(
         # improving the numerical stability.
         ρ_initial = ArbExtras.refine_root_bisection(f, only(roots)..., rtol = Arb(1e-2))
 
-        ρ = ArbExtras.refine_root(f, Arb(ρ_l_initial))
+        ρ = ArbExtras.refine_root(f, Arb(ρ_initial))
 
         return ρ
     else

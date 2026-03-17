@@ -1,4 +1,25 @@
-# TODO: Add tests and documentation for this function
+"""
+    integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+
+Compute an enclosure of the integral in `η` from `ξ₁` to infinity of
+the function
+
+```
+J_E_hat(η) * abs(P(η))^2 * P(η)
+```
+
+The approach is based on Lemma REF(lemma:integral-J_E_hat-P_hat). The
+lemma reduces it to the integral with the integrand given by a product
+of asymptotic series with remainder terms. To enclose the integral we
+compute the coefficients in the series and bounds for the remainder
+terms.
+
+The multiplication of the series is handled using nested for loops.
+For terms in the product where at least one of the factors is a
+remainder term we compute a bound for the absolute value. For terms
+were all factors are from the series we enclose the integral by
+integrating it explicitly.
+"""
 function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, λ)
     (; d, σ) = λ
@@ -25,9 +46,9 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}
                     exponent = -2 / σ - 2(i_1 + i_2 + i_3 + i_4)
 
                     if i_1 == n || i_2 == n || i_3 == n || i_4 == n
-                        # One of the terms is a remainder term. We
-                        # only bound the absolute value of the
-                        # integral.
+                        # At least one of the terms is a remainder
+                        # term. We only bound the absolute value of
+                        # the integral.
                         coefficient = Arb(1)
                         coefficient *= i_1 == n ? C_R_U_bma : abs(p_U_bma[i_1+1])
                         coefficient *= i_2 == n ? C_R_U : abs(p_U[i_2+1])
@@ -41,8 +62,9 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}
                         I_U += term
                     else
                         # None of the terms are remainder terms, we
-                        # compute an enclosure of the integral.
-
+                        # compute an enclosure of the integral. Note
+                        # that the integrand is η^(exponent - 1) times
+                        # the coefficients.
                         I_U +=
                             p_U_bma[i_1+1] *
                             p_U[i_2+1] *
@@ -55,20 +77,21 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}
         end
     end
 
-    #I_W = Arblib.integrate(ξ₁, 20ξ₁) do η
-    #    U(b - a, b, c * η^2) * U(a, b, -c * η^2)^2 * conj(U(a, b, -c * η^2)) * η^(d - 1)
-    #end / (c^(a - b) * ((-c)^(-a))^2 * conj((-c)^(-a)))
-
     return B_W_hat(κ, ϵ, λ) * c^(a - b) * abs((-c)^-a)^2 * (-c)^-a * I_U
 end
 
+"""
+    I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+
+Compute an enclosure of `I_E_hat` based on Lemma
+REF(lemma:I_E_hat-enclosure).
+"""
 function I_E_hat_enclosure(
     γ₁::Acb,
     γ₂::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     λ::CGLParams{Arb},
     F::FunctionEnclosures_hat,
     C::FunctionBounds_hat,
@@ -84,41 +107,42 @@ function I_E_hat_enclosure(
 
     I_E_hat_main = abs(γ₁)^2 * γ₁ * integral_J_E_hat_P_hat(κ, ϵ, ξ₁, λ)
 
-    C_R_Q_hat_1 = CGL2.C_R_Q_hat_1(γ₁, γ₂, κ, ϵ, ξ₁, v, λ, F, C, norms)
+    C_R_Q_hat = CGL2.C_R_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
     R_I_E_hat_bound =
         C.J_E_hat *
         (
-            3abs(γ₁)^2 * C.P_hat^2 * C_R_Q_hat_1 / abs(-2 / σ + (2σ + 1) * v - 2) +
-            3abs(γ₁) * C.P_hat * C_R_Q_hat_1^2 / abs(-2 / σ + 2(2σ + 1) * v - 4) *
-            ξ₁^((2σ + 1) * v - 2) +
-            C_R_Q_hat_1^3 / abs(-2 / σ + 3(2σ + 1) * v - 6) * ξ₁^(2(2σ + 1) * v - 4)
+            3abs(γ₁)^2 * C.P_hat^2 * C_R_Q_hat / abs(-2 / σ - 2) +
+            3abs(γ₁) * C.P_hat * C_R_Q_hat^2 / abs(-2 / σ - 4) * ξ₁^-2 +
+            C_R_Q_hat^3 / abs(-2 / σ - 6) * ξ₁^-4
         ) *
-        ξ₁^(-2 / σ + (2σ + 1) * v - 2)
+        ξ₁^(-2 / σ - 2)
     R_I_E_hat = add_error(zero(Acb), R_I_E_hat_bound)
 
     return I_E_hat_main + R_I_E_hat
 end
 
+"""
+    I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+
+Compute an enclosure of `I_E_hat_dγ₂` based on Lemma
+REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
+"""
 function I_E_hat_dγ₂_enclosure(
     γ₁::Acb,
     γ₂::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     λ::CGLParams{Arb},
     F::FunctionEnclosures_hat,
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
 )
-    (; σ) = λ
-
     # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds)
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 
-    I_E_hat_dγ₂_bound =
-        (2σ + 1) * C.I_E_hat * ξ₁^((2σ + 1) * v - 2) * norms.Q_hat^2σ * norms.Q_hat_dγ₂
+    I_E_hat_dγ₂_bound = (2λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2λ.σ * norms.Q_hat_dγ₂
 
     return add_error(zero(Acb), I_E_hat_dγ₂_bound)
 end
