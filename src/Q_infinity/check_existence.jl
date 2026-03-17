@@ -1,10 +1,27 @@
 function C_T1(κ::Arb, ϵ::Arb, ξ₁::Arb, v::Arb, λ::CGLParams{Arb}, C::FunctionBounds)
+    c = _c(κ, ϵ, λ)
     (; d, σ) = λ
+
+    # This is the bound from the first paper. It corresponds to
+    # C_{T,1} from Lemma REF(lemma:fixed-point-bounds).
     @assert (2σ + 1) * v < 2 + 2 / σ - d
     @assert 2 / d < σ
+    bound =
+        C.P * C.J_E / abs((2σ + 1) * v - 2) +
+        C.E * C.J_P / abs((2σ + 1) * v - 2 / σ + d - 2)
 
-    return C.P * C.J_E / abs((2σ + 1) * v - 2) +
-           C.E * C.J_P / abs((2σ + 1) * v - 2 / σ + d - 2)
+    if real(c) > 0
+        # This is the bound from the current paper. It uses the bounds
+        # from Lemma REF(lemma:I_E-I_P-bounds).
+        bound2 = C.P * C_I_E(κ, ϵ, ξ₁, v, λ, C) + C.E * C_I_P(κ, ϵ, ξ₁, v, λ, C)
+
+        @show bound bound2
+
+        # We return the best of the two bounds.
+        return min(bound, bound2)
+    else
+        return bound
+    end
 end
 
 function M(σ::Arb)
