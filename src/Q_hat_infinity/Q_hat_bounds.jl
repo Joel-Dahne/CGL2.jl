@@ -3,15 +3,30 @@ function p_Q_hat(γ₁, κ, ϵ, λ::CGLParams{T}) where {T}
     return γ₁ * (-c)^-a
 end
 
-# This is used by Y_infinity, so doesn't take any precomputed values.
+"""
+    C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+Compute the constant `C_Q_hat` from Lemma REF(lemma:Q-hat-bounds).
+
+This function is used in the computation of `Y_infinity` and for that
+reason it doesn't take any precomputed values, but computes them by
+itself.
+"""
 function C_Q_hat(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
-
     return norms.Q_hat
 end
 
-# This is used by Y_infinity, so doesn't take any precomputed values.
+"""
+    C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+
+Compute the constant `C_Q_hat_dξ` from Lemma REF(lemma:Q-hat-bounds).
+
+This function is used in the computation of `Y_infinity` and for that
+reason it doesn't take any precomputed values, but computes them by
+itself.
+"""
 function C_Q_hat_dξ(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
