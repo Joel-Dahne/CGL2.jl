@@ -23,6 +23,7 @@ import SparseArrays
 
 include("CGLBranch/CGLBranch.jl")
 
+include("assert_proof.jl")
 include("arb.jl")
 #include("interval.jl")
 include("helper.jl")
