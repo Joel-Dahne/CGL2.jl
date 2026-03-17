@@ -59,7 +59,7 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}
     #    U(b - a, b, c * η^2) * U(a, b, -c * η^2)^2 * conj(U(a, b, -c * η^2)) * η^(d - 1)
     #end / (c^(a - b) * ((-c)^(-a))^2 * conj((-c)^(-a)))
 
-    return B_W_hat(κ, ϵ, λ) * c^(a - b) * abs((-c)^(-a))^2 * (-c)^-a * I_U
+    return B_W_hat(κ, ϵ, λ) * c^(a - b) * abs((-c)^-a)^2 * (-c)^-a * I_U
 end
 
 function I_E_hat_enclosure(
