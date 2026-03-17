@@ -16,7 +16,7 @@ function C_I_P(κ::Arb, ϵ::Arb, ξ₁::Arb, v::Arb, λ::CGLParams{Arb}, C::Func
         # This is the bound from the current paper. It is the bound
         # from Lemma REF(lemma:I_E-I_P-bounds).
         @assert (2σ + 1) * v - 2 / σ + d - 4 < 0
-        bound2 = C.J_P / (2 / σ) * ξ₁^-2
+        bound2 = C.J_P / 2real(c) * ξ₁^-2
 
         # We return the best of the two bounds.
         return min(bound, bound2)
