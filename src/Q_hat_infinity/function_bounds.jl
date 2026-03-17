@@ -23,9 +23,7 @@ struct FunctionBounds_hat
     E_hat::Arb
     E_hat_dξ::Arb
     J_P_hat::Arb
-    R_P_hat::Arb
     J_E_hat::Arb
-    R_J_E_hat::Arb
     # Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
     I_E_hat::Arb
     I_P_hat::Arb
@@ -42,12 +40,10 @@ struct FunctionBounds_hat
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
-        indeterminate(Arb),
-        indeterminate(Arb),
     )
 end
 
-function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     (; d, σ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
@@ -56,14 +52,14 @@ function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{
 
     # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
     @assert ξ₁ > 1
-    @assert v >= 0
     @assert real(c) > 0
-    @assert (2σ + 1) * v - 2 < 0
-    @assert (2σ + 1) * v - 2 / σ + d - 4 < 0
-    @assert -((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2 < 2real(c)
+    @assert -2 / σ + d - 4 < 0
+    @assert 2real(c) + (-2 / σ + d - 4) * ξ₁^-2 > 0
 
-    # Requirements of Lemma REF(lemma:fixed-point-bounds) are the same
-    # as for Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    # Requirements of Lemma REF(lemma:Q-hat-fixed-point-bounds) are
+    # the same as for Lemma REF(lemma:I_E_hat-I_P_hat-bounds) plus the
+    # following one
+    @assert 2 / σ - d < 0
 
     CU_hat = UBounds(a, b, -c, ξ₁)
 
@@ -78,11 +74,8 @@ function FunctionBounds_hat(v::Arb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{
     C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, λ, C_hat)
     C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
 
-    C_hat.R_P_hat[] = C_R_P_hat(κ, ϵ, ξ₁, λ)
-    C_hat.R_J_E_hat[] = C_R_J_E_hat(κ, ϵ, ξ₁, λ)
-
-    C_hat.I_E_hat[] = C_I_E_hat(v, λ, C_hat)
-    C_hat.I_P_hat[] = C_I_P_hat(v, κ, ϵ, ξ₁, λ, C_hat)
+    C_hat.I_E_hat[] = C_I_E_hat(κ, ϵ, ξ₁, λ, C_hat)
+    C_hat.I_P_hat[] = C_I_P_hat(κ, ϵ, ξ₁, λ, C_hat)
 
     C_hat.T_hat[] = C_hat.P_hat * C_hat.I_E_hat + C_hat.E_hat * C_hat.I_P_hat * ξ₁^-2
 
@@ -115,48 +108,11 @@ C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBound
 C_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
     abs(B_W_hat(κ, ϵ, λ)) * C_hat.E_hat
 
-function C_R_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
+C_I_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
+    C_hat.J_E_hat / 2
 
-    z₁ = -c * ξ₁^2
-    n = 20
-    S = sum(1:(n-1)) do k
-        # p_U(k, a, b, z₁) gives us coefficient with (-z₁)^k in
-        # denominator, we want (-z₁)^(k - 1) so multiply by -z₁
-        abs(p_U(k, a, b, z₁) * (-z₁))
-    end
-
-    return (S + C_R_U(n, a, b, z₁) * abs(z₁)^(-n + 1)) * abs((-c)^(-a - 1))
-end
-
-function C_R_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
-
-    z₁ = c * ξ₁^2
-    n = 20
-    S = sum(1:(n-1)) do k
-        # p_U(k, b - a, b, z₁) gives us coefficient with (-z₁)^k in
-        # denominator, we want (-z₁)^(k - 1) so multiply by -z₁
-        abs(p_U(k, b - a, b, z₁) * (-z₁))
-    end
-
-    return abs(B_W_hat(κ, ϵ, λ)) *
-           abs(c^(a - b - 1)) *
-           (S + C_R_U(n, b - a, b, z₁) * abs(z₁)^(-n + 1))
-end
-
-C_I_E_hat(v::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
-    C_hat.J_E_hat / abs((2λ.σ + 1) * v - 2)
-
-function C_I_P_hat(
-    v::Arb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    λ::CGLParams{Arb},
-    C_hat::FunctionBounds_hat,
-)
+function C_I_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat)
     (; d, σ) = λ
-    a, b, c = _abc(κ, ϵ, λ)
-    return C_hat.J_P_hat / (2real(c) + ((2σ + 1) * v - 2 / σ + d - 4) * ξ₁^-2)
+    c = _c(κ, ϵ, λ)
+    return C_hat.J_P_hat / (2real(c) + (-2 / σ + d - 4) * ξ₁^-2)
 end
