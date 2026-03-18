@@ -84,7 +84,8 @@ function Y_infinity(
     P12 = Diagonal(SVector(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ)))
     P12_dξ = Diagonal(SVector(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ)))
 
-    K1, K2 = K_1_2(ξ₁, lambda, κ, ϵ, λ)
+    K1 = K_1(ξ₁, lambda, κ, ϵ, λ)
+    K2 = K_2(ξ₁, lambda, κ, ϵ, λ)
 
     IN = I_N(Q_hat_ξ₁, λ)
 
@@ -215,8 +216,10 @@ function Y_infinity_derivative(
     P12_dλ_dξ =
         Diagonal(SVector(P_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)))
 
-    K1, K2 = K_1_2(ξ₁, lambda, κ, ϵ, λ)
-    K1_dλ, K2_dλ = K_1_2_dλ(ξ₁, lambda, κ, ϵ, λ)
+    K1 = K_1(ξ₁, lambda, κ, ϵ, λ)
+    K2 = K_2(ξ₁, lambda, κ, ϵ, λ)
+    K1_dλ = K_1_dλ(ξ₁, lambda, κ, ϵ, λ)
+    K2_dλ = K_2_dλ(ξ₁, lambda, κ, ϵ, λ)
 
     IN = I_N(Q_hat_ξ₁, λ)
 

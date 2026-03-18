@@ -264,22 +264,23 @@
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; inv(P) * A * P \ F]))
 
-        K1_dξ, K2_dξ = CGL2.K_1_2_dξ(ξ, lambda, κ, ϵ, λ)
+        K1_dξ = CGL2.K_1_dξ(ξ, lambda, κ, ϵ, λ)
+        K2_dξ = CGL2.K_2_dξ(ξ, lambda, κ, ϵ, λ)
 
         K1_dξ_series =
-            Diagonal(getindex.(diag(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[1]), 1))
+            Diagonal(getindex.(diag(CGL2.K_1(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)), 1))
         K2_dξ_series =
-            Diagonal(getindex.(diag(CGL2.K_1_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)[2]), 1))
+            Diagonal(getindex.(diag(CGL2.K_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, λ)), 1))
 
         K1_dξ_fdm = fdm(
             ξ_real ->
-                CGL2.K_1_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64)[1],
+                CGL2.K_1(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64),
             real(ξF64),
         )
 
         K2_dξ_fdm = fdm(
             ξ_real ->
-                CGL2.K_1_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64)[2],
+                CGL2.K_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, λF64),
             real(ξF64),
         )
 
@@ -288,32 +289,23 @@
         @test ComplexF64.(F_Y.K_1_dξ) ≈ K1_dξ_fdm rtol = 1e-10
         @test ComplexF64.(F_Y.K_2_dξ) ≈ K2_dξ_fdm rtol = 1e-12
 
-        K1_dλ, K2_dλ = CGL2.K_1_2_dλ(ξ, lambda, κ, ϵ, λ)
+        K1_dλ = CGL2.K_1_dλ(ξ, lambda, κ, ϵ, λ)
+        K2_dλ = CGL2.K_2_dλ(ξ, lambda, κ, ϵ, λ)
 
         K1_dλ_series =
-            Diagonal(getindex.(diag(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[1]), 1))
+            Diagonal(getindex.(diag(CGL2.K_1(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)), 1))
         K2_dλ_series =
-            Diagonal(getindex.(diag(CGL2.K_1_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)[2]), 1))
+            Diagonal(getindex.(diag(CGL2.K_2(ξ, AcbSeries((lambda, 1)), κ, ϵ, λ)), 1))
 
         K1_dλ_fdm = fdm(
-            lambda_real -> CGL2.K_1_2(
-                ξF64,
-                complex(lambda_real, imag(lambdaF64)),
-                κF64,
-                ϵF64,
-                λF64,
-            )[1],
+            lambda_real ->
+                CGL2.K_1(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
             real(lambdaF64),
         )
 
         K2_dλ_fdm = fdm(
-            lambda_real -> CGL2.K_1_2(
-                ξF64,
-                complex(lambda_real, imag(lambdaF64)),
-                κF64,
-                ϵF64,
-                λF64,
-            )[2],
+            lambda_real ->
+                CGL2.K_2(ξF64, complex(lambda_real, imag(lambdaF64)), κF64, ϵF64, λF64),
             real(lambdaF64),
         )
 

@@ -63,9 +63,9 @@
     J_P_1_dλ = CGL2.J_P_1_dλ
     J_P_2_dλ = CGL2.J_P_2_dλ
 
-    K_1_2 = CGL2.K_1_2
-    K_1_2_dξ = CGL2.K_1_2_dξ
-    K_1_2_dλ = CGL2.K_1_2_dλ
+    K_1, K_2 = CGL2.K_1, CGL2.K_2
+    K_1_dξ, K_1_dξ = CGL2.K_1_dξ, CGL2.K_2_dξ
+    K_1_dλ, K_2_dλ = CGL2.K_1_dλ, CGL2.K_2_dλ
 
     for ξ in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* ξ₁
         ####
@@ -268,7 +268,8 @@
         ## K_1, K_2
         ######
 
-        K_1, K_2 = K_1_2(ξ, lambda, κ, ϵ, λ)
+        K_1 = K_1(ξ, lambda, κ, ϵ, λ)
+        K_2 = K_2(ξ, lambda, κ, ϵ, λ)
         @test norm_inf(K_1, 1) <=
               C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
         @test norm_inf(K_1, 1) >=
@@ -283,13 +284,14 @@
         @test norm_inf(K_2, 2) <= C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
         @test norm_inf(K_2, 2) >= 0.85C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
 
-        _, K_2_dξ = K_1_2_dξ(ξ, lambda, κ, ϵ, λ)
+        K_2_dξ = K_2_dξ(ξ, lambda, κ, ϵ, λ)
         @test norm_inf(K_2_dξ, 1) <= C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
         @test norm_inf(K_2_dξ, 1) >= 0.4C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
         @test norm_inf(K_2_dξ, 2) <= C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
         @test norm_inf(K_2_dξ, 2) >= 0.5C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
 
-        K_1_dλ, K_2_dλ = K_1_2_dλ(ξ, lambda, κ, ϵ, λ)
+        K_1_dλ = K_1_dλ(ξ, lambda, κ, ϵ, λ)
+        K_2_dλ = K_2_dλ(ξ, lambda, κ, ϵ, λ)
         @test norm_inf(K_1_dλ, 1) <=
               C_Y.K_1_dλ_1 *
               exp(real(c) * ξ^2) *
@@ -325,10 +327,10 @@
         #####
 
         Q_hat, Q_hat_dξ = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ, λ)
-        H = K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.I_N(Q_hat, λ)
+        H = K_2(ξ, lambda, κ, ϵ, λ) * CGL2.I_N(Q_hat, λ)
         H_dξ =
-            K_1_2_dξ(ξ, lambda, κ, ϵ, λ)[2] * CGL2.I_N(Q_hat, λ) +
-            K_1_2(ξ, lambda, κ, ϵ, λ)[2] * CGL2.I_N_dξ(Q_hat, Q_hat_dξ, λ)
+            K_2_dξ(ξ, lambda, κ, ϵ, λ) * CGL2.I_N(Q_hat, λ) +
+            K_2(ξ, lambda, κ, ϵ, λ) * CGL2.I_N_dξ(Q_hat, Q_hat_dξ, λ)
 
         @test abs(H[1, 1]) <= C_Y.H_11 * ξ^(1 / σ - real(lambda) / κ - 3)
         @test abs(H[1, 2]) <= C_Y.H_12 * ξ^(1 / σ - real(lambda) / κ - 3)
