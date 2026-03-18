@@ -254,7 +254,7 @@
         # K1 and K2 are suppose to give solutions to the linear system
         # Ψ * v = [[0, 0]; A \ F].
 
-        (; A) = CGL2.coeff_matrices(lambda, κ, ϵ, λ)
+        A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
         P = SMatrix{2,2,Acb}(im, 1, -im, 1)
 
         Ψ = [F_Y.E_12 F_Y.P_12; F_Y.E_12_dξ F_Y.P_12_dξ]
