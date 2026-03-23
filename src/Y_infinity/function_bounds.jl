@@ -1,8 +1,8 @@
 """
-    FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ; include_dλ = false)
+    FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-This contains all the bounds of functions that are needed in the
-enclosure asymptotic expansion of `Y` at infinity.
+Contains the constants involved in asymptotic bounds for functions
+that are needed in the enclosure of `Q_hat` at infinity.
 
 More precisely it contains the bounds from
 
@@ -11,17 +11,13 @@ More precisely it contains the bounds from
 - Lemma REF(lemma:bound-I_N)
 - Lemma REF(lemma:H-bounds)
 
-If `include_dλ = false` it doesn't include the bounds corresponding to
-derivatives in `lambda`.
-
 It checks all the conditions on the parameters that these lemmas
 assume. If any of these conditions are not satisfied it will throw an
 error. When using this struct the bounds can therefore safely be
 assume to hold.
 """
 struct FunctionBounds_Y
-    I_N::Arb
-    I_N_dξ::Arb
+    # Lemma REF(lemma:P_i_E_i-bounds)
     E_1::Arb
     E_2::Arb
     P_1::Arb
@@ -34,12 +30,6 @@ struct FunctionBounds_Y
     exp_E_2_dξ::Arb
     exp_P_1_dξ::Arb
     exp_P_2_dξ::Arb
-    K_1_1::Arb
-    K_1_2::Arb
-    K_2_1::Arb
-    K_2_2::Arb
-    K_2_dξ_1::Arb
-    K_2_dξ_2::Arb
     E_1_dλ::Arb
     E_2_dλ::Arb
     P_1_dλ::Arb
@@ -58,10 +48,21 @@ struct FunctionBounds_Y
     J_E_2_dλ::Arb
     J_P_1_dλ::Arb
     J_P_2_dλ::Arb
+    # Lemma REF(lemma:bound-K_1-K_2)
+    K_1_1::Arb
+    K_1_2::Arb
+    K_2_1::Arb
+    K_2_2::Arb
+    K_2_dξ_1::Arb
+    K_2_dξ_2::Arb
     K_1_dλ_1::Arb
     K_1_dλ_2::Arb
     K_2_dλ_1::Arb
     K_2_dλ_2::Arb
+    # Lemma REF(lemma:bound-I_N)
+    I_N::Arb
+    I_N_dξ::Arb
+    # Lemma REF(lemma:H-bounds)
     H_11::Arb
     H_12::Arb
     H_21::Arb
@@ -71,152 +72,157 @@ struct FunctionBounds_Y
     H_21_dξ::Arb
     H_22_dξ::Arb
 
-    function FunctionBounds_Y(
-        lambda::Acb,
-        γ₁::Acb,
-        γ₂::Acb,
-        κ::Arb,
-        ϵ::Arb,
-        ξ₁::Arb,
-        λ::CGLParams{Arb};
-        include_dλ::Bool = false,
+    FunctionBounds_Y() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
     )
-        (; σ, δ) = λ
-        a, b, c = _abc(κ, ϵ, λ)
-
-        # This is the only direct condition in Lemma
-        # REF(lemma:P_i_E_i-bounds), REF(lemma:I_K_1-I_K_2-bounds) and
-        # REF(lemma:H-bounds).
-        # The conditions related to the bounds for U are checked by
-        # Ubounds.
-        ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
-
-        # This is the only direct condition for Lemma
-        # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat
-        # and C_Q_hat_dξ and checked by their respective methods.
-        isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
-        iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
-
-        C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-        C_Q_hat_dξ = CGL2.C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, λ)
-
-        CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = include_dλ)
-        CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = include_dλ)
-
-        C = new(
-            C_I_N(C_Q_hat),
-            C_I_N_dξ(C_Q_hat, C_Q_hat_dξ),
-            C_E_1(lambda, κ, ϵ, ξ₁, λ, CU),
-            C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            C_P_1(lambda, κ, ϵ, ξ₁, λ, CU),
-            C_P_2(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            C_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
-            C_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            C_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU),
-            C_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj),
-            indeterminate(κ), # C_exp_E_1_dξ
-            indeterminate(κ), # C_exp_E_2_dξ
-            indeterminate(κ), # C_exp_P_1_dξ
-            indeterminate(κ), # C_exp_P_2_dξ
-            indeterminate(κ), # C_K_1_1
-            indeterminate(κ), # C_K_1_2
-            indeterminate(κ), # C_K_2_1
-            indeterminate(κ), # C_K_2_2
-            indeterminate(κ), # C_K_2_dξ_1
-            indeterminate(κ), # C_K_2_dξ_2
-            indeterminate(κ), # C_E_1_dλ
-            indeterminate(κ), # C_E_2_dλ
-            indeterminate(κ), # C_P_1_dλ
-            indeterminate(κ), # C_P_2_dλ
-            indeterminate(κ), # C_E_1_dλ_dξ
-            indeterminate(κ), # C_E_2_dλ_dξ
-            indeterminate(κ), # C_P_1_dλ_dξ
-            indeterminate(κ), # C_P_2_dλ_dξ
-            indeterminate(κ), # J_E_1
-            indeterminate(κ), # J_E_2
-            indeterminate(κ), # J_P_1
-            indeterminate(κ), # J_P_2
-            indeterminate(κ), # J_E_1_dξ
-            indeterminate(κ), # J_E_2_dξ
-            indeterminate(κ), # J_E_1_dλ
-            indeterminate(κ), # J_E_2_dλ
-            indeterminate(κ), # J_P_1_dλ
-            indeterminate(κ), # J_P_2_dλ
-            indeterminate(κ), # K_1_dλ_1
-            indeterminate(κ), # K_2_dλ_2
-            indeterminate(κ), # K_1_dλ_1
-            indeterminate(κ), # K_2_dλ_2
-            indeterminate(κ), # H_11
-            indeterminate(κ), # H_12
-            indeterminate(κ), # H_21
-            indeterminate(κ), # H_22
-            indeterminate(κ), # H_11_dξ
-            indeterminate(κ), # H_12_dξ
-            indeterminate(κ), # H_21_dξ
-            indeterminate(κ), # H_22_dξ
-        )
-
-        C.exp_E_1_dξ[] = C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
-        C.exp_E_2_dξ[] = C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-        C.exp_P_1_dξ[] = C_exp_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
-        C.exp_P_2_dξ[] = C_exp_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
-
-        C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.J_E_2[] = C_J_E_2(lambda, κ, ϵ, ξ₁, λ, C)
-        C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.J_P_2[] = C_J_P_2(lambda, κ, ϵ, ξ₁, λ, C)
-
-        C.J_E_1_dξ[] = C_J_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
-        C.J_E_2_dξ[] = C_J_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
-
-        C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
-        C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, λ, C)
-
-        C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, λ, C)
-        C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, λ, C)
-
-        C.H_11[] = C_H_11(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
-        C.H_12[] = C_H_12(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
-        C.H_21[] = C_H_21(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
-        C.H_22[] = C_H_22(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
-        C.H_11_dξ[] = C_H_11_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
-        C.H_12_dξ[] = C_H_12_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
-        C.H_21_dξ[] = C_H_21_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
-        C.H_22_dξ[] = C_H_22_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
-
-        if include_dλ
-            C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
-            C.E_2_dλ[] = C_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-
-            C.P_1_dλ[] = C_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
-            C.P_2_dλ[] = C_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-
-            C.E_1_dλ_dξ[] = C_E_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
-            C.E_2_dλ_dξ[] = C_E_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-
-            C.P_1_dλ_dξ[] = C_P_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
-            C.P_2_dλ_dξ[] = C_P_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
-
-            C.J_E_1_dλ[] = C_J_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
-            C.J_E_2_dλ[] = C_J_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
-            C.J_P_1_dλ[] = C_J_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
-            C.J_P_2_dλ[] = C_J_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
-
-            C.K_1_dλ_1[] = C_K_1_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
-            C.K_1_dλ_2[] = C_K_1_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
-            C.K_2_dλ_1[] = C_K_2_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
-            C.K_2_dλ_2[] = C_K_2_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
-        end
-
-        return C
-    end
 end
 
-C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
+function FunctionBounds_Y(
+    lambda::Acb,
+    γ₁::Acb,
+    γ₂::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    λ::CGLParams{Arb};
+)
+    (; σ, δ) = λ
+    a, b, c = _abc(κ, ϵ, λ)
 
-C_I_N_dξ(C_Q_hat::Arb, C_Q_hat_dξ::Arb) = 6C_Q_hat * C_Q_hat_dξ
+    # This is the only direct condition in Lemma
+    # REF(lemma:P_i_E_i-bounds), REF(lemma:I_K_1-I_K_2-bounds) and
+    # REF(lemma:H-bounds).
+    # The conditions related to the bounds for U are checked by
+    # Ubounds.
+    ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
+
+    # This arethe only direct condition for Lemma
+    # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat and
+    # C_Q_hat_dξ and checked by their respective methods.
+    isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
+    iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
+
+    C = FunctionBounds_Y()
+
+    CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = true)
+    CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = true)
+
+    C.E_1[] = C_E_1(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.E_2[] = C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+    C.P_1[] = C_P_1(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.P_2[] = C_P_2(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+
+    C.E_1_dξ[] = C_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.E_2_dξ[] = C_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+    C.P_1_dξ[] = C_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.P_2_dξ[] = C_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+
+    C.exp_E_1_dξ[] = C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.exp_E_2_dξ[] = C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+    C.exp_P_1_dξ[] = C_exp_P_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+    C.exp_P_2_dξ[] = C_exp_P_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_E_2[] = C_J_E_2(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_P_2[] = C_J_P_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.J_E_1_dξ[] = C_J_E_1_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_E_2_dξ[] = C_J_E_2_dξ(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.E_1_dλ[] = C_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.E_2_dλ[] = C_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+    C.P_1_dλ[] = C_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.P_2_dλ[] = C_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+
+    C.E_1_dλ_dξ[] = C_E_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.E_2_dλ_dξ[] = C_E_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+    C.P_1_dλ_dξ[] = C_P_1_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU)
+    C.P_2_dλ_dξ[] = C_P_2_dλ_dξ(lambda, κ, ϵ, ξ₁, λ, CU_conj)
+
+    C.J_E_1_dλ[] = C_J_E_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_E_2_dλ[] = C_J_E_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_P_1_dλ[] = C_J_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
+    C.J_P_2_dλ[] = C_J_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.K_1_dλ_1[] = C_K_1_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_1_dλ_2[] = C_K_1_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_2_dλ_1[] = C_K_2_dλ_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_2_dλ_2[] = C_K_2_dλ_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, λ, C)
+    C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, λ, C)
+
+    C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    C_Q_hat_dξ = CGL2.C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    C.I_N[] = C_I_N(C_Q_hat)
+    C.I_N_dξ[] = C_I_N_dξ(C_Q_hat, C_Q_hat_dξ)
+
+    C.H_11[] = C_H_11(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+    C.H_12[] = C_H_12(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+    C.H_21[] = C_H_21(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+    C.H_22[] = C_H_22(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
+    C.H_11_dξ[] = C_H_11_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_12_dξ[] = C_H_12_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_21_dξ[] = C_H_21_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_22_dξ[] = C_H_22_dξ(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat, C_Q_hat_dξ)
+
+    return C
+end
 
 function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
@@ -635,6 +641,10 @@ function C_K_2_dλ_2(
 )
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dλ
 end
+
+C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
+
+C_I_N_dξ(C_Q_hat::Arb, C_Q_hat_dξ::Arb) = 6C_Q_hat * C_Q_hat_dξ
 
 function C_H_11(
     lambda::Acb,

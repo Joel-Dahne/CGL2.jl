@@ -2,8 +2,7 @@
     FunctionBounds_hat(κ, ϵ, ξ₁, λ)
 
 Contains the constants involved in asymptotic bounds for functions
-that are needed in the enclosure asymptotic expansion of `Q_hat` at
-infinity.
+that are needed in the enclosure of `Q_hat` at infinity.
 
 More precisely it contains the bounds from
 
