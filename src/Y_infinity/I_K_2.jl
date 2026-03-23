@@ -9,7 +9,6 @@ function I_K_2_enclosure(
     Z::SVector{2,Acb},
     F_Z::FunctionEnclosures_Y,
     C_Z::FunctionBounds_Y,
-    C_I_K_j::I_K_j_Bounds,
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -25,8 +24,8 @@ function I_K_2_enclosure(
         exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
         @assert exponent < 0
 
-        I_K_2_1_bound = C_I_K_j.C_I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
-        I_K_2_2_bound = C_I_K_j.C_I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
+        I_K_2_1_bound = C_Z.I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
+        I_K_2_2_bound = C_Z.I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
 
         return add_error.(zero(c_0), SVector(I_K_2_1_bound, I_K_2_2_bound))
     end
@@ -41,29 +40,25 @@ function I_K_2_enclosure(
     # Bound remainder term
     C_Z_1 =
         C_Z.E_1 * abs(c_0[1]) +
-        (C_Z.E_1 * C_I_K_j.C_I_K_1_1 + C_Z.P_1 * C_I_K_j.C_I_K_2_1 * ξ₁^-2) *
-        ξ₁^(v - 2) *
-        norms_Z.Z
+        (C_Z.E_1 * C_Z.I_K_1_1 + C_Z.P_1 * C_Z.I_K_2_1 * ξ₁^-2) * ξ₁^(v - 2) * norms_Z.Z
     C_Z_2 =
         C_Z.E_2 * abs(c_0[2]) +
-        (C_Z.E_2 * C_I_K_j.C_I_K_1_2 + C_Z.P_2 * C_I_K_j.C_I_K_2_2 * ξ₁^-2) *
-        ξ₁^(v - 2) *
-        norms_Z.Z
+        (C_Z.E_2 * C_Z.I_K_1_2 + C_Z.P_2 * C_Z.I_K_2_2 * ξ₁^-2) * ξ₁^(v - 2) * norms_Z.Z
 
     C_exp_Z_1_dξ =
         C_Z.exp_E_1_dξ * abs(c_0[1]) +
         (
-            C_Z.exp_E_1_dξ * C_I_K_j.C_I_K_1_1 +
+            C_Z.exp_E_1_dξ * C_Z.I_K_1_1 +
             C_Z.E_1 * C_Z.K_1_1 * C_Z.I_N +
-            C_Z.exp_P_1_dξ * C_I_K_j.C_I_K_2_1 +
+            C_Z.exp_P_1_dξ * C_Z.I_K_2_1 +
             C_Z.P_1 * C_Z.K_2_1 * C_Z.I_N
         ) * ξ₁^(v - 2)
     C_exp_Z_2_dξ =
         C_Z.exp_E_2_dξ * abs(c_0[2]) +
         (
-            C_Z.exp_E_2_dξ * C_I_K_j.C_I_K_1_2 +
+            C_Z.exp_E_2_dξ * C_Z.I_K_1_2 +
             C_Z.E_2 * C_Z.K_1_2 * C_Z.I_N +
-            C_Z.exp_P_2_dξ * C_I_K_j.C_I_K_2_2 +
+            C_Z.exp_P_2_dξ * C_Z.I_K_2_2 +
             C_Z.P_2 * C_Z.K_2_2 * C_Z.I_N
         ) * ξ₁^(v - 2)
 
@@ -100,11 +95,10 @@ function I_K_2_dλ_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Z::FunctionBounds_Y,
-    C_I_K_j::I_K_j_Bounds,
     norms_Z::NormBounds_Y,
 )
-    return I_K_2_dλ_1_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, C_I_K_j, norms_Z) +
-           I_K_2_dλ_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, C_I_K_j, norms_Z)
+    return I_K_2_dλ_1_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, norms_Z) +
+           I_K_2_dλ_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, C_Z, norms_Z)
 end
 
 function I_K_2_dλ_1_enclosure(
@@ -116,7 +110,6 @@ function I_K_2_dλ_1_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Z::FunctionBounds_Y,
-    C_I_K_j::I_K_j_Bounds,
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -128,9 +121,9 @@ function I_K_2_dλ_1_enclosure(
     @assert exponent < 0
 
     I_K_2_dλ_1_1_bound =
-        C_I_K_j.C_I_K_2_dλ_1_1 * exp(-real(c) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Z.Z
+        C_Z.I_K_2_dλ_1_1 * exp(-real(c) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Z.Z
     I_K_2_dλ_1_2_bound =
-        C_I_K_j.C_I_K_2_dλ_1_2 * exp(-real(c) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Z.Z
+        C_Z.I_K_2_dλ_1_2 * exp(-real(c) * ξ₁^2) * log(ξ₁) * ξ₁^exponent * norms_Z.Z
 
     return add_error.(zero(c_0), SVector(I_K_2_dλ_1_1_bound, I_K_2_dλ_1_2_bound))
 end
@@ -144,7 +137,6 @@ function I_K_2_dλ_2_enclosure(
     v::Arb,
     λ::CGLParams{Arb},
     C_Z::FunctionBounds_Y,
-    C_I_K_j::I_K_j_Bounds,
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
@@ -156,9 +148,9 @@ function I_K_2_dλ_2_enclosure(
     @assert exponent < 0
 
     I_K_2_dλ_2_1_bound =
-        C_I_K_j.C_I_K_2_dλ_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z_dλ
+        C_Z.I_K_2_dλ_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z_dλ
     I_K_2_dλ_2_2_bound =
-        C_I_K_j.C_I_K_2_dλ_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z_dλ
+        C_Z.I_K_2_dλ_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z_dλ
 
     return add_error.(zero(c_0), SVector(I_K_2_dλ_2_1_bound, I_K_2_dλ_2_2_bound))
 end

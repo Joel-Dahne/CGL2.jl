@@ -101,7 +101,6 @@ include("Y_zero/equation.jl")
 
 include("Y_infinity/functions.jl")
 include("Y_infinity/function_bounds.jl")
-include("Y_infinity/I_bounds.jl")
 include("Y_infinity/norm_bounds_constants.jl")
 include("Y_infinity/norm_bounds.jl")
 include("Y_infinity/I_K_2.jl")

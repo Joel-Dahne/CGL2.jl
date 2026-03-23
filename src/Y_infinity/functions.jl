@@ -50,8 +50,7 @@ function FunctionEnclosures_Y(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
-    include_dλ::Bool = false,
+    λ::CGLParams{Arb},
 )
     # Compute enclosure of forward solution
     Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)

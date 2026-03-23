@@ -7,8 +7,11 @@ that are needed in the enclosure of `Q_hat` at infinity.
 More precisely it contains the bounds from
 
 - Lemma REF(lemma:P_i_E_i-bounds)
-- Lemma REF(lemma:I_K_1-I_K_2-bounds)
+- Lemma REF(lemma:bound-K_1-K_2)
 - Lemma REF(lemma:bound-I_N)
+- Lemma REF(lemma:I_K_1-I_K_2-bounds)
+- Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
+- Lemma REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
 - Lemma REF(lemma:H-bounds)
 
 It checks all the conditions on the parameters that these lemmas
@@ -62,6 +65,21 @@ struct FunctionBounds_Y
     # Lemma REF(lemma:bound-I_N)
     I_N::Arb
     I_N_dξ::Arb
+    # Lemma REF(lemma:I_K_1-I_K_2-bounds)
+    I_K_1_1::Arb
+    I_K_1_2::Arb
+    I_K_2_1::Arb
+    I_K_2_2::Arb
+    # Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
+    I_K_1_dλ_1_1::Arb
+    I_K_1_dλ_1_2::Arb
+    I_K_2_dλ_1_1::Arb
+    I_K_2_dλ_1_2::Arb
+    # Lemma REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
+    I_K_1_dλ_2_1::Arb
+    I_K_1_dλ_2_2::Arb
+    I_K_2_dλ_2_1::Arb
+    I_K_2_dλ_2_2::Arb
     # Lemma REF(lemma:H-bounds)
     H_11::Arb
     H_12::Arb
@@ -123,6 +141,18 @@ struct FunctionBounds_Y
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
     )
 end
 
@@ -133,9 +163,10 @@ function FunctionBounds_Y(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
+    v::Arb,
     λ::CGLParams{Arb};
 )
-    (; σ, δ) = λ
+    (; d, σ, δ) = λ
     a, b, c = _abc(κ, ϵ, λ)
 
     # This is the only direct condition in Lemma
@@ -151,10 +182,26 @@ function FunctionBounds_Y(
     isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
     iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
 
+    # These are requirements of Lemmas REF(lemma:I_K_1-I_K_2-bounds),
+    # REF(lemma:I_K_1_I_K_2-lambda-1-bounds) and
+    # REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
+    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
+    real(c) > 0 || throw(ArgumentError("real(c) > 0 not satisfied"))
+    v > 0 || throw(ArgumentError("v > 0 not satisfied"))
+    v - 2 < 0 || throw(ArgumentError("v - 2 < 0 not satisfied"))
+    exponent < 0 || throw(ArgumentError("exponent < 0 not satisfied"))
+
+    # This is a requirement for Lemma
+    # REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
+    ξ₁ > exp(-inv(exponent)) > 1 ||
+        throw(ArgumentError("ξ₁ > exp(-inv(exponent)) not satisfied"))
+
     C = FunctionBounds_Y()
 
     CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = true)
     CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = true)
+
+    # Lemma REF(lemma:P_i_E_i-bounds)
 
     C.E_1[] = C_E_1(lambda, κ, ϵ, ξ₁, λ, CU)
     C.E_2[] = C_E_2(lambda, κ, ϵ, ξ₁, λ, CU_conj)
@@ -194,6 +241,8 @@ function FunctionBounds_Y(
     C.J_P_1_dλ[] = C_J_P_1_dλ(lambda, κ, ϵ, ξ₁, λ, C)
     C.J_P_2_dλ[] = C_J_P_2_dλ(lambda, κ, ϵ, ξ₁, λ, C)
 
+    # Lemma REF(lemma:bound-K_1-K_2)
+
     C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, λ, C)
     C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, λ, C)
     C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, λ, C)
@@ -207,10 +256,35 @@ function FunctionBounds_Y(
     C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, λ, C)
     C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, λ, C)
 
+    # Lemma REF(lemma:bound-I_N)
+
     C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ)
     C_Q_hat_dξ = CGL2.C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, λ)
     C.I_N[] = C_I_N(C_Q_hat)
     C.I_N_dξ[] = C_I_N_dξ(C_Q_hat, C_Q_hat_dξ)
+
+    # Lemma REF(lemma:I_K_1-I_K_2-bounds)
+
+    C.I_K_1_1[] = C_I_K_1_1(v, C)
+    C.I_K_1_2[] = C_I_K_1_2(v, C)
+    C.I_K_2_1[] = C_I_K_2_1(κ, ϵ, λ, C)
+    C.I_K_2_2[] = C_I_K_2_2(κ, ϵ, λ, C)
+
+    # Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
+
+    C.I_K_1_dλ_1_1[] = C_I_K_1_dλ_1_1(ξ₁, v, C)
+    C.I_K_1_dλ_1_2[] = C_I_K_1_dλ_1_2(ξ₁, v, C)
+    C.I_K_2_dλ_1_1[] = C_I_K_2_dλ_1_1(κ, ϵ, λ, C)
+    C.I_K_2_dλ_1_2[] = C_I_K_2_dλ_1_2(κ, ϵ, λ, C)
+
+    # Lemma REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
+
+    C.I_K_1_dλ_2_1[] = C_I_K_1_dλ_2_1(v, C)
+    C.I_K_1_dλ_2_2[] = C_I_K_1_dλ_2_2(v, C)
+    C.I_K_2_dλ_2_1[] = C_I_K_2_dλ_2_1(κ, ϵ, λ, C)
+    C.I_K_2_dλ_2_2[] = C_I_K_2_dλ_2_2(κ, ϵ, λ, C)
+
+    # Lemma REF(lemma:H-bounds)
 
     C.H_11[] = C_H_11(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
     C.H_12[] = C_H_12(lambda, κ, ϵ, ξ₁, λ, C, C_Q_hat)
@@ -223,6 +297,8 @@ function FunctionBounds_Y(
 
     return C
 end
+
+# Lemma REF(lemma:P_i_E_i-bounds)
 
 function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, λ)
@@ -532,6 +608,8 @@ function C_J_P_2_dλ(
            abs(B_W_2(lambda, κ, ϵ, λ)) * C.P_2_dλ
 end
 
+# Lemma REF(lemma:bound-K_1-K_2)
+
 function C_K_1_1(
     lambda::Acb,
     κ::Arb,
@@ -642,9 +720,71 @@ function C_K_2_dλ_2(
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dλ
 end
 
+# Lemma REF(lemma:bound-I_N)
+
 C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
 
 C_I_N_dξ(C_Q_hat::Arb, C_Q_hat_dξ::Arb) = 6C_Q_hat * C_Q_hat_dξ
+
+# Lemma REF(lemma:I_K_1-I_K_2-bounds)
+
+function C_I_K_1_1(v::Arb, C_Y::FunctionBounds_Y)
+    return C_Y.K_1_1 * C_Y.I_N / abs(v - 2)
+end
+
+function C_I_K_1_2(v::Arb, C_Y::FunctionBounds_Y)
+    return C_Y.K_1_2 * C_Y.I_N / abs(v - 2)
+end
+
+function C_I_K_2_1(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    _, _, c = _abc(κ, ϵ, λ)
+    return C_Y.K_2_1 * C_Y.I_N / (2real(c))
+end
+
+function C_I_K_2_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    _, _, c = _abc(κ, ϵ, λ)
+    return C_Y.K_2_2 * C_Y.I_N / (2real(c))
+end
+
+# Lemma REF(I_K_1_I_K_2-lambda-1-bounds)
+
+function C_I_K_1_dλ_1_1(ξ₁::Arb, v::Arb, C_Y::FunctionBounds_Y)
+    return C_Y.K_1_dλ_1 * C_Y.I_N * (abs(v - 2) + inv(log(ξ₁))) / (v - 2)^2
+end
+
+function C_I_K_1_dλ_1_2(ξ₁::Arb, v::Arb, C_Y::FunctionBounds_Y)
+    return C_Y.K_1_dλ_2 * C_Y.I_N * (abs(v - 2) + inv(log(ξ₁))) / (v - 2)^2
+end
+
+function C_I_K_2_dλ_1_1(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    _, _, c = _abc(κ, ϵ, λ)
+    return C_Y.K_2_dλ_1 * C_Y.I_N / (2real(c))
+end
+
+function C_I_K_2_dλ_1_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    _, _, c = _abc(κ, ϵ, λ)
+    return C_Y.K_2_dλ_2 * C_Y.I_N / (2real(c))
+end
+
+# Lemma REF(I_K_1_I_K_2-lambda-2-bounds)
+
+function C_I_K_1_dλ_2_1(v::Arb, C_Y::FunctionBounds_Y)
+    return C_I_K_1_2(v, C_Y)
+end
+
+function C_I_K_1_dλ_2_2(v::Arb, C_Y::FunctionBounds_Y)
+    return C_I_K_1_2(v, C_Y)
+end
+
+function C_I_K_2_dλ_2_1(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    return C_I_K_2_1(κ, ϵ, λ, C_Y)
+end
+
+function C_I_K_2_dλ_2_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
+    return C_I_K_2_2(κ, ϵ, λ, C_Y)
+end
+
+# Lemma REF(lemma:H-bounds)
 
 function C_H_11(
     lambda::Acb,
