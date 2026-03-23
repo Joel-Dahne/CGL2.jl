@@ -34,11 +34,11 @@ function norm_bound_Z(
     λ::CGLParams{Arb},
     C_Z::FunctionBounds_Y,
 )
-    C_T = C_T_12(lambda, κ, ϵ, ξ₁, v, λ, C_Z)
-    if 2C_T * ξ₁^(-2) < 1
-        return inv(1 - C_T * ξ₁^-2) * max(C_Z.E_1 * abs(c[1]), C_Z.E_2 * abs(c[2])) * ξ₁^-v
+    if 2C_Z.T_12 * ξ₁^(-2) < 1
+        return inv(1 - C_Z.T_12 * ξ₁^-2) *
+               max(C_Z.E_1 * abs(c[1]), C_Z.E_2 * abs(c[2])) *
+               ξ₁^-v
     else
-        #@debug "Non-finite norm" 2C_T * ξ₁^(-2)
         return indeterminate(Arb)
     end
 end
@@ -54,12 +54,13 @@ function norm_bound_Z_dλ(
     C_Z::FunctionBounds_Y,
     norms_Z::NormBounds_Y,
 )
-    num = C_Z_dλ_1(c, v, C_Z) + C_Z_dλ_2(lambda, κ, ϵ, ξ₁, v, λ, C_Z) * norms_Z.Z
-    den = 1 - C_Z_dλ_3(lambda, κ, ϵ, ξ₁, v, λ, C_Z)
+    num =
+        max(C_Z.E_1_dλ * abs(c[1]), C_Z.E_2_dλ * abs(c[2])) * exp(Arb(-1)) / v +
+        C_Z.Z_dλ_1 * norms_Z.Z
+    den = 1 - C_Z.Z_dλ_2
     if den > 0
         return num / den
     else
-        #@debug "Non-finite norm" den
         return indeterminate(Arb)
     end
 end

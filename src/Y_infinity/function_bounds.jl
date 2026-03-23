@@ -10,8 +10,10 @@ More precisely it contains the bounds from
 - Lemma REF(lemma:bound-K_1-K_2)
 - Lemma REF(lemma:bound-I_N)
 - Lemma REF(lemma:I_K_1-I_K_2-bounds)
+- Lemma REF(lemma:Z-fixed-point-bounds)
 - Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
 - Lemma REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
+- Lemma REF(lemma:Z-lambda-fixed-point-bounds)
 - Lemma REF(lemma:H-bounds)
 
 It checks all the conditions on the parameters that these lemmas
@@ -70,6 +72,8 @@ struct FunctionBounds_Y
     I_K_1_2::Arb
     I_K_2_1::Arb
     I_K_2_2::Arb
+    # Lemma REF(lemma:Z-fixed-point-bounds)
+    T_12::Arb
     # Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
     I_K_1_dλ_1_1::Arb
     I_K_1_dλ_1_2::Arb
@@ -80,6 +84,9 @@ struct FunctionBounds_Y
     I_K_1_dλ_2_2::Arb
     I_K_2_dλ_2_1::Arb
     I_K_2_dλ_2_2::Arb
+    # Lemma REF(lemma:Z-lambda-fixed-point-bounds)
+    Z_dλ_1::Arb
+    Z_dλ_2::Arb
     # Lemma REF(lemma:H-bounds)
     H_11::Arb
     H_12::Arb
@@ -91,6 +98,9 @@ struct FunctionBounds_Y
     H_22_dξ::Arb
 
     FunctionBounds_Y() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
@@ -190,11 +200,19 @@ function FunctionBounds_Y(
     v > 0 || throw(ArgumentError("v > 0 not satisfied"))
     v - 2 < 0 || throw(ArgumentError("v - 2 < 0 not satisfied"))
     exponent < 0 || throw(ArgumentError("exponent < 0 not satisfied"))
-
     # This is a requirement for Lemma
     # REF(lemma:I_K_1_I_K_2-lambda-2-bounds)
     ξ₁ > exp(-inv(exponent)) > 1 ||
         throw(ArgumentError("ξ₁ > exp(-inv(exponent)) not satisfied"))
+
+    # The requirements for Lemma REF(lemma:Z-fixed-point-bounds) are
+    # the same as for REF(lemma:I_K_1-I_K_2-bounds).
+
+    # The requirements for Lemma
+    # REF(lemma:Z-lambda-fixed-point-bounds) are those of Lemmas
+    # REF(lemma:I_K_1_I_K_2-lambda-1-bounds) and
+    # REF(lemma:I_K_1_I_K_2-lambda-2-bounds) plus the following one
+    ξ₁ > exp(Arb(1 // 4)) || throw(ArgumentError("ξ₁ > exp(1 / 4) not satisfied"))
 
     C = FunctionBounds_Y()
 
@@ -270,6 +288,10 @@ function FunctionBounds_Y(
     C.I_K_2_1[] = C_I_K_2_1(κ, ϵ, λ, C)
     C.I_K_2_2[] = C_I_K_2_2(κ, ϵ, λ, C)
 
+    # Lemma REF(lemma:Z-fixed-point-bounds)
+
+    C.T_12[] = C_T_12(lambda, κ, ϵ, ξ₁, v, λ, C)
+
     # Lemma REF(lemma:I_K_1_I_K_2-lambda-1-bounds)
 
     C.I_K_1_dλ_1_1[] = C_I_K_1_dλ_1_1(ξ₁, v, C)
@@ -283,6 +305,11 @@ function FunctionBounds_Y(
     C.I_K_1_dλ_2_2[] = C_I_K_1_dλ_2_2(v, C)
     C.I_K_2_dλ_2_1[] = C_I_K_2_dλ_2_1(κ, ϵ, λ, C)
     C.I_K_2_dλ_2_2[] = C_I_K_2_dλ_2_2(κ, ϵ, λ, C)
+
+    # Lemma REF(lemma:Z-lambda-fixed-point-bounds)
+
+    C.Z_dλ_1[] = C_Z_dλ_1(lambda, κ, ϵ, ξ₁, v, λ, C)
+    C.Z_dλ_2[] = C_Z_dλ_2(lambda, κ, ϵ, ξ₁, v, λ, C)
 
     # Lemma REF(lemma:H-bounds)
 
@@ -746,6 +773,21 @@ function C_I_K_2_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
     return C_Y.K_2_2 * C_Y.I_N / (2real(c))
 end
 
+# Lemma REF(lemma:Z-fixed-point-bounds)
+
+function C_T_12(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    v::Arb,
+    λ::CGLParams{Arb},
+    C_Z::FunctionBounds_Y,
+)
+    return max(C_Z.E_1 * C_Z.I_K_1_1, C_Z.E_2 * C_Z.I_K_1_2) +
+           max(C_Z.P_1 * C_Z.I_K_2_1, C_Z.P_2 * C_Z.I_K_2_2) * ξ₁^-2
+end
+
 # Lemma REF(I_K_1_I_K_2-lambda-1-bounds)
 
 function C_I_K_1_dλ_1_1(ξ₁::Arb, v::Arb, C_Y::FunctionBounds_Y)
@@ -782,6 +824,37 @@ end
 
 function C_I_K_2_dλ_2_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
     return C_I_K_2_2(κ, ϵ, λ, C_Y)
+end
+
+# Lemma REF(lemma:Z-lambda-fixed-point-bounds)
+
+function C_Z_dλ_1(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    v::Arb,
+    λ::CGLParams{Arb},
+    C_Z::FunctionBounds_Y,
+)
+    return max(C_Z.E_1_dλ * C_Z.I_K_1_1, C_Z.E_2_dλ * C_Z.I_K_1_2) * exp(Arb(-1)) / v *
+           ξ₁^(v - 2) +
+           max(C_Z.P_1_dλ * C_Z.I_K_2_1, C_Z.P_2_dλ * C_Z.I_K_2_2) * log(ξ₁) * ξ₁^-4 +
+           max(C_Z.E_1 * C_Z.I_K_1_dλ_1_1, C_Z.E_2 * C_Z.I_K_1_dλ_1_2) * log(ξ₁) * ξ₁^-2 +
+           max(C_Z.P_1 * C_Z.I_K_2_dλ_1_1, C_Z.P_2 * C_Z.I_K_2_dλ_1_2) * log(ξ₁) * ξ₁^-4
+end
+
+function C_Z_dλ_2(
+    lambda::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    v::Arb,
+    λ::CGLParams{Arb},
+    C_Z::FunctionBounds_Y,
+)
+    return max(C_Z.E_1 * C_Z.I_K_1_dλ_2_1, C_Z.E_2 * C_Z.I_K_1_dλ_2_2) * ξ₁^-2 +
+           max(C_Z.P_1 * C_Z.I_K_2_dλ_2_1, C_Z.P_2 * C_Z.I_K_2_dλ_2_2) * ξ₁^-4
 end
 
 # Lemma REF(lemma:H-bounds)
