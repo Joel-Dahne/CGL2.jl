@@ -764,12 +764,12 @@ function C_I_K_1_2(v::Arb, C_Y::FunctionBounds_Y)
 end
 
 function C_I_K_2_1(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     return C_Y.K_2_1 * C_Y.I_N / (2real(c))
 end
 
 function C_I_K_2_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     return C_Y.K_2_2 * C_Y.I_N / (2real(c))
 end
 
@@ -799,12 +799,12 @@ function C_I_K_1_dλ_1_2(ξ₁::Arb, v::Arb, C_Y::FunctionBounds_Y)
 end
 
 function C_I_K_2_dλ_1_1(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     return C_Y.K_2_dλ_1 * C_Y.I_N / (2real(c))
 end
 
 function C_I_K_2_dλ_1_2(κ::Arb, ϵ::Arb, λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     return C_Y.K_2_dλ_2 * C_Y.I_N / (2real(c))
 end
 

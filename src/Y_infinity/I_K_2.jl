@@ -133,7 +133,7 @@ function I_K_2_dλ_1_enclosure(
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
 
     @assert v > 0
@@ -160,7 +160,7 @@ function I_K_2_dλ_2_enclosure(
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
     exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
 
     @assert v > 0
