@@ -20,7 +20,7 @@ struct NormBounds_Y
 end
 
 function NormBounds_Y(
-    c::SVector{2,Acb},
+    c_0::SVector{2,Acb},
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -47,14 +47,14 @@ function NormBounds_Y(
     # The other conditions are checked in the norm_bound_Z_dλ
     # function.
 
-    norms.Z[] = norm_bound_Z(c, lambda, κ, ϵ, ξ₁, v, λ, C)
-    norms.Z_dλ[] = norm_bound_Z_dλ(c, lambda, κ, ϵ, ξ₁, v, λ, C, norms)
+    norms.Z[] = norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, v, λ, C)
+    norms.Z_dλ[] = norm_bound_Z_dλ(c_0, lambda, κ, ϵ, ξ₁, v, λ, C, norms)
 
     return norms
 end
 
 """
-    norm_bound_Z(c, lambda, κ, ϵ, ξ₁, v, λ, C)
+    norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, v, λ, C)
 
 To apply the fixed point theorem in Proposition
 REF(prop:Z-fixed-point) we need to find `ρ` satisfying the inequality
@@ -87,14 +87,14 @@ function norm_bound_Z(
     C::FunctionBounds_Y,
 )
     if C.T_12 * ξ₁^-2 < 1
-        return inv(1 - C.T_12 * ξ₁^-2) * max(C.E_1 * abs(c[1]), C.E_2 * abs(c[2])) * ξ₁^-v
+        return inv(1 - C.T_12 * ξ₁^-2) * max(C.E_1 * abs(c_0[1]), C.E_2 * abs(c_0[2])) * ξ₁^-v
     else
         throw(ErrorException("could not verify T_12 * ξ₁^-2 < 1"))
     end
 end
 
 """
-    norm_bound_Z_dλ(c, lambda, κ, ϵ, ξ₁, v, λ, C)
+    norm_bound_Z_dλ(c_0, lambda, κ, ϵ, ξ₁, v, λ, C)
 
 Compute a bound for the norm of `Z_dλ` based on Lemma
 REF(lemma:Z-lambda-fixed-point-bounds).
@@ -111,7 +111,7 @@ function norm_bound_Z_dλ(
     norms_Z::NormBounds_Y,
 )
     num =
-        max(C.E_1_dλ * abs(c[1]), C.E_2_dλ * abs(c[2])) * exp(Arb(-1)) / v +
+        max(C.E_1_dλ * abs(c_0[1]), C.E_2_dλ * abs(c_0[2])) * exp(Arb(-1)) / v +
         C.Z_dλ_1 * norms_Z.Z
     den = 1 - C.Z_dλ_2
     if den > 0
