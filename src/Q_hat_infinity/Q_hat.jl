@@ -46,7 +46,6 @@ Q_hat_infinity(
     Q_hat_infinity(Acb(γ₁), Acb(γ₂), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(λ)),
 )
 
-
 """
     Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
 
