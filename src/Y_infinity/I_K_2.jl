@@ -1,3 +1,18 @@
+"""
+    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, norms_Z)
+
+Compute an enclosure of ``I_{K_2}(ξ)`` at the point `ξ = ξ₁`.
+
+It uses two different approaches depending on the accuracy of the
+enclosure for `Z`.
+
+For wide enclosures of `Z`, it bounds the value using Lemma
+REF(lemma:I_K_1-I_K_2-bounds). In this case we classify wide as the
+enclosure overlapping zero.
+
+For tighter enclosures of `Z` the bound is based on Lemma REF(TODO).
+TODO: Add more documentation once the Lemma is finalized.
+"""
 function I_K_2_enclosure(
     c_0::SVector{2,Acb},
     lambda::Acb,
@@ -12,16 +27,17 @@ function I_K_2_enclosure(
     norms_Z::NormBounds_Y,
 )
     (; d, σ) = λ
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
 
-    @assert v > 0
-    @assert real(c) > 0
-
-    # In the first iteration Z overlaps zero and in this case the
-    # higher order expansion is usually worse. We then use a direct
-    # expansion.
     if all(Arblib.contains_zero, Z)
+        # This is the wide case. The bound is computed using
+        # REF(lemma:I_K_1-I_K_2-bounds)
+
         exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
+
+        # These are the requirements of Lemma REF(lemma:I_K_1-I_K_2-bounds)
+        @assert v > 0
+        @assert real(c) > 0
         @assert exponent < 0
 
         I_K_2_1_bound = C_Z.I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
@@ -30,9 +46,13 @@ function I_K_2_enclosure(
         return add_error.(zero(c_0), SVector(I_K_2_1_bound, I_K_2_2_bound))
     end
 
-    # In later iterations we have finite enclosures of both Y and dY.
-    # We then compute an enclosure coming from integration by parts
-    # two times. See Lemma REF(XXX).
+    # This is the tight case. The bound is based on Lemma REF(TODO).
+
+    # The requirements of Lemma REF(TODO) related to Lemma REF(TODO)
+    # are checked in the computation of C_Z. The other requirements
+    # are:
+    @assert v > 0
+    @assert real(c) > 0
 
     H = F_Z.K_2 * F_Z.I_N
     main = inv(2c) * H * Z
