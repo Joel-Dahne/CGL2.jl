@@ -16,7 +16,7 @@ function Y_infinity(
     λ::CGLParams{Arb},
 )
     v = Arb("0.1")
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
 
     # Precompute functions as well as function and norm bounds
     F_Z = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
@@ -51,66 +51,6 @@ function Y_infinity(
     return vcat(Y, dY)
 end
 
-function Y_infinity(
-    c_0::SVector{2,ComplexF64},
-    lambda::ComplexF64,
-    γ₁::ComplexF64,
-    γ₂::ComplexF64,
-    κ::Float64,
-    ϵ::Float64,
-    ξ₁::Float64,
-    λ::CGLParams{Float64},
-)
-    Q_hat_ξ₁ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)[1]
-
-    return Y_infinity(c_0, lambda, κ, ϵ, ξ₁, Q_hat_ξ₁, λ)
-end
-
-function Y_infinity(
-    c_0::SVector{2,ComplexF64},
-    lambda::ComplexF64,
-    κ::Float64,
-    ϵ::Float64,
-    ξ₁::Float64,
-    Q_hat_ξ₁::ComplexF64,
-    λ::CGLParams{Float64},
-)
-    _, _, c = _abc(κ, ϵ, λ)
-
-    E12 = Diagonal(SVector(E_1(ξ₁, lambda, κ, ϵ, λ), E_2(ξ₁, lambda, κ, ϵ, λ)))
-    E12_dξ = Diagonal(SVector(E_1_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dξ(ξ₁, lambda, κ, ϵ, λ)))
-    P12 = Diagonal(SVector(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ)))
-    P12_dξ = Diagonal(SVector(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ)))
-
-    K1 = K_1(ξ₁, lambda, κ, ϵ, λ)
-    K2 = K_2(ξ₁, lambda, κ, ϵ, λ)
-
-    IN = I_N(Q_hat_ξ₁, λ)
-
-    # First order approximation
-    Z = E12 * c_0
-    dZ = zero(Z)
-
-    # Improve bounds iteratively.
-    for _ = 1:5
-        I_K_2 = let H = K2 * IN
-            inv(2c) * H * Z
-        end
-
-        Z = E12 * c_0 + P12 * I_K_2
-
-        I_K_1_dξ = K1 * IN * Z
-        I_K_2_dξ = -K2 * IN * Z
-
-        dZ = E12_dξ * c_0 + E12 * I_K_1_dξ + P12_dξ * I_K_2 + P12 * I_K_2_dξ
-    end
-
-    M = SMatrix{2,2}(im, 1, -im, 1)
-    Y = M * Z
-    dY = M * dZ
-    return vcat(Y, dY)
-end
-
 """
     Y_infinity_derivative(γ, κ, ϵ, ξ₁, λ::CGLParams)
 
@@ -128,7 +68,7 @@ function Y_infinity_derivative(
     λ::CGLParams{Arb},
 )
     v = Arb("0.1")
-    _, _, c = _abc(κ, ϵ, λ)
+    c = _c(κ, ϵ, λ)
 
     # Precompute functions as well as function and norm bounds
     F_Z = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
@@ -166,91 +106,6 @@ function Y_infinity_derivative(
             F_Z.P_12_dξ * I_K_2_dλ +
             F_Z.P_12_dλ * I_K_2_dξ +
             F_Z.P_12 * I_K_2_dλ_dξ
-    end
-
-    M = SMatrix{2,2}(im, 1, -im, 1)
-    Y_dλ = M * Z_dλ
-    dY_dλ = M * dZ_dλ
-    return vcat(Y_dλ, dY_dλ)
-end
-
-function Y_infinity_derivative(
-    c_0::SVector{2,ComplexF64},
-    lambda::ComplexF64,
-    γ₁::ComplexF64,
-    γ₂::ComplexF64,
-    κ::Float64,
-    ϵ::Float64,
-    ξ₁::Float64,
-    λ::CGLParams{Float64},
-)
-    Q_hat_ξ₁ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)[1]
-
-    return Y_infinity_derivative(c_0, lambda, κ, ϵ, ξ₁, Q_hat_ξ₁, λ)
-end
-
-function Y_infinity_derivative(
-    c_0::SVector{2,ComplexF64},
-    lambda::ComplexF64,
-    κ::Float64,
-    ϵ::Float64,
-    ξ₁::Float64,
-    Q_hat_ξ₁::ComplexF64,
-    λ::CGLParams{Float64},
-)
-    _, _, c = _abc(κ, ϵ, λ)
-
-    E12 = Diagonal(SVector(E_1(ξ₁, lambda, κ, ϵ, λ), E_2(ξ₁, lambda, κ, ϵ, λ)))
-    E12_dξ = Diagonal(SVector(E_1_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dξ(ξ₁, lambda, κ, ϵ, λ)))
-    P12 = Diagonal(SVector(P_1(ξ₁, lambda, κ, ϵ, λ), P_2(ξ₁, lambda, κ, ϵ, λ)))
-    P12_dξ = Diagonal(SVector(P_1_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dξ(ξ₁, lambda, κ, ϵ, λ)))
-
-    E12_dλ = Diagonal(SVector(E_1_dλ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ(ξ₁, lambda, κ, ϵ, λ)))
-    E12_dλ_dξ =
-        Diagonal(SVector(E_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)))
-    P12_dλ = Diagonal(SVector(P_1_dλ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ(ξ₁, lambda, κ, ϵ, λ)))
-    P12_dλ_dξ =
-        Diagonal(SVector(P_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ)))
-
-    K1 = K_1(ξ₁, lambda, κ, ϵ, λ)
-    K2 = K_2(ξ₁, lambda, κ, ϵ, λ)
-    K1_dλ = K_1_dλ(ξ₁, lambda, κ, ϵ, λ)
-    K2_dλ = K_2_dλ(ξ₁, lambda, κ, ϵ, λ)
-
-    IN = I_N(Q_hat_ξ₁, λ)
-
-    # First order approximation
-    Z = E12 * c_0
-    Z_dλ = E12_dλ * c_0
-    dZ = zero(Z)
-    dZ_dλ = zero(Z)
-
-    # Improve bounds iteratively.
-    for _ = 1:5
-        I_K_2 = let H = K2 * IN
-            inv(2c) * H * Z
-        end
-
-        I_K_2_dλ = zero(Z) # IMPROVE: Compute approximation of this
-
-        Z = E12 * c_0 + P12 * I_K_2
-        Z_dλ = E12_dλ * c_0 + P12_dλ * I_K_2 + P12_dλ * I_K_2_dλ
-
-        I_K_1_dξ = K1 * IN * Z
-        I_K_2_dξ = -K2 * IN * Z
-
-        I_K_1_dλ_dξ = K1_dλ * IN * Z + K1 * IN * Z_dλ
-        I_K_2_dλ_dξ = -K2_dλ * IN * Z - K2 * IN * Z_dλ
-
-        dZ = E12_dξ * c_0 + E12 * I_K_1_dξ + P12_dξ * I_K_2 + P12 * I_K_2_dξ
-        dZ_dλ =
-            E12_dλ_dξ * c_0 +
-            E12_dλ * I_K_1_dξ +
-            E12 * I_K_1_dλ_dξ +
-            P12_dλ_dξ * I_K_2 +
-            P12_dξ * I_K_2_dλ +
-            P12_dλ * I_K_2_dξ +
-            P12 * I_K_2_dλ_dξ
     end
 
     M = SMatrix{2,2}(im, 1, -im, 1)
