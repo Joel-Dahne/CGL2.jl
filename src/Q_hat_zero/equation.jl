@@ -79,7 +79,7 @@ function cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, λ::CGLParams)
     α, β = dQ
 
     a2b2σ = (a^2 + b^2)^σ
-    @show typeof(a) typeof(a) typeof(α) typeof(β) typeof(κ) typeof(ϵ) typeof(ξ)
+
     # Same as cgl_equation_real except changing the sign of κ and ω
     @fastmath F1 = -κ * ξ * β - κ / σ * b - ω * a - a2b2σ * a + δ * a2b2σ * b
     @fastmath F2 = κ * ξ * α + κ / σ * a - ω * b - a2b2σ * b - δ * a2b2σ * a
@@ -90,7 +90,7 @@ function cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, λ::CGLParams)
     end
 
     res = [(F1 - ϵ * F2) / (1 + ϵ^2), (ϵ * F1 + F2) / (1 + ϵ^2)]
-    @show typeof(dQ) typeof(Q) typeof(F1) typeof(F2) typeof(res)
+
     return res
 end
 

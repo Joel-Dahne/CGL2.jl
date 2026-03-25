@@ -15,8 +15,6 @@ function C_T1(κ::Arb, ϵ::Arb, ξ₁::Arb, v::Arb, λ::CGLParams{Arb}, C::Funct
         # from Lemma REF(lemma:I_E-I_P-bounds).
         bound2 = C.P * C_I_E(κ, ϵ, ξ₁, v, λ, C) + C.E * C_I_P(κ, ϵ, ξ₁, v, λ, C)
 
-        @show bound bound2
-
         # We return the best of the two bounds.
         return min(bound, bound2)
     else
