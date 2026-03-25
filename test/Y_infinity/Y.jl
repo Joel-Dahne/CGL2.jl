@@ -7,56 +7,41 @@
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
     ξ₁ = Arb(30)
-    λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
-
-    c_0F64 = ComplexF64.(c_0)
-    lambdaF64 = ComplexF64(lambda)
-    νF64 = ComplexF64(ν)
-    γ₁F64 = ComplexF64(γ₁)
-    γ₂F64 = ComplexF64(γ₂)
-    κF64 = Float64(κ)
-    ϵF64 = Float64(ϵ)
-    ξ₁F64 = Float64(ξ₁)
-    λF64 = CGLParams{Float64}(λ)
+    λ = CGLParams{Arb}(3, 1, 1, 0)
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
 
     res = CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
-    # Compare with Float64 version
-    resF64 = CGL2.Y_infinity(c_0F64, lambdaF64, γ₁F64, γ₂F64, κF64, ϵF64, ξ₁F64, λF64)
-    @test ComplexF64.(res) ≈ resF64 rtol = 1e-13
+    # Compute derivative w.r.t. ξ using finite differences in Float64
+    resF64_dξ = fdm(ξ -> ComplexF64.(CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, Arb(ξ), λ)), Float64(ξ₁))
 
-    res_J = CGL2.Y_infinity_derivative(c_0, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    # Check that the derivative computed with finite differences
+    # agree. Note that the precision is quite low, so rtol is
+    # relatively large.
+    @test ComplexF64.(res[3:4]) ≈ resF64_dξ[1:2] rtol = 1e-3
 
-    # Compare with Float64 version
-    resF64_J =
-        CGL2.Y_infinity_derivative(c_0F64, lambdaF64, γ₁F64, γ₂F64, κF64, ϵF64, ξ₁F64, λF64)
-    @test ComplexF64.(res_J) ≈ resF64_J rtol = 1e-13
+    # Check if the finite difference value approximately satisfies the
+    # equation
 
-    # Compare with fdm method
-    resF64_J_fdm = fdm(
-        lambda_real -> CGL2.Y_infinity(
-            c_0F64,
-            complex(lambda_real, imag(lambdaF64)),
-            γ₁F64,
-            γ₂F64,
-            κF64,
-            ϵF64,
-            ξ₁F64,
-            λF64,
-        ),
-        real(lambdaF64),
-    )
+    (; d, ω, σ) = λ
+    I = SMatrix{2,2}(1, 0, 0, 1)
+    J = SMatrix{2,2}(0, 1, -1, 0)
+    A = ϵ * I + J
+    B_1 = κ * I
+    B_2 = (d - 1) * ϵ * I + (d - 1) * J
+    C = κ / σ * I + ω * J
+    a, b = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    J_N = SMatrix{2,2}(-2a * b, 3a^2 + b^2, -(a^2 + 3b^2), 2a * b)
 
-    # Since we use a very rough enclosure for I_K_2_dλ the res_J
-    # version is not particularly precise. We therefore only check
-    # with rtol = 1e-4.
-    @test ComplexF64.(res_J) ≈ resF64_J_fdm rtol = 1e-4
-    # We also check that res_J contains the approximate version, due
-    # to the finite difference is of course not guaranteed. But in
-    # practice the errors from the finite difference should be much
-    # smaller than the error bounds for res_J
-    @test all(Arblib.contains.(res_J, Acb.(resF64_J_fdm)))
+    Y = ComplexF64.(res[1:2])
+    Y_dξ = ComplexF64.(res[3:4])
+    Y_dξ_dξ = resF64_dξ[3:4]
+
+    # The of the error should be compared to the norm of the inputs.
+    # We check that it is substantially smaller than the largest norm
+    # of the input.
+    @test norm(ComplexF64.(A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - lambda * I) * Y)) <
+          1e-5max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
 end
