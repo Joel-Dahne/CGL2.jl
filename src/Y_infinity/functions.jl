@@ -13,12 +13,6 @@ Contains enclosures of the functions
 - [`K_2_dξ`](@ref)
 - [`I_N`](@ref)
 - [`I_N_dξ`](@ref)
-- [`E_12_dλ`](@ref)
-- [`E_12_dλ_dξ`](@ref)
-- [`P_12_dλ`](@ref)
-- [`P_12_dλ_dξ`](@ref)
-- [`K_1_dλ`](@ref)
-- [`K_2_dλ`](@ref)
 
 when evaluated at `ξ₁`.
 """
@@ -31,16 +25,8 @@ struct FunctionEnclosures_Y
     K_2::Diagonal{Acb,SVector{2,Acb}}
     K_1_dξ::Diagonal{Acb,SVector{2,Acb}}
     K_2_dξ::Diagonal{Acb,SVector{2,Acb}}
-
     I_N::SMatrix{2,2,Acb}
     I_N_dξ::SMatrix{2,2,Acb}
-
-    E_12_dλ::Diagonal{Acb,SVector{2,Acb}}
-    E_12_dλ_dξ::Diagonal{Acb,SVector{2,Acb}}
-    P_12_dλ::Diagonal{Acb,SVector{2,Acb}}
-    P_12_dλ_dξ::Diagonal{Acb,SVector{2,Acb}}
-    K_1_dλ::Diagonal{Acb,SVector{2,Acb}}
-    K_2_dλ::Diagonal{Acb,SVector{2,Acb}}
 end
 
 function FunctionEnclosures_Y(
@@ -66,12 +52,6 @@ function FunctionEnclosures_Y(
         K_2_dξ(ξ₁, lambda, κ, ϵ, λ),
         I_N(Q_hat, λ),
         I_N_dξ(Q_hat, Q_hat_dξ, λ),
-        Diagonal(SVector(E_1_dλ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ(ξ₁, lambda, κ, ϵ, λ))),
-        Diagonal(SVector(E_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), E_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))),
-        Diagonal(SVector(P_1_dλ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ(ξ₁, lambda, κ, ϵ, λ))),
-        Diagonal(SVector(P_1_dλ_dξ(ξ₁, lambda, κ, ϵ, λ), P_2_dλ_dξ(ξ₁, lambda, κ, ϵ, λ))),
-        K_1_dλ(ξ₁, lambda, κ, ϵ, λ),
-        K_2_dλ(ξ₁, lambda, κ, ϵ, λ),
     )
 end
 
@@ -131,61 +111,61 @@ function E_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
            z_dξ
 end
 
-function P_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -c * ξ^2
-    return -U_da(a - lambda / 2κ, b, z) / 2κ
+function K_1(ξ, lambda, κ, ϵ, λ::CGLParams)
+    return -Diagonal(
+        SVector((ϵ - im) * J_P_1(ξ, lambda, κ, ϵ, λ), (ϵ + im) * J_P_2(ξ, lambda, κ, ϵ, λ)),
+    ) / (1 + ϵ^2)
 end
 
-function P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -c * ξ^2
-    z_dξ = -2c * ξ
-    return -U_dzda(a - lambda / 2κ, b, z) / 2κ * z_dξ
+function K_2(ξ, lambda, κ, ϵ, λ::CGLParams)
+    return Diagonal(
+        SVector((ϵ - im) * J_E_1(ξ, lambda, κ, ϵ, λ), (ϵ + im) * J_E_2(ξ, lambda, κ, ϵ, λ)),
+    ) / (1 + ϵ^2)
 end
 
-function P_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -conj(c) * ξ^2
-    return -U_da(conj(a) - lambda / 2κ, b, z) / 2κ
+function K_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    return -Diagonal(
+        SVector(
+            (ϵ - im) * J_P_1_dξ(ξ, lambda, κ, ϵ, λ),
+            (ϵ + im) * J_P_2_dξ(ξ, lambda, κ, ϵ, λ),
+        ),
+    ) / (1 + ϵ^2)
 end
 
-function P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -conj(c) * ξ^2
-    z_dξ = -2conj(c) * ξ
-    return -U_dzda(conj(a) - lambda / 2κ, b, z) / 2κ * z_dξ
+function K_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
+    return Diagonal(
+        SVector(
+            (ϵ - im) * J_E_1_dξ(ξ, lambda, κ, ϵ, λ),
+            (ϵ + im) * J_E_2_dξ(ξ, lambda, κ, ϵ, λ),
+        ),
+    ) / (1 + ϵ^2)
 end
 
-function E_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -c * ξ^2
-    return exp(z) * U_da(b - a + lambda / 2κ, b, -z) / 2κ
+function I_N(Q_hat, λ::CGLParams{T}) where {T}
+    @assert isone(λ.σ)
+    @assert iszero(λ.δ)
+
+    return SMatrix{2,2}(
+        2im * abs2(Q_hat),
+        conj(-im * Q_hat^2),
+        -im * Q_hat^2,
+        -2im * abs2(Q_hat),
+    )
 end
 
-function E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -c * ξ^2
-    z_dξ = -2c * ξ
-    return exp(z) *
-           (U_da(b - a + lambda / 2κ, b, -z) - U_dzda(b - a + lambda / 2κ, b, -z)) / 2κ *
-           z_dξ
+function I_N_dξ(Q_hat, Q_hat_dξ, λ::CGLParams{T}) where {T}
+    @assert isone(λ.σ)
+    @assert iszero(λ.δ)
+
+    return SMatrix{2,2}(
+        4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
+        conj(-2im * Q_hat * Q_hat_dξ),
+        -2im * Q_hat * Q_hat_dξ,
+        -4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
+    )
 end
 
-function E_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -conj(c) * ξ^2
-    return exp(z) * U_da(b - conj(a) + lambda / 2κ, b, -z) / 2κ
-end
-
-function E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ::CGLParams{T}) where {T}
-    a, b, c = _abc(κ, ϵ, λ)
-    z = -conj(c) * ξ^2
-    z_dξ = -2conj(c) * ξ
-    return exp(z) * (
-        U_da(b - conj(a) + lambda / 2κ, b, -z) - U_dzda(b - conj(a) + lambda / 2κ, b, -z)
-    ) / 2κ * z_dξ
-end
+# The rest of these functions are only used for testing
 
 function W_1(ξ, lambda, κ, ϵ, λ::CGLParams)
     a, b, c = _abc(κ, ϵ, λ)
@@ -211,24 +191,6 @@ function B_W_2(lambda, κ, ϵ, λ::CGLParams)
     a, b, c = _abc(κ, ϵ, λ)
     sgn = c isa AcbSeries ? sign(imag(c[0])) : sign(imag(c))
     return 1 // 2 * exp(-sgn * im * (b - conj(a) + lambda / 2κ) * π) * (-conj(c))^(b - 1)
-end
-
-function B_W_1_dλ(lambda, κ, ϵ, λ::CGLParams)
-    a, b, c = _abc(κ, ϵ, λ)
-    sgn = c isa AcbSeries ? sign(imag(c[0])) : sign(imag(c))
-    return 1 // 2 *
-           (sgn * im / 2κ * π) *
-           exp(sgn * im * (b - a + lambda / 2κ) * π) *
-           (-c)^(b - 1)
-end
-
-function B_W_2_dλ(lambda, κ, ϵ, λ::CGLParams)
-    a, b, c = _abc(κ, ϵ, λ)
-    sgn = c isa AcbSeries ? sign(imag(c[0])) : sign(imag(c))
-    return 1 // 2 *
-           (-sgn * im / 2κ * π) *
-           exp(-sgn * im * (b - conj(a) + lambda / 2κ) * π) *
-           (-conj(c))^(b - 1)
 end
 
 function J_P_1(ξ, lambda, κ, ϵ, λ::CGLParams)
@@ -305,120 +267,4 @@ function J_E_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
            ) *
            exp(conj(c) * ξ^2) *
            ξ^d
-end
-
-function J_P_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    (; d) = λ
-    c = _c(κ, ϵ, λ)
-    return (
-               B_W_1_dλ(lambda, κ, ϵ, λ) * P_1(ξ, lambda, κ, ϵ, λ) +
-               B_W_1(lambda, κ, ϵ, λ) * P_1_dλ(ξ, lambda, κ, ϵ, λ)
-           ) *
-           exp(c * ξ^2) *
-           ξ^(d - 1)
-end
-
-function J_P_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    (; d) = λ
-    c = _c(κ, ϵ, λ)
-    return (
-               B_W_2_dλ(lambda, κ, ϵ, λ) * P_2(ξ, lambda, κ, ϵ, λ) +
-               B_W_2(lambda, κ, ϵ, λ) * P_2_dλ(ξ, lambda, κ, ϵ, λ)
-           ) *
-           exp(conj(c) * ξ^2) *
-           ξ^(d - 1)
-end
-
-function J_E_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    (; d) = λ
-    c = _c(κ, ϵ, λ)
-    return (
-               B_W_1_dλ(lambda, κ, ϵ, λ) * E_1(ξ, lambda, κ, ϵ, λ) +
-               B_W_1(lambda, κ, ϵ, λ) * E_1_dλ(ξ, lambda, κ, ϵ, λ)
-           ) *
-           exp(c * ξ^2) *
-           ξ^(d - 1)
-end
-
-function J_E_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    (; d) = λ
-    c = _c(κ, ϵ, λ)
-    return (
-               B_W_2_dλ(lambda, κ, ϵ, λ) * E_2(ξ, lambda, κ, ϵ, λ) +
-               B_W_2(lambda, κ, ϵ, λ) * E_2_dλ(ξ, lambda, κ, ϵ, λ)
-           ) *
-           exp(conj(c) * ξ^2) *
-           ξ^(d - 1)
-end
-
-function I_N(Q_hat, λ::CGLParams{T}) where {T}
-    @assert isone(λ.σ)
-    @assert iszero(λ.δ)
-
-    return SMatrix{2,2}(
-        2im * abs2(Q_hat),
-        conj(-im * Q_hat^2),
-        -im * Q_hat^2,
-        -2im * abs2(Q_hat),
-    )
-end
-
-function I_N_dξ(Q_hat, Q_hat_dξ, λ::CGLParams{T}) where {T}
-    @assert isone(λ.σ)
-    @assert iszero(λ.δ)
-
-    return SMatrix{2,2}(
-        4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
-        conj(-2im * Q_hat * Q_hat_dξ),
-        -2im * Q_hat * Q_hat_dξ,
-        -4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
-    )
-end
-
-function K_1(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return -Diagonal(
-        SVector((ϵ - im) * J_P_1(ξ, lambda, κ, ϵ, λ), (ϵ + im) * J_P_2(ξ, lambda, κ, ϵ, λ)),
-    ) / (1 + ϵ^2)
-end
-
-function K_2(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return Diagonal(
-        SVector((ϵ - im) * J_E_1(ξ, lambda, κ, ϵ, λ), (ϵ + im) * J_E_2(ξ, lambda, κ, ϵ, λ)),
-    ) / (1 + ϵ^2)
-end
-
-function K_1_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return -Diagonal(
-        SVector(
-            (ϵ - im) * J_P_1_dξ(ξ, lambda, κ, ϵ, λ),
-            (ϵ + im) * J_P_2_dξ(ξ, lambda, κ, ϵ, λ),
-        ),
-    ) / (1 + ϵ^2)
-end
-
-function K_2_dξ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return Diagonal(
-        SVector(
-            (ϵ - im) * J_E_1_dξ(ξ, lambda, κ, ϵ, λ),
-            (ϵ + im) * J_E_2_dξ(ξ, lambda, κ, ϵ, λ),
-        ),
-    ) / (1 + ϵ^2)
-end
-
-function K_1_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return -Diagonal(
-        SVector(
-            (ϵ - im) * J_P_1_dλ(ξ, lambda, κ, ϵ, λ),
-            (ϵ + im) * J_P_2_dλ(ξ, lambda, κ, ϵ, λ),
-        ),
-    ) / (1 + ϵ^2)
-end
-
-function K_2_dλ(ξ, lambda, κ, ϵ, λ::CGLParams)
-    return Diagonal(
-        SVector(
-            (ϵ - im) * J_E_1_dλ(ξ, lambda, κ, ϵ, λ),
-            (ϵ + im) * J_E_2_dλ(ξ, lambda, κ, ϵ, λ),
-        ),
-    ) / (1 + ϵ^2)
 end
