@@ -39,7 +39,6 @@ using FiniteDifferences
     @testset "Y" begin
         include("Y_zero/Y.jl")
 
-        #include("Y_infinity/parameters.jl") # TODO: Update these tests
         include("Y_infinity/functions.jl")
         include("Y_infinity/function_bounds.jl")
         include("Y_infinity/Y.jl")
