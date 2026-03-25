@@ -77,7 +77,7 @@ we take
 ```
 """
 function norm_bound_Z(
-    c::SVector{2,Acb},
+    c_0::SVector{2,Acb},
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -100,7 +100,7 @@ Compute a bound for the norm of `Z_dλ` based on Lemma
 REF(lemma:Z-lambda-fixed-point-bounds).
 """
 function norm_bound_Z_dλ(
-    c::SVector{2,Acb},
+    c_0::SVector{2,Acb},
     lambda::Acb,
     κ::Arb,
     ϵ::Arb,
