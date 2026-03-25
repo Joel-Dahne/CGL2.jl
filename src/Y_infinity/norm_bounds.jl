@@ -87,7 +87,9 @@ function norm_bound_Z(
     C::FunctionBounds_Y,
 )
     if C.T_12 * ξ₁^-2 < 1
-        return inv(1 - C.T_12 * ξ₁^-2) * max(C.E_1 * abs(c_0[1]), C.E_2 * abs(c_0[2])) * ξ₁^-v
+        return inv(1 - C.T_12 * ξ₁^-2) *
+               max(C.E_1 * abs(c_0[1]), C.E_2 * abs(c_0[2])) *
+               ξ₁^-v
     else
         throw(ErrorException("could not verify T_12 * ξ₁^-2 < 1"))
     end
