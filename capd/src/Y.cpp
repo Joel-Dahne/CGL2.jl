@@ -515,75 +515,6 @@ void Y_optimized_d3_fixed_epsilon(
   }
 }
 
-void Y_optimized_d3_fixed_epsilon_jacobian(
-    IVector Q_hat_0,
-    IVector Y_0,
-    interval lambda_real,
-    interval lambda_imag,
-    interval kappa,
-    interval epsilon,
-    interval T0,
-    interval T1,
-    double tol
-) {
-    IVector u0(15);
-
-    u0[0] = Q_hat_0[0];
-    u0[1] = Q_hat_0[1];
-    u0[2] = Q_hat_0[2];
-    u0[3] = Q_hat_0[3];
-
-    u0[4] = Y_0[0];
-    u0[5] = Y_0[1];
-    u0[6] = Y_0[2];
-    u0[7] = Y_0[3];
-    u0[8] = Y_0[4];
-    u0[9] = Y_0[5];
-    u0[10] = Y_0[6];
-    u0[11] = Y_0[7];
-
-    u0[12] = lambda_real;
-    u0[13] = lambda_imag;
-    u0[14] = kappa;
-
-    int dim = 15;
-    IMap vf = IMap(vectorField_optimized_d3_fixed_epsilon, dim, dim, 1);
-    vf.setParameter(0, epsilon);
-
-    // Create the solver and the time map
-    IOdeSolver solver(vf, 20);
-
-    solver.setAbsoluteTolerance(tol);
-    solver.setRelativeTolerance(tol);
-
-    ITimeMap timeMap(solver);
-
-  try {
-      // Define a representation of the initial value
-      C1HORect2Set s(u0, T0);
-
-      // Solve the system
-      IVector result = timeMap(T1, s);
-
-      IMatrix m = (IMatrix)(s);
-
-      for (int i = 4; i < 12; i++)
-          // Only print derivatives of u[4], ..., u[11]
-          for (int j = 4; j < 12; j++)
-              cout << m[j][i] << endl;
-
-      // Derivative w.r.t. lambda_real
-      for (int j = 4; j < 12; j++)
-	  cout << m[j][12] << endl;
-
-      // Derivative w.r.t. lambda_imag
-      for (int j = 4; j < 12; j++)
-	  cout << m[j][13] << endl;
-  } catch(exception& e) {
-    cout << "\n\nException caught!\n" << e.what() << endl << endl;
-  }
-}
-
 int main()
 {
   // Enough to exactly recover Float64 values
@@ -613,20 +544,12 @@ int main()
   interval T0, T1;
   cin >> T0 >> T1;
 
-  // Read flag for if to output Jacobian
-  int output_jacobian;
-  cin >> output_jacobian;
-
   // Read tolerance to use
   double tol;
   cin >> tol;
 
   if (d == 3 && sigma == 1 && delta == 0 && omega == 1) {
-      if (output_jacobian) {
-          Y_optimized_d3_fixed_epsilon_jacobian(Q_hat_0, Y_0, lambda_real, lambda_imag, kappa, epsilon, T0, T1, tol);
-      } else {
-          Y_optimized_d3_fixed_epsilon(Q_hat_0, Y_0, lambda_real, lambda_imag, kappa, epsilon, T0, T1, tol);
-      }
+      Y_optimized_d3_fixed_epsilon(Q_hat_0, Y_0, lambda_real, lambda_imag, kappa, epsilon, T0, T1, tol);
   } else {
       // TODO: Do we need to implement any other versions?
       cout << "Exception: Got unsupported parameters" << endl;

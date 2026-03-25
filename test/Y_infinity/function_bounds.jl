@@ -6,12 +6,13 @@
     ϵ = Arb(0.15002213424487343)
     ξ₁ = Arb(15)
     λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
+    v = Arb("0.1")
     (; d, σ) = λ
     _, _, c = CGL2._abc(κ, ϵ, λ)
     A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
     M = SMatrix{2,2}(im, 1, -im, 1)
 
-    C_Y = CGL2.FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ, include_dλ = true)
+    C_Y = CGL2.FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, v, λ)
 
     norm_inf = CGL2.norm_inf
 
@@ -45,11 +46,6 @@
                (2conj(c) * ξ * P_2(ξ, lambda, κ, ϵ, λ) + P_2_dξ(ξ, lambda, κ, ϵ, λ))
     end
 
-    E_1_dλ, E_1_dλ_dξ = CGL2.E_1_dλ, CGL2.E_1_dλ_dξ
-    E_2_dλ, E_2_dλ_dξ = CGL2.E_2_dλ, CGL2.E_2_dλ_dξ
-    P_1_dλ, P_1_dλ_dξ = CGL2.P_1_dλ, CGL2.P_1_dλ_dξ
-    P_2_dλ, P_2_dλ_dξ = CGL2.P_2_dλ, CGL2.P_2_dλ_dξ
-
     J_E_1 = CGL2.J_E_1
     J_E_2 = CGL2.J_E_2
     J_P_1 = CGL2.J_P_1
@@ -58,14 +54,8 @@
     J_E_1_dξ = CGL2.J_E_1_dξ
     J_E_2_dξ = CGL2.J_E_2_dξ
 
-    J_E_1_dλ = CGL2.J_E_1_dλ
-    J_E_2_dλ = CGL2.J_E_2_dλ
-    J_P_1_dλ = CGL2.J_P_1_dλ
-    J_P_2_dλ = CGL2.J_P_2_dλ
-
     K_1, K_2 = CGL2.K_1, CGL2.K_2
-    K_1_dξ, K_1_dξ = CGL2.K_1_dξ, CGL2.K_2_dξ
-    K_1_dλ, K_2_dλ = CGL2.K_1_dλ, CGL2.K_2_dλ
+    K_1_dξ, K_2_dξ = CGL2.K_1_dξ, CGL2.K_2_dξ
 
     for ξ in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* ξ₁
         ####
@@ -115,42 +105,6 @@
         @test abs(exp_E_2_dξ(ξ, lambda, κ, ϵ, λ)) >=
               0.85C_Y.exp_E_2_dξ * ξ^(1 / σ - d - real(lambda) / κ - 1)
 
-        @test abs(E_1_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.E_1_dλ * exp(-real(c) * ξ^2) * log(ξ) * ξ^(1 / σ - d - real(lambda) / κ)
-        @test abs(E_2_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.E_2_dλ * exp(-real(c) * ξ^2) * log(ξ) * ξ^(1 / σ - d - real(lambda) / κ)
-        @test abs(E_1_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.6C_Y.E_1_dλ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ)
-        @test abs(E_2_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.55C_Y.E_2_dλ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ)
-
-        @test abs(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.E_1_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-        @test abs(E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.E_2_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-        @test abs(E_1_dλ_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.6C_Y.E_1_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-        @test abs(E_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.5C_Y.E_2_dλ_dξ *
-              exp(-real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(1 / σ - d - real(lambda) / κ + 1)
-
         ####
         ## P_1 and P_2
         ####
@@ -178,24 +132,6 @@
         @test abs(exp_P_2_dξ(ξ, lambda, κ, ϵ, λ)) >=
               0.9C_Y.exp_P_2_dξ * exp(real(c) * ξ^2) * ξ^(-1 / σ + real(lambda) / κ + 1)
 
-        @test abs(P_1_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.P_1_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-        @test abs(P_2_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.P_2_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-        @test abs(P_1_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.6C_Y.P_1_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-        @test abs(P_2_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.6C_Y.P_2_dλ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ)
-
-        @test abs(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.P_1_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-        @test abs(P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.P_2_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-        @test abs(P_1_dλ_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.P_1_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-        @test abs(P_2_dλ_dξ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.P_2_dλ_dξ * log(ξ) * ξ^(-1 / σ + real(lambda) / κ - 1)
-
         ######
         ## J_E_1 and J_E_2
         ######
@@ -218,16 +154,6 @@
         @test abs(J_E_2_dξ(ξ, lambda, κ, ϵ, λ)) >=
               0.85C_Y.J_E_2_dξ * ξ^(1 / σ - real(lambda) / κ - 2)
 
-        @test abs(J_E_1_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.J_E_1_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test abs(J_E_1_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.J_E_1_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-
-        @test abs(J_E_2_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.J_E_2_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test abs(J_E_2_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.J_E_2_dλ * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-
         ######
         ## J_P_1 and J_P_2
         ######
@@ -242,85 +168,36 @@
         @test abs(J_P_2(ξ, lambda, κ, ϵ, λ)) >=
               0.9C_Y.J_P_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
 
-        @test abs(J_P_1_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.J_P_1_dλ *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test abs(J_P_1_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.J_P_1_dλ *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-
-        @test abs(J_P_2_dλ(ξ, lambda, κ, ϵ, λ)) <=
-              C_Y.J_P_2_dλ *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test abs(J_P_2_dλ(ξ, lambda, κ, ϵ, λ)) >=
-              0.4C_Y.J_P_2_dλ *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-
         ######
         ## K_1, K_2
         ######
 
-        K_1 = K_1(ξ, lambda, κ, ϵ, λ)
-        K_2 = K_2(ξ, lambda, κ, ϵ, λ)
-        @test norm_inf(K_1, 1) <=
+        @test norm_inf(K_1(ξ, lambda, κ, ϵ, λ), 1) <=
               C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1, 1) >=
+        @test norm_inf(K_1(ξ, lambda, κ, ϵ, λ), 1) >=
               0.95C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1, 2) <=
+        @test norm_inf(K_1(ξ, lambda, κ, ϵ, λ), 2) <=
               C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1, 2) >=
+        @test norm_inf(K_1(ξ, lambda, κ, ϵ, λ), 2) >=
               0.9C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(lambda) / κ - 1)
 
-        @test norm_inf(K_2, 1) <= C_Y.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2, 1) >= 0.9C_Y.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2, 2) <= C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2, 2) >= 0.85C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2(ξ, lambda, κ, ϵ, λ), 1) <=
+              C_Y.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2(ξ, lambda, κ, ϵ, λ), 1) >=
+              0.9C_Y.K_2_1 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2(ξ, lambda, κ, ϵ, λ), 2) <=
+              C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2(ξ, lambda, κ, ϵ, λ), 2) >=
+              0.85C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
 
-        K_2_dξ = K_2_dξ(ξ, lambda, κ, ϵ, λ)
-        @test norm_inf(K_2_dξ, 1) <= C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ, 1) >= 0.4C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ, 2) <= C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ, 2) >= 0.5C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
-
-        K_1_dλ = K_1_dλ(ξ, lambda, κ, ϵ, λ)
-        K_2_dλ = K_2_dλ(ξ, lambda, κ, ϵ, λ)
-        @test norm_inf(K_1_dλ, 1) <=
-              C_Y.K_1_dλ_1 *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1_dλ, 1) >=
-              0.4C_Y.K_1_dλ_1 *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1_dλ, 2) <=
-              C_Y.K_1_dλ_2 *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-        @test norm_inf(K_1_dλ, 2) >=
-              0.4C_Y.K_1_dλ_2 *
-              exp(real(c) * ξ^2) *
-              log(ξ) *
-              ξ^(- 1 / σ + d + real(lambda) / κ - 1)
-
-        @test norm_inf(K_2_dλ, 1) <=
-              C_Y.K_2_dλ_1 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2_dλ, 1) >=
-              0.4C_Y.K_2_dλ_1 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2_dλ, 2) <=
-              C_Y.K_2_dλ_2 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
-        @test norm_inf(K_2_dλ, 2) >=
-              0.4C_Y.K_2_dλ_2 * log(ξ) * ξ^(1 / σ - real(lambda) / κ - 1)
+        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, λ), 1) <=
+              C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
+        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, λ), 1) >=
+              0.4C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
+        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, λ), 2) <=
+              C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
+        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, λ), 2) >=
+              0.5C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
 
         #####
         ## H_OJ
@@ -351,4 +228,6 @@
         @test abs(H_dξ[2, 1]) >= 0.2C_Y.H_21_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
         @test abs(H_dξ[2, 2]) >= 0.3C_Y.H_22_dξ * ξ^(1 / σ - real(lambda) / κ - 4)
     end
+
+    # TODO: Add tests for remaining constants
 end

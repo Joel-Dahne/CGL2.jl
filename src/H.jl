@@ -24,38 +24,3 @@ function H(
 
     return det_4x4(M)
 end
-
-function H(
-    lambda::AcbSeries,
-    ν::Acb,
-    γ₁::Acb,
-    γ₂::Acb,
-    κ::T,
-    ϵ::T,
-    ξ₁::T,
-    λ::CGLParams{T},
-) where {T}
-    @assert Arblib.degree(lambda) == 1
-    lambda₀ = lambda[0]
-    # IMPROVE: Compute Y_0_1 and Y_0_1_derivative together
-    Y_0_1 = Y_zero(SVector{2,Acb}(1, 0), lambda₀, ν, κ, ϵ, ξ₁, λ)
-    Y_0_2 = Y_zero(SVector{2,Acb}(0, 1), lambda₀, ν, κ, ϵ, ξ₁, λ)
-    Y_inf_1 = Y_infinity(SVector{2,Acb}(1, 0), lambda₀, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    Y_inf_2 = Y_infinity(SVector{2,Acb}(0, 1), lambda₀, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-
-    Y_0_1_derivative = Y_zero_derivative(SVector{2,Acb}(1, 0), lambda₀, ν, κ, ϵ, ξ₁, λ)
-    Y_0_2_derivative = Y_zero_derivative(SVector{2,Acb}(0, 1), lambda₀, ν, κ, ϵ, ξ₁, λ)
-    Y_inf_1_derivative =
-        Y_infinity_derivative(SVector{2,Acb}(1, 0), lambda₀, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    Y_inf_2_derivative =
-        Y_infinity_derivative(SVector{2,Acb}(0, 1), lambda₀, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-
-    M = hcat(Y_0_1, Y_0_2, Y_inf_1, Y_inf_2)
-
-    M_derivative =
-        hcat(Y_0_1_derivative, Y_0_2_derivative, Y_inf_1_derivative, Y_inf_2_derivative)
-
-    res = det_4x4(AcbSeries.(tuple.(M, M_derivative)))
-
-    return ArbExtras.compose_zero!(res, res, lambda)
-end
