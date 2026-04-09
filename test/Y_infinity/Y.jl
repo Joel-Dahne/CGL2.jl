@@ -15,7 +15,10 @@
     res = CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
 
     # Compute derivative w.r.t. ξ using finite differences in Float64
-    resF64_dξ = fdm(ξ -> ComplexF64.(CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, Arb(ξ), λ)), Float64(ξ₁))
+    resF64_dξ = fdm(
+        ξ -> ComplexF64.(CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, Arb(ξ), λ)),
+        Float64(ξ₁),
+    )
 
     # Check that the derivative computed with finite differences
     # agree. Note that the precision is quite low, so rtol is
@@ -42,6 +45,9 @@
     # The of the error should be compared to the norm of the inputs.
     # We check that it is substantially smaller than the largest norm
     # of the input.
-    @test norm(ComplexF64.(A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - lambda * I) * Y)) <
-          1e-5max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
+    @test norm(
+        ComplexF64.(
+            A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - lambda * I) * Y,
+        ),
+    ) < 1e-5max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
 end
