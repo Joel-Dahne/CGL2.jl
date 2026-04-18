@@ -1,10 +1,10 @@
 """
-    newton_step(f, x::Acb; verbose = false)
+    newton_step(f, x::Acb)
 
 Perform one internval Newton iteration for the function `f` on the
 input `x`. The derivative is automatically computed using `AcbSeries`.
 """
-function newton_step(f, x::Acb; verbose = false)
+function newton_step(f, x::Acb)
     mid = midpoint(Acb, x)
 
     y = f(mid)
@@ -17,31 +17,22 @@ function newton_step(f, x::Acb; verbose = false)
 end
 
 """
-    newton_step(f, df, x; verbose = false)
+    newton_step(f, df, x::AbstractVector{T}) where {T<:Union{Arb,Acb}}
 
 Perform one internval Newton iteration for the function `f` on the
 input `x`. The function `df` should compute the Jacobian of `f`.
 """
-function newton_step(f, df, x::AbstractVector{T}; verbose = false) where {T<:Union{Arb,Acb}}
-    TMatrix = T == Arb ? ArbMatrix : AcbMatrix
-
+function newton_step(f, df, x::AbstractVector{T}) where {T<:Union{Arb,Acb}}
     mid = midpoint.(T, x)
 
-    y = TMatrix(f(mid))
+    y = f(mid)
 
-    isfinite(y) || return indeterminate.(x)
+    all(isfinite, y) || return indeterminate.(x)
 
-    J = TMatrix(df(x))
-    J_div_y = similar(y)
+    dy = df(x)
 
-    success = !iszero(Arblib.solve!(J_div_y, J, y))
-
-    if success
-        return mid - convert(typeof(mid), J_div_y[:])
-    else
-        verbose && @warn "Could not compute J \\ y" J
-        return indeterminate.(x)
-    end
+    TMatrix = T == Arb ? ArbMatrix : AcbMatrix
+    return mid - convert(typeof(x), TMatrix(dy) \ TMatrix(y))
 end
 
 """
@@ -103,7 +94,7 @@ function verify_and_refine_root(
     error_previous = radius.(Float64, root)
     isproved = false
     for i = 1:max_iterations
-        new_root = newton_step(f, df, root; verbose)
+        new_root = newton_step(f, df, root)
 
         # Note that since Arblib.intersection! only returns an
         # enclosure of the result it's not enough to check that the
