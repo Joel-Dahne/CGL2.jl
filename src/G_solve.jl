@@ -27,8 +27,7 @@ function G_solve_fix_epsilon(
 
     if try_expand_uniqueness
         verbose && @info "Expanding region for uniqueness"
-        root_uniqueness =
-            expand_uniqueness(G_x, dG_x, root_uniqueness; verbose, extra_verbose)
+        root_uniqueness = expand_uniqueness(G_x, dG_x, root_uniqueness; verbose)
     end
 
     if return_uniqueness isa Val{true}
@@ -67,8 +66,7 @@ function G_solve_fix_kappa(
 
     if try_expand_uniqueness
         verbose && @info "Expanding region for uniqueness"
-        root_uniqueness =
-            expand_uniqueness(G_x, dG_x, root_uniqueness; verbose, extra_verbose)
+        root_uniqueness = expand_uniqueness(G_x, dG_x, root_uniqueness; verbose)
     end
 
     if return_uniqueness isa Val{true}
