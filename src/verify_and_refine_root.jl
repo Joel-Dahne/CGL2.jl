@@ -50,9 +50,14 @@ end
 Verify that `root` contains a root of the function `f` and refine the
 enclosure. The function `df` should compute the Jacobian of `f`.
 
+If succesfull, it returns an enclosure of existence and an enclosure
+of uniqueness. The first enclosure is proved to contain a root of the
+function, and that root is proved to be unique in the second
+enclosure. If unsuccesful both return values are set to indeterminate
+balls.
+
 The verification and refinement is done using successive interval
-Newton iterations. For the method to succeed the Jacobian most be
-non-zero on the enclosure of the root.
+Newton iterations.
 
 At each iteration it checks if the required tolerance is met according
 to [`ArbExtras.check_tolerance`](@ref). The default tolerances are
@@ -123,7 +128,7 @@ function verify_and_refine_root(
 
         root = Arblib.intersection.(root, new_root)
 
-        if !isproved && all(Arblib.contains_interior.(original_root, new_root))
+        if !isproved && all(Arblib.contains.(original_root, new_root))
             verbose && @info "Proved root"
             isproved = true
         end
@@ -174,11 +179,11 @@ Given an approximation `root` of a root of the function `f` this
 method attempts to prove the existence of a nearby root. The
 derivative is computed automatically using `AcbSeries`.
 
-If succesfull it returns an enclosure of existence and an enclosure of
-uniqueness. The first enclosure is proved to contain a root of the
+If succesfull, it returns an enclosure of existence and an enclosure
+of uniqueness. The first enclosure is proved to contain a root of the
 function, and that root is proved to be unique in the second
-enclosure. If unsuccesful both return values are indeterminate
-vectors.
+enclosure. If unsuccesful both return values are set to indeterminate
+balls.
 
 The method works by applying interval Newton iterations, but without
 the usual intersection with the original enclosure. After each
@@ -198,20 +203,20 @@ function verify_root_from_approximation(
 )
     verbose && @info "Original approximation" root
 
-    if any(!isfinite, root)
+    if !isfinite(root)
         verbose && @warn "Non-finite input"
-        return indeterminate.(root), indeterminate.(root)
+        return indeterminate(root), indeterminate(root)
     end
 
     for i = 1:max_iterations
         new_root = newton_step(f, root)
 
-        if !all(isfinite, new_root)
+        if !isfinite(new_root)
             verbose && @warn "Newton step failed" new_root
-            return indeterminate.(root), indeterminate.(root)
+            return indeterminate(root), indeterminate(root)
         end
 
-        if all(Arblib.contains_interior.(root, new_root))
+        if Arblib.contains(root, new_root)
             root_uniqueness = root
             root = new_root
             verbose && @info "Success" root root_uniqueness
@@ -220,12 +225,12 @@ function verify_root_from_approximation(
 
         verbose && @info "Iteration $i" new_root
 
-        rad = map(z -> max(radius.(reim(z))...), new_root)
-        root = add_error.(new_root, expansion_rate * rad)
+        rad = max(radius.(reim(new_root)...))
+        root = add_error(new_root, expansion_rate * rad)
     end
 
     verbose && @warn "Reached maximum number of iterations"
-    return indeterminate.(root), indeterminate.(root)
+    return indeterminate(root), indeterminate(root)
 end
 
 
@@ -243,10 +248,11 @@ Given an approximation `root` of a root of the function `f` this
 method attempts to prove the existence of a nearby root. The function
 `df` should compute the Jacobian of `f`.
 
-If succesfull it returns a vector of existence and a vector of
-uniqueness. The first vector is proved to contain a root of the
-function, and that root is proved to be unique in the second vector.
-If unsuccesful both return values are indeterminate vectors.
+If succesfull, it returns an enclosure of existence and an enclosure
+of uniqueness. The first enclosure is proved to contain a root of the
+function, and that root is proved to be unique in the second
+enclosure. If unsuccesful both return values are set to indeterminate
+balls.
 
 The method works by applying interval Newton iterations, but without
 the usual intersection with the original enclosure. After each
