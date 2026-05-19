@@ -1,6 +1,5 @@
 """
-    Q_hat_zero_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
-    Q_hat_zero_capd(ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Q_hat_zero_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; ξ₀, tol)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
 vector with four real values, the first two are the real and imaginary
@@ -8,46 +7,26 @@ values at `ξ₁` and the second two are their derivatives.
 
 The solution is computed using the rigorous CAPD integrator.
 
-If `ξ₀` is given then it uses a single Taylor expansion on the
-interval `[0, ξ₀]` and CAPD on `[ξ₀, ξ₁]`. For `λ.d != 1` this is
-automatically used (`ξ₀ = 1e-2` by default) to handle the removable
-singularity at zero.
+If `ξ₀` is non-zero it uses a single Taylor expansion on the interval
+`[0, ξ₀]` and the CAPD integrator on `[ξ₀, ξ₁]`. This is needed to
+avoid the removable singularity at `ξ = 0` which CAPD cannot handle
+directly. For `Λ.d = 1` there is no removable singularity and the
+default value is `ξ₀ = 0`, otherwise the default value is `ξ₀ = 1e-2`.
 
 If the given `ξ₀` gives a non-finite enclosure on `[0, ξ₀]`, then it
 tries with half that value. If it fails again it tries to halve it
 once more, iterating like this for a maximum of a few times.
 """
-Q_hat_zero_capd(
-    ν_real::Arb,
-    ν_imag::Arb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    λ::CGLParams{Arb};
-    tol::Float64 = 1e-11,
-) = Q_hat_zero_capd(
-    ν_real,
-    ν_imag,
-    κ,
-    ϵ,
-    ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
-    ξ₁,
-    λ;
-    tol,
-)
-
 function Q_hat_zero_capd(
     ν_real::Arb,
     ν_imag::Arb,
     κ::Arb,
     ϵ::Arb,
-    ξ₀::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb};
+    ξ₀::Arb = ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
     tol::Float64 = 1e-11,
 )
-    S = Interval{Float64}
-
     Q_hat_ξ₀ = if !iszero(ξ₀)
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
@@ -61,65 +40,35 @@ function Q_hat_zero_capd(
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
-        convert(SVector{4,S}, Q_hat_ξ₀)
+        Q_hat_ξ₀
     else
-        SVector{4,S}(ν_real, ν_imag, interval(0.0), interval(0.0))
+        SVector{4,Arb}(ν_real, ν_imag, 0, 0)
     end
 
-    # Integrate system on [ξ₀, ξ₁] using capd.
+    # Integrate system on [ξ₀, ξ₁] using CAPD.
     # We use the fact that the equation is identical to the one for Q,
     # except for the change in sign for κ and ω.
-    Q_hat = _Q_zero_capd(
-        Q_hat_ξ₀,
-        convert(S, -κ),
-        convert(S, ϵ),
-        convert(S, ξ₀),
-        convert(S, ξ₁),
-        CGLParams{S}(λ, ω = -λ.ω);
-        tol,
-    )
-
-    return Arb.(Q_hat)
+    return Q_hat = _Q_zero_capd(Q_hat_ξ₀, -κ, ϵ, ξ₀, ξ₁, CGLParams(λ, ω = -λ.ω); tol)
 end
 
 """
-    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
-    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₀, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; ξ₀, tol)
 
 This function computes the Jacobian of [`Q_hat_zero_capd`](@ref)
 w.r.t. the parameter `ν`.
-"""
-Q_hat_zero_jacobian_capd(
-    ν_real::Arb,
-    ν_imag::Arb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    λ::CGLParams{Arb};
-    tol::Float64 = 1e-11,
-) = Q_hat_zero_jacobian_capd(
-    ν_real,
-    ν_imag,
-    κ,
-    ϵ,
-    ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
-    ξ₁,
-    λ;
-    tol,
-)
 
+In general it works similarly to [`Q_hat_zero_capd`](@ref).
+"""
 function Q_hat_zero_jacobian_capd(
     ν_real::Arb,
     ν_imag::Arb,
     κ::Arb,
     ϵ::Arb,
-    ξ₀::Arb,
     ξ₁::Arb,
     λ::CGLParams{Arb};
+    ξ₀::Arb = ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
     tol::Float64 = 1e-11,
 )
-    S = Interval{Float64}
-
     Q_hat_ξ₀, J_ξ₀ = let
         if !iszero(ξ₀)
             @assert 0 < ξ₀ < ξ₁
@@ -135,24 +84,12 @@ function Q_hat_zero_jacobian_capd(
                 end
                 iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
             end
-
-            Q_hat_ξ₀ = convert(SVector{4,S}, Q_hat_ξ₀)
-            J_ξ₀ = convert(SMatrix{4,2,S}, J_ξ₀)
         else
-            Q_hat_ξ₀ = SVector{4,S}(ν_real, ν_imag, interval(0.0), interval(0.0))
+            Q_hat_ξ₀ = SVector{4,Arb}(ν_real, ν_imag, 0, 0)
             # Empty integration so the only non-zero derivatives are
             # the ones of Q_hat_ξ₀[1] and Q_hat_ξ₀[2] w.r.t. ν_real
             # and ν_imag, which are both 1.
-            J_ξ₀ = SMatrix{4,2,S}(
-                interval(1.0),
-                interval(0.0),
-                interval(0.0),
-                interval(0.0),
-                interval(1.0),
-                interval(0.0),
-                interval(0.0),
-                interval(0.0),
-            )
+            J_ξ₀ = SMatrix{4,2,Arb}(1, 0, 0, 0, 1, 0, 0, 0)
         end
 
         Q_hat_ξ₀, J_ξ₀
@@ -163,18 +100,17 @@ function Q_hat_zero_jacobian_capd(
     # except for the change in sign for κ and ω.
     J_ξ₀_ξ₁ = _Q_zero_capd(
         Q_hat_ξ₀,
-        convert(S, -κ),
-        convert(S, ϵ),
-        convert(S, ξ₀),
-        convert(S, ξ₁),
-        CGLParams{S}(λ, ω = -λ.ω),
-        output_jacobian_only_init = Val{true}();
+        -κ,
+        ϵ,
+        ξ₀,
+        ξ₁,
+        CGLParams(λ, ω = -λ.ω);
+        output_jacobian = Val(true),
+        include_parameter_derivatives = Val(false),
         tol,
     )
 
     # The Jacobian on the interval [0, ξ₁] is the product of the one
     # on [0, ξ₀] and the one on [ξ₀, ξ₁].
-    J = J_ξ₀_ξ₁ * J_ξ₀
-
-    return Arb.(J)
+    return J_ξ₀_ξ₁ * J_ξ₀
 end

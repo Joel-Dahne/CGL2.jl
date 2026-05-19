@@ -192,6 +192,43 @@ void vectorField_d3_optimized_epsilon_0(Node xi, Node in[], int /*dimIn*/, Node 
   out[5] = 0 * epsilon;
 }
 
+// Specialization for d == 3, omega == -1, sigma == 1, delta == 0.
+// This is used for Q_hat_zero.
+// The -2/xi terms in F1 and F2 cancel the (1+epsilon^2) denominator
+// after forming (F1 - epsilon*F2) and (epsilon*F1 + F2); see the
+// inline comment for details. No params required.
+void vectorField_d3_hat_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node* /*params*/, int /*noParams*/)
+{
+  Node a = in[0];
+  Node b = in[1];
+  Node alpha = in[2];
+  Node beta = in[3];
+  Node kappa = in[4];
+  Node epsilon = in[5];
+
+  Node a2b2_p1 = (a^2) + (b^2) + 1;
+  Node kappa_xi = kappa * xi;
+  Node one_p_epsilon2 = 1 + (epsilon^2);
+
+  // The -2*(alpha + epsilon*beta)/xi term in F1 and -2*(beta - epsilon*alpha)/xi
+  // term in F2, after forming (F1 - epsilon*F2) and (epsilon*F1 + F2), combine
+  // to -2*alpha*(1 + epsilon^2)/xi and -2*beta*(1 + epsilon^2)/xi respectively,
+  // cancelling the (1 + epsilon^2) denominator. We factor these out to avoid
+  // multiplying wide intervals F1, F2 by epsilon.
+  Node a_m_eps_b = a - epsilon * b;
+  Node b_p_eps_a = b + epsilon * a;
+
+  Node G1 =  kappa_xi * (beta  + epsilon * alpha) + kappa * b_p_eps_a - a2b2_p1 * a_m_eps_b;
+  Node G2 = -kappa_xi * (alpha - epsilon * beta)  - kappa * a_m_eps_b - a2b2_p1 * b_p_eps_a;
+
+  out[0] = alpha;
+  out[1] = beta;
+  out[2] = -2 * alpha / xi + G1 / one_p_epsilon2;
+  out[3] = -2 * beta  / xi + G2 / one_p_epsilon2;
+  out[4] = 0 * kappa;
+  out[5] = 0 * epsilon;
+}
+
 // ===========================================================================
 // SHARED LOGIC
 // ===========================================================================
@@ -206,6 +243,7 @@ IMap build_vector_field(int d, interval omega, interval sigma, interval delta, i
     bool d1_opt = (d == 1) && (omega == 1) && (delta == 0);
     bool d3_opt_eps0 = (d == 3) && (omega == 1) && (sigma == 1) && (delta == 0) && (epsilon == 0) && (!computing_epsilon_deriv);
     bool d3_opt = (d == 3) && (omega == 1) && (sigma == 1) && (delta == 0);
+    bool d3_hat_opt = (d == 3) && (omega == -1) && (sigma == 1) && (delta == 0);
 
     if (d1_opt) {
 	// Specialized for Case I in paper
@@ -223,6 +261,9 @@ IMap build_vector_field(int d, interval omega, interval sigma, interval delta, i
     } else if (d3_opt) {
 	// Specialized for Case II in paper
         vf = IMap(vectorField_d3_optimized, dim, dim, 0);
+    } else if (d3_hat_opt) {
+	// Specialized for Q_hat in Case II
+        vf = IMap(vectorField_d3_hat_optimized, dim, dim, 0);
     } else {
 	// Generic version
         vf = IMap(vectorField, dim, dim, 4);
@@ -314,6 +355,7 @@ int Q_zero_jacobian(
     interval xi_1,
     /** Settings **/
     bool wrt_epsilon,
+    bool include_parameter_derivative,
     double tol
 ) {
     // To get better enclosures for wide kappa and epsilon we treat
@@ -380,18 +422,19 @@ int Q_zero_jacobian(
 		cout << m[i][j] << endl;
 	    }
 
-	if (wrt_epsilon) {
-	    // Derivative w.r.t. epsilon
-	    for (int i = 0; i < 4; i++) {
-		cout << m[i][5] << endl;
-	    }
-	} else {
-	    // Derivative w.r.t. kappa
-	    for (int i = 0; i < 4; i++) {
-		cout << m[i][4] << endl;
-	    }
-	}
-
+        if (include_parameter_derivative) {
+            if (wrt_epsilon) {
+                // Derivative w.r.t. epsilon
+                for (int i = 0; i < 4; i++) {
+                    cout << m[i][5] << endl;
+                }
+            } else {
+                // Derivative w.r.t. kappa
+                for (int i = 0; i < 4; i++) {
+                    cout << m[i][4] << endl;
+                }
+            }
+        }
 	return 0; // Success
     } catch(...) {
 	for (int j = 0; j < 5; j++)
@@ -571,9 +614,11 @@ int main()
   // should be with respect to epsilon instead of kappa.
   int output_jacobian;
   int wrt_epsilon;
+  int include_parameter_derivative;
   int output_curve;
   cin >> output_jacobian;
   cin >> wrt_epsilon;
+  cin >> include_parameter_derivative;
   cin >> output_curve;
 
   // Read tolerance to use
@@ -581,7 +626,7 @@ int main()
   cin >> tol;
 
   if (output_jacobian) {
-      return Q_zero_jacobian(Q_xi_0, d, kappa, epsilon, omega, sigma, delta, xi_0, xi_1, wrt_epsilon, tol);
+      return Q_zero_jacobian(Q_xi_0, d, kappa, epsilon, omega, sigma, delta, xi_0, xi_1, wrt_epsilon, include_parameter_derivative, tol);
   } else if (output_curve) {
       return Q_zero_curve(Q_xi_0, d, kappa, epsilon, omega, sigma, delta, xi_0, xi_1, tol);
   } else {

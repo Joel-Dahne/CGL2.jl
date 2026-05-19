@@ -6,7 +6,8 @@
         ξ₁::Arb,
         Λ::CGLParams{Arb};
         output_jacobian::Union{Val{false},Val{true}} = Val(false),
-        jacobian_epsilon::Bool = false,
+        wrt_epsilon::Bool = false,
+        include_parameter_derivatives::Union{Val{false},Val{true}} = Val(true),
         output_curve::Union{Val{false},Val{true}} = Val(true),
         tol::Float64 = 1e-11,
     )
@@ -23,6 +24,10 @@ imaginary values at `ξ₁` and the second two are their derivatives.
 If `output_jacobian = Val(true)`, then it returns the Jacobian w.r.t.
 the initial value `Q_ξ₀` as well as either `κ` or `ϵ` depending on the
 argument `wrt_epsilon`.
+
+If `include_parameter_derivatives = Val(false)`, then do not include
+the derivative w.r.t. `κ` or `ϵ` in the Jacobian. This is intended to
+be used for [`Q_hat_zero_jacobian_capd`](@ref).
 
 If `output_curve = Val(true)`, then it returns an enclosure of the
 entire curve from `ξ₀` to `ξ₁` as well as values related to the second
@@ -53,6 +58,7 @@ function _Q_zero_capd(
     Λ::CGLParams{Arb};
     output_jacobian::Union{Val{false},Val{true}} = Val(false),
     wrt_epsilon::Bool = false,
+    include_parameter_derivatives::Union{Val{false},Val{true}} = Val(true),
     output_curve::Union{Val{false},Val{true}} = Val(false),
     tol::Float64 = 1e-11,
 )
@@ -87,6 +93,7 @@ function _Q_zero_capd(
             # Write settings
             println(io, Cint(output_jacobian isa Val{true}))
             println(io, Cint(wrt_epsilon))
+            println(io, Cint(include_parameter_derivatives isa Val{true}))
             println(io, Cint(output_curve isa Val{true}))
             println(io, tol)
             close(io.in)
@@ -107,13 +114,29 @@ function _Q_zero_capd(
     # str) for parsing the output from the program.
 
     if output_jacobian isa Val{true}
-        if !exit_success
-            J = fill(nai(Float64), 20)
-        else
-            J = parse.(Interval{Float64}, split(output, "\n"))::Vector{Interval{Float64}}
-        end
+        if include_parameter_derivatives isa Val{true}
+            if !exit_success
+                J = fill(nai(Float64), 20)
+            else
+                J = parse.(
+                    Interval{Float64},
+                    split(output, "\n"),
+                )::Vector{Interval{Float64}}
+            end
 
-        return SMatrix{4,5,Arb}(J)
+            return SMatrix{4,5,Arb}(J)
+        else
+            if !exit_success
+                J = fill(nai(Float64), 16)
+            else
+                J = parse.(
+                    Interval{Float64},
+                    split(output, "\n"),
+                )::Vector{Interval{Float64}}
+            end
+
+            return SMatrix{4,4,Arb}(J)
+        end
     elseif output_curve isa Val{true}
         if !exit_success
             # In this case we want to set ξ to the entire interval

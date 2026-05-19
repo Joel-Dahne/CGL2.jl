@@ -64,14 +64,12 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParam
 
     CU = UBounds(a, b, c, ξ₁)
     C = FunctionBounds(κ, ϵ, ξ₁, λ, CU)
-    norms = NormBounds(γ, κ, ϵ, ξ₁, v, λ, C)
+    CI = IBounds(κ, ϵ, ξ₁, v, λ, C)
+    norms = NormBounds(γ, κ, ϵ, ξ₁, v, λ, C, CI)
 
     I_E_main = abs(γ)^2 * γ * integral_J_E_P(κ, ϵ, ξ₁, λ)
 
-    C_R_Q =
-        (C.P * C_I_E(κ, ϵ, ξ₁, v, λ, C) + C.E * C_I_P(κ, ϵ, ξ₁, v, λ, C)) *
-        norms.Q^(2σ + 1) *
-        ξ₁^((2σ + 1) * v - 2)
+    C_R_Q = (C.P * CI.I_E + C.E * CI.I_P) * norms.Q^(2σ + 1) * ξ₁^((2σ + 1) * v - 2)
     R_I_E_bound =
         C.J_E * (3abs(γ)^2 * C.P^2 * C_R_Q + 3abs(γ) * C.P * C_R_Q^2 + C_R_Q^3) / (2 / σ) *
         ξ₁^(-2 / σ)
