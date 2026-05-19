@@ -70,22 +70,34 @@ and
 2M_σ * C_T_hat * ξ₁^-2 * ρ^2σ < 1
 ```
 
-The second inequality gives us a direct upper bound for `ρ`, which we
-denote `ρ_bound`. For the first inequality we show that
+The second inequality gives us a direct upper bound for `ρ`, we take
+`ρ_bound` to be a value slightly less than this upper bound. For the
+first inequality we show that
 
 ```
-C_P_hat * abs(γ₁) +
+f(ρ) = C_P_hat * abs(γ₁) +
     E_hat * abs(γ₂) * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d) +
     C_T_hat * ξ₁^-2 * ρ^(2σ + 1) - ρ
 ```
 
-has a unique root on the interval ``0 < ρ < ρ_bound``. The expression
-is always positive at `ρ = 0`, so to the right of the root it will be
-negative and satisfy the inequality. The zero itself is the smallest
-possible `ρ` satisfying the inequality.
+has a unique root on the interval ``0 <= ρ < ρ_bound``. The expression
+is always non-negative at `ρ = 0`, so to the right of the root it will
+be negative and satisfy the inequality. The zero itself is the
+smallest possible `ρ` satisfying the inequality.
 
-From Proposition REF(prop:Q-hat-fixed-point) we then have that the
-norm of `Q_hat` is bounded by `ρ`.
+To prove that there is a unique root on the interval ``0 <= ρ <
+ρ_bound`` we note that
+
+```
+f'(ρ) = (2σ + 1) * C_T_hat * ξ₁^-2 * ρ^2σ - 1
+```
+
+has a unique root for `ρ > 0`. It follows that that `f(ρ)` has a
+unique critical point. If `f(ρ_bound)` is negative it then follows
+that `f(ρ)` has a unique root on the interval (possibly at `ρ = 0`).
+
+From Proposition REF(prop:Q-hat-fixed-point) we have that the norm of
+`Q_hat` is bounded by `ρ`.
 """
 function norm_bound_Q_hat(
     γ₁::Acb,
@@ -99,29 +111,47 @@ function norm_bound_Q_hat(
     c = _c(κ, ϵ, λ)
     (; d, σ) = λ
 
-    # Upper bound for ρ from second inequality
-    ρ_bound = (2C.T_hat * M(σ) * ξ₁^-2)^(-1 / 2σ)
+    # Upper bound for ρ from second inequality. We take a value that
+    # is strictly lower than this (by eps(Arb)), so that we know that
+    # the strict inequality is satisfied.
+    ρ_bound = lbound((2C.T_hat * M(σ) * ξ₁^-2)^(-1 / 2σ) - eps(Arb))
 
-    isfinite(ρ_bound) || throw(ErrorException("could not compute bound for norm of Q_hat"))
+    isfinite(ρ_bound) || return indeterminate(Arb)
 
-    f(ρ) =
-        C.P_hat * abs(γ₁) +
-        C.E_hat * abs(γ₂) * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d) +
-        C.T_hat * ξ₁^-2 * abspow(ρ, 2σ + 1) - ρ
+    # Precompute constants
+    w_1 = C.P_hat * abs(γ₁) + C.E_hat * abs(γ₂) * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d)
+    w_2 = C.T_hat * ξ₁^-2
+    f(ρ) = w_1 + w_2 * ρ^(2σ + 1) - ρ
 
-    # Isolate roots
-    roots, flags = ArbExtras.isolate_roots(f, Arf(0), lbound(ρ_bound))
+    # Check that f is negative at the right endpoint.
+    Arblib.isnegative(f(Arb(ρ_bound))) || return indeterminate(Arb)
 
-    if length(roots) == 1 && only(flags)
-        # Refine a little bit with bisection. This helps a lot with
-        # improving the numerical stability.
-        ρ_initial = ArbExtras.refine_root_bisection(f, only(roots)..., rtol = Arb(1e-2))
+    # We now know that there is a unique root on the interval 0 <= ρ <
+    # ρ_bound.
 
-        ρ = ArbExtras.refine_root(f, Arb(ρ_initial))
+    if Arblib.ispositive(f(Arb(0)))
+        # When f(0) is positive we first get a rough enclosure using
+        # bisection and then refine it using interval Newton.
 
-        return ρ
+        ρ_initial = ArbExtras.refine_root_bisection(f, Arf(0), ρ_bound, rtol = Arb(1e-3))
+
+        return ArbExtras.refine_root(f, Arb(ρ_initial), strict = false)
     else
-        throw(ErrorException("could not isolate root in ρ when computing norm of Q_hat"))
+        # If f(0) contains zero we can't use refine_root_bisection
+        # directly since it can determine the sign at the left
+        # endpoint. Instead we take a uniform grid on the interval [0,
+        # ρ_bound] and return the first value on which f is negative.
+        # This doesn't give a tight enclosure, but is good enough
+        # since this case doesn't occur in most cases.
+        ρs = range(Arb(0), Arb(ρ_bound), 20)[2:end-1]
+
+        i = findfirst(ρ -> Arblib.isnegative(f(ρ)), ρs)
+
+        if isnothing(i)
+            return Arb(ρ_bound)
+        else
+            return ρs[i]
+        end
     end
 end
 
