@@ -11,11 +11,14 @@ CAPD_CONFIG ?= capd-config
 # Get the CAPD library path
 CAPD_LIB_PATH=$(shell $(CAPD_CONFIG) --libs-only-L | sed 's/-L//g' | xargs)
 
-TARGETS = build/Q_zero
+TARGETS = build/Q_zero build/Y_zero
 
 all: directories $(TARGETS)
 
 build/Q_zero: src/Q_zero.cpp | directories
+	$(CXX) $(CFLAGS) $< -o $@ `$(CAPD_CONFIG) --cflags --libs` -Wl,-rpath,$(CAPD_LIB_PATH)
+
+build/Y_zero: src/Y_zero.cpp | directories
 	$(CXX) $(CFLAGS) $< -o $@ `$(CAPD_CONFIG) --cflags --libs` -Wl,-rpath,$(CAPD_LIB_PATH)
 
 directories:

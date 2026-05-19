@@ -18,8 +18,8 @@
     res = CGL2.Y_zero(Y₀, lambda, ν, κ, ϵ, ξ₁, λ)
 
     # Test with different settings for Taylor expansion
-    res2 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, Arb(1e-1), ξ₁, λ, degree = 5)
-    res3 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, Arb(1e-3), ξ₁, λ)
+    res2 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ, ξ₀ = Arb(1e-1), degree = 5)
+    res3 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ, ξ₀ = Arb(1e-3))
     @test all(Arblib.overlaps.(res, res2))
     @test all(Arblib.overlaps.(res, res3))
 

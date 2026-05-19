@@ -1,22 +1,4 @@
 """
-    newton_step(f, x::Acb)
-
-Perform one internval Newton iteration for the function `f` on the
-input `x`. The derivative is automatically computed using `AcbSeries`.
-"""
-function newton_step(f, x::Acb)
-    mid = midpoint(Acb, x)
-
-    y = f(mid)
-
-    isfinite(y) || return indeterminate(x)
-
-    dy = ArbExtras.derivative_function(f)(x)
-
-    return mid - y / dy
-end
-
-"""
     newton_step(f, df, x::AbstractVector{T}) where {T<:Union{Arb,Acb}}
 
 Perform one internval Newton iteration for the function `f` on the
@@ -165,74 +147,6 @@ function verify_and_refine_root(
         return indeterminate.(root)
     end
 end
-
-"""
-    verify_root_from_approximation(
-        f,
-        root::Acb;
-        expansion_rate = 0.05
-        max_iterations = 10,
-        verbose::Bool = false,
-    )
-
-Given an approximation `root` of a root of the function `f` this
-method attempts to prove the existence of a nearby root. The
-derivative is computed automatically using `AcbSeries`.
-
-If succesfull, it returns an enclosure of existence and an enclosure
-of uniqueness. The first enclosure is proved to contain a root of the
-function, and that root is proved to be unique in the second
-enclosure. If unsuccesful both return values are set to indeterminate
-balls.
-
-The method works by applying interval Newton iterations, but without
-the usual intersection with the original enclosure. After each
-iteration the radius of the ball is expanded by a factor determined by
-`expansion_rate`. A larger `expansion_rate` generally means faster
-convergence, but increases the risk of failute.
-
-If `verbose = true` then print the result at each iteration and some
-more information in the end.
-"""
-function verify_root_from_approximation(
-    f,
-    root::Acb;
-    expansion_rate = 0.05,
-    max_iterations = 10,
-    verbose::Bool = false,
-)
-    verbose && @info "Original approximation" root
-
-    if !isfinite(root)
-        verbose && @warn "Non-finite input"
-        return indeterminate(root), indeterminate(root)
-    end
-
-    for i = 1:max_iterations
-        new_root = newton_step(f, root)
-
-        if !isfinite(new_root)
-            verbose && @warn "Newton step failed" new_root
-            return indeterminate(root), indeterminate(root)
-        end
-
-        if Arblib.contains(root, new_root)
-            root_uniqueness = root
-            root = new_root
-            verbose && @info "Success" root root_uniqueness
-            return root, root_uniqueness
-        end
-
-        verbose && @info "Iteration $i" new_root
-
-        rad = max(radius.(reim(new_root)...))
-        root = add_error(new_root, expansion_rate * rad)
-    end
-
-    verbose && @warn "Reached maximum number of iterations"
-    return indeterminate(root), indeterminate(root)
-end
-
 
 """
     verify_root_from_approximation(
