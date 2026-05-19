@@ -54,7 +54,7 @@ Check this box to set the code to save the figures.
 fontsize = 22
 
 # ╔═╡ ad65706c-75ec-4ddb-9d1b-571fbe4998d1
-λ = CGLParams{Arb}(3, 1, 1, 0)
+Λ = CGLParams{Arb}(3, 1, 1, 0)
 
 # ╔═╡ da71a660-d085-42c6-851a-e7d28f472574
 ϵ = Arb("0.1681")
@@ -86,7 +86,7 @@ These approximations are then refined using a Newton-Raphson method.
 """
 
 # ╔═╡ 098d9c62-a9c4-4a3e-a1f7-7d466f136f0f
-μ₀, γ₀, κ₀ = CGL2.refine_approximation_fix_epsilon(μ_approx, κ_approx, ϵ, ξ₁, λ)
+μ₀, γ₀, κ₀ = CGL2.refine_approximation_fix_epsilon(μ_approx, κ_approx, ϵ, ξ₁, Λ)
 
 # ╔═╡ 93669102-c090-4a86-bfb2-9609fbfe924f
 md"""
@@ -109,7 +109,7 @@ The application of the interval Newton method is handled by `G_solve_fix_epsilon
 
 # ╔═╡ baa627cb-3a2c-4a48-89ee-515ceaed7049
 μ, γ_real, γ_imag, κ =
-    CGL2.G_solve_fix_epsilon(μ₀, real(γ₀), imag(γ₀), κ₀, ϵ, ξ₁, λ, verbose = true)
+    CGL2.G_solve_fix_epsilon(μ₀, real(γ₀), imag(γ₀), κ₀, ϵ, ξ₁, Λ, verbose = true)
 
 # ╔═╡ 683c7c63-57df-4bb6-9a3d-96dfbcd85784
 γ = Acb(γ_real, γ_imag)
@@ -139,7 +139,7 @@ TODO: Rename `p_Q_0` to `p_Q`?
 """
 
 # ╔═╡ f044e3bf-87b5-4d4f-8bcd-b0ec3f816676
-p_Q = CGL2.p_Q_0(γ, κ, ϵ, ξ₁, λ)
+p_Q = CGL2.p_Q_0(γ, κ, ϵ, ξ₁, Λ)
 
 # ╔═╡ 5888a3a0-7064-4b6b-9428-42fcb61d396a
 md"""
@@ -159,7 +159,7 @@ let
         Float64(κ),
         Float64(ϵ),
         ξs[end],
-        CGLParams{Float64}(λ),
+        CGLParams{Float64}(Λ),
     ).(
         ξs,
     )
@@ -176,7 +176,7 @@ Next we prove the existance of a forward self-similar solution with the same asy
 """
 
 # ╔═╡ b4049ea0-ee9f-409c-b2e3-2fdbabe1b8a9
-a, b, c = CGL2._abc(κ, ϵ, λ)
+a, b, c = CGL2._abc(κ, ϵ, Λ)
 
 # ╔═╡ c2f067f3-4a78-4048-834d-186ec249350e
 γ₁ = p_Q / (-c)^-a
@@ -204,7 +204,7 @@ Next we compute a numerical approximation for ``\nu`` and ``\gamma_2``. This is 
         Float64(κ),
         Float64(ϵ),
         Float64(ξ₁),
-        CGLParams{Float64}(λ),
+        CGLParams{Float64}(Λ),
     ),
 )
 
@@ -225,7 +225,7 @@ The application of the interval Newton method is handled by `G_solve_hat`. Note 
 """
 
 # ╔═╡ 75653ff9-94ca-4c7b-a0c5-363b1de657e0
-ν, γ₂ = CGL2.G_hat_solve(ν_approx, γ₁, γ₂_approx, κ, ϵ, ξ₁, λ, verbose = true)
+ν, γ₂ = CGL2.G_hat_solve(ν_approx, γ₁, γ₂_approx, κ, ϵ, ξ₁, Λ, verbose = true)
 
 # ╔═╡ 3df5f78f-d780-4db7-bd39-a858e04f650a
 @assert_proof isfinite(ν) && isfinite(γ₂)
@@ -252,7 +252,7 @@ let
         Float64(κ),
         Float64(ϵ),
         ξs[end],
-        CGLParams{Float64}(λ),
+        CGLParams{Float64}(Λ),
     ).(
         ξs,
     )
@@ -282,19 +282,19 @@ The first step is to compute an approximate solution using a finite-difference m
 
 # ╔═╡ f1ea08ed-8969-448f-859b-8aea8ba546de
 # Find approximation using finite differences
-λsF64 = filter(
+ΛsF64 = filter(
     lambda -> imag(lambda) > 0,
     CGL2.linearization_eigenvalues_real_1(
         ComplexF64(ν),
         Float64(κ),
         Float64(ϵ),
         Float64(ξ₁),
-        CGLParams{Float64}(λ),
+        CGLParams{Float64}(Λ),
     )[1],
 )
 
 # ╔═╡ 21cf1d05-df4a-4853-b1be-66bb66e5b35f
-lambda_approx = Acf(λsF64[findmax(real, λsF64)[2]])
+lambda_approx = Acf(ΛsF64[findmax(real, ΛsF64)[2]])
 
 # ╔═╡ 71b8a3b1-3227-44b9-8f06-50c9192ac96f
 md"""
@@ -388,16 +388,16 @@ We then use these to construct the pieces for the different sides of the square.
 """
 
 # ╔═╡ 3e493c1b-b786-4cd3-b321-0de29ae04bf0
-λs_bottom = corner_bl .+ ts_bottom .* (corner_br - corner_bl)
+Λs_bottom = corner_bl .+ ts_bottom .* (corner_br - corner_bl)
 
 # ╔═╡ 7d7217b1-5186-4d2f-97ab-f2581add502e
-λs_right = corner_br .+ (ts_right .- 1) .* (corner_tr - corner_br)
+Λs_right = corner_br .+ (ts_right .- 1) .* (corner_tr - corner_br)
 
 # ╔═╡ c0a0d2fd-9a35-4028-b4e6-dbcf4e777613
-λs_top = corner_tr .+ (ts_top .- 2) .* (corner_tl - corner_tr)
+Λs_top = corner_tr .+ (ts_top .- 2) .* (corner_tl - corner_tr)
 
 # ╔═╡ ca27e948-94c4-44a9-93c8-8b83493eb479
-λs_left = corner_tl .+ (ts_left .- 3) .* (corner_bl - corner_tl)
+Λs_left = corner_tl .+ (ts_left .- 3) .* (corner_bl - corner_tl)
 
 # ╔═╡ 6f7407fb-8d41-451a-a220-80bdcc1fe881
 md"""
@@ -405,16 +405,16 @@ Compute ``H`` for each piece.
 """
 
 # ╔═╡ 340f6f00-629a-4c52-8f07-baf6568a2957
-H_square_bottom = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ), λs_bottom)
+H_square_bottom = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_bottom)
 
 # ╔═╡ 060bd72c-1e0f-47cf-bbf1-f03c6e8c3599
-H_square_right = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ), λs_right)
+H_square_right = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_right)
 
 # ╔═╡ da7f234b-b681-4956-ba49-7f2ac6b363c2
-H_square_top = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ), λs_top)
+H_square_top = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_top)
 
 # ╔═╡ 942b9ffc-f12a-4c3c-9002-ffb69c784fd1
-H_square_left = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, λ), λs_left)
+H_square_left = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_left)
 
 # ╔═╡ 193f2a06-c0d3-45f5-8a2f-ba65d5a41ab3
 to_rect(x::Arb, y::Arb) = Rect2d(lbound(x), lbound(y), 2radius(x), 2radius(y))

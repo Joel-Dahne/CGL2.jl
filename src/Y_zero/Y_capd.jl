@@ -102,7 +102,7 @@ function _Y_zero_capd(
 end
 
 """
-    Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ::CGLParams; ξ₀, tol, degree = 20)
+    Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol, degree = 20)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
 initial values given by `Y₀`. Returns a vector with four complex
@@ -128,23 +128,23 @@ function Y_zero_capd(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
-    ξ₀::Arb = ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
+    Λ::CGLParams{Arb};
+    ξ₀::Arb = ifelse(isone(Λ.d), zero(Arb), Arb(1e-2)),
     tol::Float64 = 1e-11,
     degree = 20,
 )
     Q_hat_ξ₀, Y_ξ₀ = if !iszero(ξ₀)
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
-        Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-        Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+        Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, Λ)
+        Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ; degree)
         if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀))
             iterations = 0
             while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀)) && iterations < 5
                 iterations += 1
                 ξ₀ /= 2
-                Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, λ)
-                Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ; degree)
+                Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, Λ)
+                Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ; degree)
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
@@ -155,5 +155,5 @@ function Y_zero_capd(
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
-    return _Y_zero_capd(Q_hat_ξ₀, Y_ξ₀, lambda, κ, ϵ, ξ₀, ξ₁, λ; tol)
+    return _Y_zero_capd(Q_hat_ξ₀, Y_ξ₀, lambda, κ, ϵ, ξ₀, ξ₁, Λ; tol)
 end

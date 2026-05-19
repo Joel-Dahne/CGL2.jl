@@ -7,7 +7,7 @@
         κ::Arb,
         ϵ::Arb,
         ξ₀::Arb,
-        λ::CGLParams{Arb},
+        Λ::CGLParams{Arb},
     )
 
 Compute an enclosure of the remainder term in [`Y_zero_taylor`](@ref).
@@ -36,7 +36,7 @@ function _Y_zero_taylor_remainder(
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
 )
     @assert Arblib.degree(Y1) == Arblib.degree(Y2)
 
@@ -44,7 +44,7 @@ function _Y_zero_taylor_remainder(
 
     isfinite(Y1) && isfinite(Y2) || return indeterminate_result
 
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     # Compute expansion of forward solution
     a, b = cgl_equation_real_taylor(
@@ -52,7 +52,7 @@ function _Y_zero_taylor_remainder(
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree = Arblib.degree(Y1),
     )
 
@@ -127,7 +127,7 @@ function _Y_zero_taylor_remainder(
 end
 
 """
-    Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, λ::CGLParams; degree = 20)
+    Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ::CGLParams; degree = 20)
 
 Compute the solution to the ODE on the interval ``[0, ξ₀]``. Returns a
 vector with four complex values, the first two are the values at `ξ₀`
@@ -144,7 +144,7 @@ function Y_zero_taylor(
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     degree = 20,
 )
     # Compute expansion
@@ -155,12 +155,12 @@ function Y_zero_taylor(
         κ,
         ϵ,
         zero(ξ₀),
-        λ;
+        Λ;
         degree,
     )
 
     remainder, remainder_derivative =
-        _Y_zero_taylor_remainder(Y1, Y2, lambda, ν, κ, ϵ, ξ₀, λ)
+        _Y_zero_taylor_remainder(Y1, Y2, lambda, ν, κ, ϵ, ξ₀, Λ)
 
     Y10, Y11 = Arblib.evaluate2(Y1, ξ₀)
     Y20, Y21 = Arblib.evaluate2(Y2, ξ₀)

@@ -1,5 +1,5 @@
 """
-    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, λ, Z, F_Z, C_Z, norms_Z)
+    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, Λ, Z, F_Z, C_Z, norms_Z)
 
 Compute an enclosure of ``I_{K_2}(ξ)`` at the point `ξ = ξ₁`.
 
@@ -20,14 +20,14 @@ function I_K_2_enclosure(
     ϵ::Arb,
     ξ₁::Arb,
     v::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     Z::SVector{2,Acb},
     F_Z::FunctionEnclosures_Y,
     C_Z::FunctionBounds_Y,
     norms_Z::NormBounds_Y,
 )
-    (; d, σ) = λ
-    c = _c(κ, ϵ, λ)
+    (; d, σ) = Λ
+    c = _c(κ, ϵ, Λ)
 
     if all(Arblib.contains_zero, Z)
         # This is the wide case. The bound is computed using

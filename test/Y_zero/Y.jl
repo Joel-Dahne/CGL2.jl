@@ -5,7 +5,7 @@
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
     ξ₁ = Arb(30)
-    λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
+    Λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
 
     Y₀F64 = ComplexF64.(Y₀)
     lambdaF64 = ComplexF64(lambda)
@@ -13,17 +13,17 @@
     κF64 = Float64(κ)
     ϵF64 = Float64(ϵ)
     ξ₁F64 = Float64(ξ₁)
-    λF64 = CGLParams{Float64}(λ)
+    ΛF64 = CGLParams{Float64}(Λ)
 
-    res = CGL2.Y_zero(Y₀, lambda, ν, κ, ϵ, ξ₁, λ)
+    res = CGL2.Y_zero(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ)
 
     # Test with different settings for Taylor expansion
-    res2 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ, ξ₀ = Arb(1e-1), degree = 5)
-    res3 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, λ, ξ₀ = Arb(1e-3))
+    res2 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ, ξ₀ = Arb(1e-1), degree = 5)
+    res3 = CGL2.Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ, ξ₀ = Arb(1e-3))
     @test all(Arblib.overlaps.(res, res2))
     @test all(Arblib.overlaps.(res, res3))
 
     # Compare with Float64 version
-    resF64 = CGL2.Y_zero(Y₀F64, lambdaF64, νF64, κF64, ϵF64, ξ₁F64, λF64)
+    resF64 = CGL2.Y_zero(Y₀F64, lambdaF64, νF64, κF64, ϵF64, ξ₁F64, ΛF64)
     @test ComplexF64.(res) ≈ resF64 rtol = 1e-10
 end

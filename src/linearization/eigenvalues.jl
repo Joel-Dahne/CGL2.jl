@@ -1,5 +1,5 @@
 """
-    linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10, return_L = false)
+    linearization_eigenvalues_1(ν, κ, ϵ, ξ₁, Λ::CGLParams; n = 2048, nev = 10, return_L = false)
 
 Compute the eigenvalues and eigenvectors of the linearized equation.
 
@@ -15,16 +15,16 @@ function linearization_eigenvalues_1(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     n = 2048,
     nev = 10,
     return_L = false,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
-    sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
+    sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
 
@@ -81,16 +81,16 @@ function linearization_eigenvalues_1(
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
-    λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
+    Λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
 
     if return_L
-        return L, λs, vs
+        return L, Λs, vs
     end
-    return λs, vs
+    return Λs, vs
 end
 
 """
-    linearization_eigenvalues_2(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10, return_L = false)
+    linearization_eigenvalues_2(ν, κ, ϵ, ξ₁, Λ::CGLParams; n = 2048, nev = 10, return_L = false)
 
 Compute the eigenvalues and eigenvectors of the linearized equation.
 
@@ -106,16 +106,16 @@ function linearization_eigenvalues_2(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     n = 2048,
     nev = 10,
     return_L = false,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
-    sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs)
+    sol = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ, saveat = ξs)
     # Compute complex values at grid points
     Qs = map(y -> complex(y[1], y[2]), sol.u)
 
@@ -161,16 +161,16 @@ function linearization_eigenvalues_2(
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
-    λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
+    Λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
 
     if return_L
-        return L, λs, vs
+        return L, Λs, vs
     end
-    return λs, vs
+    return Λs, vs
 end
 
 """
-    linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10, return_L = false)
+    linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, Λ::CGLParams; n = 2048, nev = 10, return_L = false)
 
 Compute the eigenvalues and eigenvectors of the linearized equation.
 
@@ -186,16 +186,16 @@ function linearization_eigenvalues_real_1(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     n = 2048,
     nev = 10,
     return_L = false,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
-    Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
+    Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ, saveat = ξs).u
 
     h = step(ξs)
 
@@ -247,16 +247,16 @@ function linearization_eigenvalues_real_1(
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
-    λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
+    Λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
 
     if return_L
-        return L, λs, vs
+        return L, Λs, vs
     end
-    return λs, vs
+    return Λs, vs
 end
 
 """
-    linearization_eigenvalues_real_3(ν, κ, ϵ, ξ₁, λ::CGLParams; n = 2048, nev = 10, return_L = false)
+    linearization_eigenvalues_real_3(ν, κ, ϵ, ξ₁, Λ::CGLParams; n = 2048, nev = 10, return_L = false)
 
 Compute the eigenvalues and eigenvectors of the linearized equation.
 
@@ -276,21 +276,21 @@ function linearization_eigenvalues_real_3(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     n = 2048,
     nev = 10,
     return_L = false,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     # Grid we discretize the linear operator on
     ξs = range(zero(ξ₁), ξ₁, n + 2)[2:(end-1)]
-    Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, λ, saveat = ξs).u
+    Qs = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ, saveat = ξs).u
 
     h = step(ξs)
 
     Ms = map(Qs, ξs) do Q, ξ
-        linearization_real_matrix(Q, κ, ϵ, ξ, λ)
+        linearization_real_matrix(Q, κ, ϵ, ξ, Λ)
     end
 
     # Adjust top left corner for Neumann boundary conditions
@@ -303,10 +303,10 @@ function linearization_eigenvalues_real_3(
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
-    λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
+    Λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
 
     if return_L
-        return L, λs, vs
+        return L, Λs, vs
     end
-    return λs, vs
+    return Λs, vs
 end

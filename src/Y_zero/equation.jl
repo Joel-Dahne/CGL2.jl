@@ -1,16 +1,16 @@
 """
-    cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, λ)
-    cgl_linearization_equation(YZ, (lambda, κ, ϵ, Q_hat, λ), ξ)
+    cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ)
+    cgl_linearization_equation(YZ, (lambda, κ, ϵ, Q_hat, Λ), ξ)
 
 Evaluate the right hand side of the forward ODE when written as a four
 dimensional complex system. It is evaluated at the point `Y` and time
 `ξ`.
 
-For `λ.d != 1` there is a removable singularity at `ξ = 0`. To return
+For `Λ.d != 1` there is a removable singularity at `ξ = 0`. To return
 a finite value we in this case required that `Y[3] = Y[4] = 0`.
 """
-function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, λ::CGLParams)
-    (; d, ω, σ, δ) = λ
+function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
+    (; d, ω, σ, δ) = Λ
     Y = SVector(YZ[1], YZ[2])
     Z = SVector(YZ[3], YZ[4])
 
@@ -42,8 +42,8 @@ function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, λ::CGLParams
 end
 
 # For use with ODEProblem
-cgl_linearization_equation(u, (lambda, κ, ϵ, Q_hat, λ), ξ) =
-    cgl_linearization_equation(u, lambda, κ, ϵ, ξ, Q_hat, λ)
+cgl_linearization_equation(u, (lambda, κ, ϵ, Q_hat, Λ), ξ) =
+    cgl_linearization_equation(u, lambda, κ, ϵ, ξ, Q_hat, Λ)
 
 function cgl_linearization_equation_real(
     YZ_reim,
@@ -53,9 +53,9 @@ function cgl_linearization_equation_real(
     ϵ,
     ξ,
     Q_hat,
-    λ::CGLParams,
+    Λ::CGLParams,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
     Y_r = SVector(YZ_reim[1], YZ_reim[2])
     Y_i = SVector(YZ_reim[3], YZ_reim[4])
     Z_r = SVector(YZ_reim[5], YZ_reim[6])
@@ -163,25 +163,25 @@ function cgl_linearization_equation_real(
 end
 
 # For use with ODEProblem
-cgl_linearization_equation_real(u, (lambda_real, lambda_imag, κ, ϵ, Q_hat, λ), ξ) =
-    cgl_linearization_equation_real(u, lambda_real, lambda_imag, κ, ϵ, ξ, Q_hat, λ)
+cgl_linearization_equation_real(u, (lambda_real, lambda_imag, κ, ϵ, Q_hat, Λ), ξ) =
+    cgl_linearization_equation_real(u, lambda_real, lambda_imag, κ, ϵ, ξ, Q_hat, Λ)
 
 function _cgl_linearization_equation_taylor_J_N_taylor(
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     degree::Integer = 5,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     a, b = cgl_equation_real_taylor(
         SVector{2,NTuple{2,Arb}}((real(ν), 0), (imag(ν), 0)),
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
 
@@ -200,10 +200,10 @@ function cgl_linearization_equation_taylor(
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     degree::Integer = 5,
 )
-    (; d, ω, σ, δ) = λ
+    (; d, ω, σ, δ) = Λ
 
     Y1 = AcbSeries(Y_ξ₀[1]; degree)
     Y2 = AcbSeries(Y_ξ₀[2]; degree)
@@ -216,7 +216,7 @@ function cgl_linearization_equation_taylor(
     B₁ = SMatrix{2,2}(κ, 0, 0, κ)
     B₂ = (d - 1) * A
     C = SMatrix{2,2}(κ / σ, ω, -ω, κ / σ)
-    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, λ; degree)
+    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, Λ; degree)
 
     for n = 0:2:(degree-2)
         if iszero(ξ₀)

@@ -4,11 +4,11 @@ function branch_eigenvalue_points(
     κs::Vector{Arb},
     ϵs::Vector{Arb},
     ξ₁s::Vector{Arb},
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     verbose = false,
 )
     res = map(μs, γs, κs, ϵs, ξ₁s) do μ, γ, κ, ϵ, ξ₁
-        eigenvalue_solve(μ, γ, κ, ϵ, ξ₁, λ; verbose)
+        eigenvalue_solve(μ, γ, κ, ϵ, ξ₁, Λ; verbose)
     end
 
     xs = getindex.(res, 1)

@@ -1,5 +1,5 @@
 """
-    G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+    G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 Compute
 ```
@@ -17,16 +17,16 @@ function G_hat(
     κ::T,
     ϵ::T,
     ξ₁::T,
-    λ::CGLParams{T},
+    Λ::CGLParams{T},
 ) where {T}
-    Q_hat_0, Q_hat_0_dξ = Q_hat_zero(ν, κ, ϵ, ξ₁, λ)
-    Q_hat_inf, Q_hat_inf_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    Q_hat_0, Q_hat_0_dξ = Q_hat_zero(ν, κ, ϵ, ξ₁, Λ)
+    Q_hat_inf, Q_hat_inf_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     return SVector(Q_hat_0 - Q_hat_inf, Q_hat_0_dξ - Q_hat_inf_dξ)
 end
 
 """
-    G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+    G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 This function computes the Jacobian of [`G_hat`](@ref) w.r.t. the
 parameters `ν` and `γ₂`.
@@ -38,10 +38,10 @@ function G_hat_jacobian(
     κ::T,
     ϵ::T,
     ξ₁::T,
-    λ::CGLParams{T},
+    Λ::CGLParams{T},
 ) where {T}
-    Q_hat_0_J = Q_hat_zero_jacobian(ν, κ, ϵ, ξ₁, λ)
-    Q_hat_inf_J = Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    Q_hat_0_J = Q_hat_zero_jacobian(ν, κ, ϵ, ξ₁, Λ)
+    Q_hat_inf_J = Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     return SMatrix{2,2}(
         # Derivative w.r.t. ν

@@ -1,5 +1,5 @@
 """
-    integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
+    integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
 
 Compute an enclosure of the integral in `η` from `ξ₁` to infinity of
 the function
@@ -20,9 +20,9 @@ remainder term we compute a bound for the absolute value. For terms
 were all factors are from the series we enclose the integral by
 integrating it explicitly.
 """
-function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d, σ) = λ
+function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
+    (; d, σ) = Λ
 
     I_U = zero(Acb)
 
@@ -77,11 +77,11 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}
         end
     end
 
-    return B_W_hat(κ, ϵ, λ) * c^(a - b) * abs((-c)^-a)^2 * (-c)^-a * I_U
+    return B_W_hat(κ, ϵ, Λ) * c^(a - b) * abs((-c)^-a)^2 * (-c)^-a * I_U
 end
 
 """
-    I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+    I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of `I_E_hat` based on Lemma
 REF(lemma:I_E_hat-enclosure).
@@ -92,22 +92,22 @@ function I_E_hat_enclosure(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     F::FunctionEnclosures_hat,
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
 )
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d, σ) = λ
+    a, b, c = _abc(κ, ϵ, Λ)
+    (; d, σ) = Λ
 
     # Requirements of Lemma REF(lemma:I_E_hat-enclosure)
     # The requirements from Lemma REF(lemma:Q-hat-leading-term) are
     # checked internally by the function C_R_Q_hat.
     @assert isone(σ)
 
-    I_E_hat_main = abs(γ₁)^2 * γ₁ * integral_J_E_hat_P_hat(κ, ϵ, ξ₁, λ)
+    I_E_hat_main = abs(γ₁)^2 * γ₁ * integral_J_E_hat_P_hat(κ, ϵ, ξ₁, Λ)
 
-    C_R_Q_hat = CGL2.C_R_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+    C_R_Q_hat = CGL2.C_R_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
     R_I_E_hat_bound =
         C.J_E_hat *
         (
@@ -122,7 +122,7 @@ function I_E_hat_enclosure(
 end
 
 """
-    I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+    I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of `I_E_hat_dγ₂` based on Lemma
 REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
@@ -133,7 +133,7 @@ function I_E_hat_dγ₂_enclosure(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     F::FunctionEnclosures_hat,
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
@@ -142,7 +142,7 @@ function I_E_hat_dγ₂_enclosure(
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 
-    I_E_hat_dγ₂_bound = (2λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2λ.σ * norms.Q_hat_dγ₂
+    I_E_hat_dγ₂_bound = (2Λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2Λ.σ * norms.Q_hat_dγ₂
 
     return add_error(zero(Acb), I_E_hat_dγ₂_bound)
 end

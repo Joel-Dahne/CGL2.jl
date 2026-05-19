@@ -1,5 +1,5 @@
 """
-    FunctionBounds_hat(κ, ϵ, ξ₁, λ)
+    FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
 
 Contains the constants involved in asymptotic bounds for functions
 that are needed in the enclosure of `Q_hat` at infinity.
@@ -42,9 +42,9 @@ struct FunctionBounds_hat
     )
 end
 
-function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    (; d, σ) = λ
-    a, b, c = _abc(κ, ϵ, λ)
+function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    (; d, σ) = Λ
+    a, b, c = _abc(κ, ϵ, Λ)
 
     # Requirement of Lemma REF(lemma:P_hat-E_hat-bounds)
     @assert ξ₁ > 1
@@ -64,54 +64,54 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
 
     C_hat = FunctionBounds_hat()
 
-    C_hat.P_hat[] = C_P_hat(κ, ϵ, ξ₁, λ, CU_hat)
-    C_hat.P_hat_dξ[] = C_P_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
+    C_hat.P_hat[] = C_P_hat(κ, ϵ, ξ₁, Λ, CU_hat)
+    C_hat.P_hat_dξ[] = C_P_hat_dξ(κ, ϵ, ξ₁, Λ, CU_hat)
 
-    C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, λ, CU_hat)
-    C_hat.E_hat_dξ[] = C_E_hat_dξ(κ, ϵ, ξ₁, λ, CU_hat)
+    C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, Λ, CU_hat)
+    C_hat.E_hat_dξ[] = C_E_hat_dξ(κ, ϵ, ξ₁, Λ, CU_hat)
 
-    C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, λ, C_hat)
-    C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, λ, C_hat)
+    C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, Λ, C_hat)
+    C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, Λ, C_hat)
 
-    C_hat.I_E_hat[] = C_I_E_hat(κ, ϵ, ξ₁, λ, C_hat)
-    C_hat.I_P_hat[] = C_I_P_hat(κ, ϵ, ξ₁, λ, C_hat)
+    C_hat.I_E_hat[] = C_I_E_hat(κ, ϵ, ξ₁, Λ, C_hat)
+    C_hat.I_P_hat[] = C_I_P_hat(κ, ϵ, ξ₁, Λ, C_hat)
 
     C_hat.T_hat[] = C_hat.P_hat * C_hat.I_E_hat + C_hat.E_hat * C_hat.I_P_hat * ξ₁^-2
 
     return C_hat
 end
 
-function C_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
     return CU_hat.U_a_b * abs((-c)^-a)
 end
 
-function C_P_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_P_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
     return CU_hat.U_dz_a_b * abs(2(-c)^-a)
 end
 
-function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
     return CU_hat.U_bma_b * abs(c^(a - b))
 end
 
-function C_E_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
     return 2(CU_hat.U_bma_b * abs(c) + CU_hat.U_dz_bma_b * ξ₁^-2) * abs(c^(a - b))
 end
 
-C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
-    abs(B_W_hat(κ, ϵ, λ)) * C_hat.P_hat
+C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
+    abs(B_W_hat(κ, ϵ, Λ)) * C_hat.P_hat
 
-C_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
-    abs(B_W_hat(κ, ϵ, λ)) * C_hat.E_hat
+C_J_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
+    abs(B_W_hat(κ, ϵ, Λ)) * C_hat.E_hat
 
-C_I_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
+C_I_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
     C_hat.J_E_hat / 2
 
-function C_I_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C_hat::FunctionBounds_hat)
-    (; d, σ) = λ
-    c = _c(κ, ϵ, λ)
+function C_I_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_hat::FunctionBounds_hat)
+    (; d, σ) = Λ
+    c = _c(κ, ϵ, Λ)
     return C_hat.J_P_hat / (2real(c) + (-2 / σ + d - 4) * ξ₁^-2)
 end

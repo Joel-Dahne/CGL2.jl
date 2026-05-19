@@ -1,5 +1,5 @@
 """
-    Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ::CGLParams; degree = 20, enclose_curve = Val{false}())
+    Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ::CGLParams; degree = 20, enclose_curve = Val{false}())
 
 Compute the solution to the ODE on the interval ``[0, ξ₀]``. Returns a
 vector with four real values, the first two are the real and imaginary
@@ -20,7 +20,7 @@ function Q_hat_zero_taylor(
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     degree = 20,
     enclose_curve::Union{Val{false},Val{true}} = Val{false}(),
 )
@@ -32,12 +32,12 @@ function Q_hat_zero_taylor(
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
 
     remainder, remainder_derivative, remainder_derivative2 =
-        _Q_zero_taylor_remainder(a, b, -κ, ϵ, ξ₀, CGLParams(λ, ω = -λ.ω))
+        _Q_zero_taylor_remainder(a, b, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     if enclose_curve isa Val{true}
         a0, a1 = Arblib.evaluate2(a, Arb((0, ξ₀)))
@@ -65,7 +65,7 @@ function Q_hat_zero_taylor(
 end
 
 """
-    Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ::CGLParams; degree = 20, enclose_curve = Val{false}())
+    Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ::CGLParams; degree = 20, enclose_curve = Val{false}())
 
 This function computes the Jacobian of [`Q_hat_zero_taylor`](@ref)
 w.r.t. the parameters `ν_real` and `ν_imag`. It also returns the
@@ -77,7 +77,7 @@ function Q_hat_zero_jacobian_taylor(
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     degree = 20,
 )
     # Compute expansion
@@ -88,7 +88,7 @@ function Q_hat_zero_jacobian_taylor(
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
 
@@ -105,7 +105,7 @@ function Q_hat_zero_jacobian_taylor(
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
 
@@ -117,18 +117,18 @@ function Q_hat_zero_jacobian_taylor(
         -κ,
         ϵ,
         zero(ξ₀),
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
 
     remainder, remainder_derivative, _ =
-        _Q_zero_taylor_remainder(a, b, -κ, ϵ, ξ₀, CGLParams(λ, ω = -λ.ω))
+        _Q_zero_taylor_remainder(a, b, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     remainder_dν_real, remainder_derivative_dν_real =
-        _Q_zero_taylor_remainder_dμ(a_dν_real, b_dν_real, -κ, ϵ, ξ₀, CGLParams(λ, ω = -λ.ω))
+        _Q_zero_taylor_remainder_dμ(a_dν_real, b_dν_real, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     remainder_dν_imag, remainder_derivative_dν_imag =
-        _Q_zero_taylor_remainder_dμ(a_dν_imag, b_dν_imag, -κ, ϵ, ξ₀, CGLParams(λ, ω = -λ.ω))
+        _Q_zero_taylor_remainder_dμ(a_dν_imag, b_dν_imag, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     a0, a1 = Arblib.evaluate2(a, ξ₀)
     b0, b1 = Arblib.evaluate2(b, ξ₀)

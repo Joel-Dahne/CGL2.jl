@@ -26,7 +26,7 @@ function NormBounds_hat(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds_hat,
 )
     norms = NormBounds_hat()
@@ -45,14 +45,14 @@ function NormBounds_hat(
     # constants are computed. The other conditions are checked in the
     # norm_bound_Q_hat_dγ₂ function.
 
-    norms.Q_hat[] = norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
-    norms.Q_hat_dγ₂[] = norm_bound_Q_hat_dγ₂(κ, ϵ, ξ₁, λ, C, norms)
+    norms.Q_hat[] = norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
+    norms.Q_hat_dγ₂[] = norm_bound_Q_hat_dγ₂(κ, ϵ, ξ₁, Λ, C, norms)
 
     return norms
 end
 
 """
-    norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
+    norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
 
 To apply the fixed point theorem in Proposition
 REF(prop:Q-hat-fixed-point) we need to find `ρ` satisfying the
@@ -105,11 +105,11 @@ function norm_bound_Q_hat(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds_hat,
 )
-    c = _c(κ, ϵ, λ)
-    (; d, σ) = λ
+    c = _c(κ, ϵ, Λ)
+    (; d, σ) = Λ
 
     # Upper bound for ρ from second inequality. We take a value that
     # is strictly lower than this (by eps(Arb)), so that we know that
@@ -156,7 +156,7 @@ function norm_bound_Q_hat(
 end
 
 """
-    norm_bound_Q_hat_dγ₂(γ₁, γ₂, κ, ϵ, ξ₁, λ, C, norms)
+    norm_bound_Q_hat_dγ₂(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C, norms)
 
 Compute a bound for the norm of `Q_hat_dγ₂` based on Lemma
 REF(lemma:Q-hat-dgamma-bound).
@@ -165,12 +165,12 @@ function norm_bound_Q_hat_dγ₂(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
 )
-    c = _c(κ, ϵ, λ)
-    (; d, σ) = λ
+    c = _c(κ, ϵ, Λ)
+    (; d, σ) = Λ
 
     num = C.E_hat * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d)
     den = 1 - (2σ + 1) * C.T_hat * ξ₁^-2 * norms.Q_hat^2σ

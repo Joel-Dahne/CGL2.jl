@@ -1,5 +1,5 @@
 """
-    linearization_real_matrix(Q₀, κ, ϵ, ξ, λ::CGLParams)
+    linearization_real_matrix(Q₀, κ, ϵ, ξ, Λ::CGLParams)
 
 Computes the matrix corresponding to the linearization around the
 solution `Q₀`. The linearized equation can be written on the form
@@ -20,12 +20,12 @@ where `J(N)(Q₀)` denotes the Jacobian of `N` evaluated at `Q₀`.
 This should return the same result as
 ```
 ForwardDiff.jacobian(Q₀) do Q
-    CGL2.cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ₁, λ)
+    CGL2.cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ₁, Λ)
 end
 ```
 """
-function linearization_real_matrix(Q₀, κ, ϵ, ξ, λ::CGLParams)
-    (; d, ω, σ, δ) = λ
+function linearization_real_matrix(Q₀, κ, ϵ, ξ, Λ::CGLParams)
+    (; d, ω, σ, δ) = Λ
 
     A =
         1 / (1 + ϵ^2) * @SMatrix[

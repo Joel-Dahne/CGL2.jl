@@ -3,13 +3,13 @@ function G_hat_approximate(
     κ::T,
     ϵ::T,
     ξ₁::T,
-    λ::CGLParams{T};
+    Λ::CGLParams{T};
     return_convergence::Union{Val{false},Val{true}} = Val{false}(),
     verbose = false,
 ) where {T}
-    F((ν, γ₂), (γ₁, κ, ϵ, ξ₁, λ)) = G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    F((ν, γ₂), (γ₁, κ, ϵ, ξ₁, Λ)) = G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
     x₀ = SVector(zero(γ₁), zero(γ₁)) # IMPROVE: Pick this in a smarter way
-    prob = NonlinearProblem{false}(F, x₀, (γ₁, κ, ϵ, ξ₁, λ))
+    prob = NonlinearProblem{false}(F, x₀, (γ₁, κ, ϵ, ξ₁, Λ))
     sol = try
         solve(
             prob,
@@ -54,13 +54,13 @@ function G_hat_solve(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     expansion_rate = 0.05,
     max_iterations = 10,
     verbose = false,
 )
-    G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
+    dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     root, _ = verify_root_from_approximation(
         G_hat_x,

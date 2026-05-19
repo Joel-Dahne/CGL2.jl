@@ -1,5 +1,5 @@
 """
-    Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
 vector with four real values, the first two are the real and imaginary
@@ -11,12 +11,12 @@ intervals for `ν`, `κ` and/or `ϵ` it computes it at the corners of the
 box they form. This means you still get something that resembles an
 enclosure.
 """
-function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
     prob = ODEProblem{false}(
         cgl_hat_equation_real,
         SVector(ν_real, ν_imag, 0, 0),
         (zero(ξ₁), ξ₁),
-        (κ, ϵ, λ),
+        (κ, ϵ, Λ),
     )
 
     # Used to exit early in extreme cases. Sometimes the
@@ -45,11 +45,11 @@ function Q_hat_zero_float(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
+    Λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 )
     ξ₁ = Float64(ξ₁)
-    λ = CGLParams{Float64}(λ)
+    Λ = CGLParams{Float64}(Λ)
 
     ν_reals = iswide(ν_real) ? collect(Float64.(getinterval(ν_real))) : [Float64(ν_real)]
     ν_imags = iswide(ν_imag) ? collect(Float64.(getinterval(ν_imag))) : [Float64(ν_imag)]
@@ -57,7 +57,7 @@ function Q_hat_zero_float(
     ϵs = iswide(ϵ) ? collect(Float64.(getinterval(ϵ))) : [Float64(ϵ)]
 
     us = map(Iterators.product(ν_reals, ν_imags, κs, ϵs)) do (ν_real, ν_imag, κ, ϵ)
-        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ; tol)
+        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ; tol)
     end
 
     return SVector(
@@ -69,7 +69,7 @@ function Q_hat_zero_float(
 end
 
 """
-    Q_hat_zero_jacobian_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Q_hat_zero_jacobian_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
 
 This function computes the Jacobian of [`Q_hat_zero_float`](@ref) w.r.t.
 the parameters `ν_real` and `ν_imag`.
@@ -80,16 +80,16 @@ function Q_hat_zero_jacobian_float(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     tol::Float64 = 1e-11,
 )
     return ForwardDiff.jacobian(SVector(ν_real, ν_imag)) do (ν_real, ν_imag)
-        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, λ; tol)
+        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ; tol)
     end
 end
 
 """
-    Q_hat_zero_float_curve(ν_real, ν_imag, κ, ϵ, ξ₁, λ::CGLParams; tol::Float64 = 1e-11)
+    Q_hat_zero_float_curve(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
 
 Similar to [`Q_hat_zero_float`](@ref) but returns the whole
 solution object given by the ODE solver, instead of just the value at
@@ -101,7 +101,7 @@ function Q_hat_zero_float_curve(
     κ,
     ϵ,
     ξ₁,
-    λ::CGLParams;
+    Λ::CGLParams;
     tol::Float64 = 1e-11,
     saveat = [],
 )
@@ -109,7 +109,7 @@ function Q_hat_zero_float_curve(
         cgl_hat_equation_real,
         SVector(ν_real, ν_imag, 0, 0),
         (zero(ξ₁), ξ₁),
-        (κ, ϵ, λ),
+        (κ, ϵ, Λ),
     )
 
     sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)

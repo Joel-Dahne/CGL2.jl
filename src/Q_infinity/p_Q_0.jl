@@ -1,7 +1,7 @@
 # TODO: Add tests and documentation for this function
-function integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d, σ) = λ
+function integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
+    (; d, σ) = Λ
 
     I_U = zero(Acb)
 
@@ -54,20 +54,20 @@ function integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
         end
     end
 
-    return B_W(κ, ϵ, λ) * (-c)^(a - b) * abs(c^-a)^2 * c^-a * I_U
+    return B_W(κ, ϵ, Λ) * (-c)^(a - b) * abs(c^-a)^2 * c^-a * I_U
 end
 
-function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
+function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
     v = Arb("0.001")
-    (; σ) = λ
+    (; σ) = Λ
 
     CU = UBounds(a, b, c, ξ₁)
-    C = FunctionBounds(κ, ϵ, ξ₁, λ, CU)
-    CI = IBounds(κ, ϵ, ξ₁, v, λ, C)
-    norms = NormBounds(γ, κ, ϵ, ξ₁, v, λ, C, CI)
+    C = FunctionBounds(κ, ϵ, ξ₁, Λ, CU)
+    CI = IBounds(κ, ϵ, ξ₁, v, Λ, C)
+    norms = NormBounds(γ, κ, ϵ, ξ₁, v, Λ, C, CI)
 
-    I_E_main = abs(γ)^2 * γ * integral_J_E_P(κ, ϵ, ξ₁, λ)
+    I_E_main = abs(γ)^2 * γ * integral_J_E_P(κ, ϵ, ξ₁, Λ)
 
     C_R_Q = (C.P * CI.I_E + C.E * CI.I_P) * norms.Q^(2σ + 1) * ξ₁^((2σ + 1) * v - 2)
     R_I_E_bound =
@@ -78,11 +78,11 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParam
     return I_E_main + R_I_E
 end
 
-function p_Q_0(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
-    return c^-a * (γ + I_E_infty_enclosure(γ, κ, ϵ, ξ₁, λ))
+function p_Q_0(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
+    return c^-a * (γ + I_E_infty_enclosure(γ, κ, ϵ, ξ₁, Λ))
 end
 
 # IMPROVE: Do we need this function?
-p_Q_0(γ::ComplexF64, κ::Float64, ϵ::Float64, ξ₁::Float64, λ::CGLParams{Float64}) =
-    Float64(p_Q_0(Acb(γ), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(λ)))
+p_Q_0(γ::ComplexF64, κ::Float64, ϵ::Float64, ξ₁::Float64, Λ::CGLParams{Float64}) =
+    Float64(p_Q_0(Acb(γ), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(Λ)))

@@ -1,6 +1,6 @@
 """
-    cgl_hat_equation_real(Q, κ, ϵ, ξ, λ)
-    cgl_hat_equation_real(Q, (κ, ϵ, λ), ξ)
+    cgl_hat_equation_real(Q, κ, ϵ, ξ, Λ)
+    cgl_hat_equation_real(Q, (κ, ϵ, Λ), ξ)
 
 Evaluate the right hand side of the forward ODE when written as a four
 dimensional real system. It is evaluated at the point
@@ -9,11 +9,11 @@ Q = [a, b, α, β]
 ```
 and time `ξ`.
 
-For `λ.d != 1` there is a removable singularity at `ξ = 0`. To return
+For `Λ.d != 1` there is a removable singularity at `ξ = 0`. To return
 a finite value we in this case required that `α = β = 0`.
 """
-function cgl_hat_equation_real(Q, κ, ϵ, ξ, λ::CGLParams)
-    (; d, ω, σ, δ) = λ
+function cgl_hat_equation_real(Q, κ, ϵ, ξ, Λ::CGLParams)
+    (; d, ω, σ, δ) = Λ
     a, b, α, β = Q
 
     a2b2σ = (a^2 + b^2)^σ
@@ -31,18 +31,18 @@ function cgl_hat_equation_real(Q, κ, ϵ, ξ, λ::CGLParams)
 end
 
 # For use with ODEProblem
-cgl_hat_equation_real(u, (κ, ϵ, λ), ξ) = cgl_hat_equation_real(u, κ, ϵ, ξ, λ)
+cgl_hat_equation_real(u, (κ, ϵ, Λ), ξ) = cgl_hat_equation_real(u, κ, ϵ, ξ, Λ)
 
 """
-    cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ, λ)
-    cgl_hat_equation_real_matrix_form(Q, (κ, ϵ, λ), ξ)
+    cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ, Λ)
+    cgl_hat_equation_real_matrix_form(Q, (κ, ϵ, Λ), ξ)
 
 Same as [`cgl_hat_equation_real`](@ref), but the computations are done
 by writing the system in matrix form. This method is primarily
 intended to test that the system is correctly written down.
 """
-function cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ, λ::CGLParams)
-    (; d, ω, σ, δ) = λ
+function cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ, Λ::CGLParams)
+    (; d, ω, σ, δ) = Λ
 
     # Rename things to follow same notation as in paper
     X = Q
@@ -64,17 +64,17 @@ function cgl_hat_equation_real_matrix_form(Q, κ, ϵ, ξ, λ::CGLParams)
 end
 
 """
-    cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, λ)
-    cgl_hat_equation_real_second_order(dQ, Q, (κ, ϵ, λ), ξ)
+    cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, Λ)
+    cgl_hat_equation_real_second_order(dQ, Q, (κ, ϵ, Λ), ξ)
 
 Evaluate the right hand side of the forward ODE when written as a
 second order two dimensional real system.
 
-For `λ.d != 1` there is a removable singularity at `ξ = 0`. To return
+For `Λ.d != 1` there is a removable singularity at `ξ = 0`. To return
 a finite value we in this case required that `α = β = 0`.
 """
-function cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, λ::CGLParams)
-    (; d, ω, σ, δ) = λ
+function cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, Λ::CGLParams)
+    (; d, ω, σ, δ) = Λ
     a, b = Q
     α, β = dQ
 
@@ -95,5 +95,5 @@ function cgl_hat_equation_real_second_order(dQ, Q, κ, ϵ, ξ, λ::CGLParams)
 end
 
 # For use with ODEProblem
-cgl_hat_equation_real_second_order(du, u, (κ, ϵ, λ), ξ) =
-    cgl_hat_equation_real_second_order(du, u, κ, ϵ, ξ, λ)
+cgl_hat_equation_real_second_order(du, u, (κ, ϵ, Λ), ξ) =
+    cgl_hat_equation_real_second_order(du, u, κ, ϵ, ξ, Λ)

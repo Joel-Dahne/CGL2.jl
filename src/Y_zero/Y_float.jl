@@ -1,5 +1,5 @@
 """
-    Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
 initial values given by `Y₀`. Returns a vector with four complex
@@ -9,12 +9,12 @@ are the derivatives.
 The solution is computed using [`ODEProblem`](@ref). The computations
 are always done in `ComplexF64`.
 """
-function Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
+function Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
     prob = ODEProblem{false}(
         cgl_linearization_equation,
         SVector{4,ComplexF64}(Y₀[1], Y₀[2], 0, 0),
         (zero(ξ₁), ξ₁),
-        (lambda, κ, ϵ, Q_hat, λ),
+        (lambda, κ, ϵ, Q_hat, Λ),
     )
 
     # Used to exit early in extreme cases. Sometimes the
@@ -38,7 +38,7 @@ function Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Fl
 end
 
 """
-    Y_zero_float_curve(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero_float_curve(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
 
 Similar to [`Y_hat_zero_float`](@ref) but returns the whole
 solution object given by the ODE solver, instead of just the value at
@@ -51,7 +51,7 @@ function Y_zero_float_curve(
     ϵ,
     ξ₁,
     Q_hat,
-    λ::CGLParams;
+    Λ::CGLParams;
     Y₀_deriv = SVector{2,ComplexF64}(0, 0),
     ξ₀ = zero(ξ₁),
     tol::Float64 = 1e-11,
@@ -61,7 +61,7 @@ function Y_zero_float_curve(
         cgl_linearization_equation,
         SVector{4,ComplexF64}(Y₀[1], Y₀[2], Y₀_deriv[1], Y₀_deriv[2]),
         (ξ₀, ξ₁),
-        (lambda, κ, ϵ, Q_hat, λ),
+        (lambda, κ, ϵ, Q_hat, Λ),
     )
 
     sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)

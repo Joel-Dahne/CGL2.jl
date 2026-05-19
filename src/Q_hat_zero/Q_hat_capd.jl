@@ -1,5 +1,5 @@
 """
-    Q_hat_zero_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; ξ₀, tol)
+    Q_hat_zero_capd(ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
 vector with four real values, the first two are the real and imaginary
@@ -23,20 +23,20 @@ function Q_hat_zero_capd(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
-    ξ₀::Arb = ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
+    Λ::CGLParams{Arb};
+    ξ₀::Arb = ifelse(isone(Λ.d), zero(Arb), Arb(1e-2)),
     tol::Float64 = 1e-11,
 )
     Q_hat_ξ₀ = if !iszero(ξ₀)
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
-        Q_hat_ξ₀ = Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ)
+        Q_hat_ξ₀ = Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ)
         if !all(isfinite, Q_hat_ξ₀)
             iterations = 0
             while !all(isfinite, Q_hat_ξ₀) && iterations < 5
                 iterations += 1
                 ξ₀ /= 2
-                Q_hat_ξ₀ = Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ)
+                Q_hat_ξ₀ = Q_hat_zero_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ)
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
@@ -48,11 +48,11 @@ function Q_hat_zero_capd(
     # Integrate system on [ξ₀, ξ₁] using CAPD.
     # We use the fact that the equation is identical to the one for Q,
     # except for the change in sign for κ and ω.
-    return Q_hat = _Q_zero_capd(Q_hat_ξ₀, -κ, ϵ, ξ₀, ξ₁, CGLParams(λ, ω = -λ.ω); tol)
+    return Q_hat = _Q_zero_capd(Q_hat_ξ₀, -κ, ϵ, ξ₀, ξ₁, CGLParams(Λ, ω = -Λ.ω); tol)
 end
 
 """
-    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₁, λ::CGLParams; ξ₀, tol)
+    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
 
 This function computes the Jacobian of [`Q_hat_zero_capd`](@ref)
 w.r.t. the parameter `ν`.
@@ -65,22 +65,22 @@ function Q_hat_zero_jacobian_capd(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb};
-    ξ₀::Arb = ifelse(isone(λ.d), zero(Arb), Arb(1e-2)),
+    Λ::CGLParams{Arb};
+    ξ₀::Arb = ifelse(isone(Λ.d), zero(Arb), Arb(1e-2)),
     tol::Float64 = 1e-11,
 )
     Q_hat_ξ₀, J_ξ₀ = let
         if !iszero(ξ₀)
             @assert 0 < ξ₀ < ξ₁
             # Integrate system on [0, ξ₀] using Taylor expansion at zero
-            Q_hat_ξ₀, J_ξ₀ = Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ)
+            Q_hat_ξ₀, J_ξ₀ = Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ)
             if !all(isfinite, Q_hat_ξ₀) && !all(isfinite, J_ξ₀)
                 iterations = 0
                 while !all(isfinite, Q_hat_ξ₀) && iterations < 5
                     iterations += 1
                     ξ₀ /= 2
                     Q_hat_ξ₀, J_ξ₀ =
-                        Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, λ)
+                        Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ)
                 end
                 iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
             end
@@ -104,7 +104,7 @@ function Q_hat_zero_jacobian_capd(
         ϵ,
         ξ₀,
         ξ₁,
-        CGLParams(λ, ω = -λ.ω);
+        CGLParams(Λ, ω = -Λ.ω);
         output_jacobian = Val(true),
         include_parameter_derivatives = Val(false),
         tol,

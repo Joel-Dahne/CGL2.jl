@@ -7,16 +7,16 @@
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
     ξ₁ = Arb(30)
-    λ = CGLParams{Arb}(3, 1, 1, 0)
+    Λ = CGLParams{Arb}(3, 1, 1, 0)
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
 
-    res = CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    res = CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     # Compute derivative w.r.t. ξ using finite differences in Float64
     resF64_dξ = fdm(
-        ξ -> ComplexF64.(CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, Arb(ξ), λ)),
+        ξ -> ComplexF64.(CGL2.Y_infinity(c_0, lambda, γ₁, γ₂, κ, ϵ, Arb(ξ), Λ)),
         Float64(ξ₁),
     )
 
@@ -28,14 +28,14 @@
     # Check if the finite difference value approximately satisfies the
     # equation
 
-    (; d, ω, σ) = λ
+    (; d, ω, σ) = Λ
     I = SMatrix{2,2}(1, 0, 0, 1)
     J = SMatrix{2,2}(0, 1, -1, 0)
     A = ϵ * I + J
     B_1 = κ * I
     B_2 = (d - 1) * ϵ * I + (d - 1) * J
     C = κ / σ * I + ω * J
-    a, b = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    a, b = CGL2.Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
     J_N = SMatrix{2,2}(-2a * b, 3a^2 + b^2, -(a^2 + 3b^2), 2a * b)
 
     Y = ComplexF64.(res[1:2])

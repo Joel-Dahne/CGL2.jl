@@ -1,5 +1,5 @@
 """
-H(lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+H(lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 Compute the determinant of the `4x4` matrix with columns given by
 `Y_0_1(ξ)`, `Y_0_2(ξ)`, `Y_inf_1(ξ)` and `Y_inf_2(ξ)`.
@@ -12,13 +12,13 @@ function H(
     κ::T,
     ϵ::T,
     ξ₁::T,
-    λ::CGLParams{T},
+    Λ::CGLParams{T},
 ) where {T}
     complex_T = ifelse(T == Arb, Acb, Complex{T})
-    Y_0_1 = Y_zero(SVector{2,complex_T}(1, 0), lambda, ν, κ, ϵ, ξ₁, λ)
-    Y_0_2 = Y_zero(SVector{2,complex_T}(0, 1), lambda, ν, κ, ϵ, ξ₁, λ)
-    Y_inf_1 = Y_infinity(SVector{2,complex_T}(1, 0), lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
-    Y_inf_2 = Y_infinity(SVector{2,complex_T}(0, 1), lambda, γ₁, γ₂, κ, ϵ, ξ₁, λ)
+    Y_0_1 = Y_zero(SVector{2,complex_T}(1, 0), lambda, ν, κ, ϵ, ξ₁, Λ)
+    Y_0_2 = Y_zero(SVector{2,complex_T}(0, 1), lambda, ν, κ, ϵ, ξ₁, Λ)
+    Y_inf_1 = Y_infinity(SVector{2,complex_T}(1, 0), lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
+    Y_inf_2 = Y_infinity(SVector{2,complex_T}(0, 1), lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     M = hcat(Y_0_1, Y_0_2, Y_inf_1, Y_inf_2)
 

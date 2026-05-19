@@ -1,21 +1,21 @@
 """
-    Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+    Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 Compute the solution to the forward self-similar ODE on the interval
 ``[ξ₁, ∞)``. Returns a vector with two complex values, where the first
 is the value at `ξ₁` and the second is the derivative at `ξ₁`.
 """
-function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    (; d, σ) = λ
-    c = _c(κ, ϵ, λ)
+function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    (; d, σ) = Λ
+    c = _c(κ, ϵ, Λ)
 
     # Precompute functions as well as function and norm bounds
-    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
-    C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
-    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
+    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, Λ)
+    C = FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
 
     # Enclosure of Q_hat
-    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
     I_P_hat = zero(Acb)
 
     Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
@@ -41,13 +41,13 @@ Q_hat_infinity(
     κ::Float64,
     ϵ::Float64,
     ξ₁::Float64,
-    λ::CGLParams{Float64},
+    Λ::CGLParams{Float64},
 ) = ComplexF64.(
-    Q_hat_infinity(Acb(γ₁), Acb(γ₂), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(λ)),
+    Q_hat_infinity(Acb(γ₁), Acb(γ₂), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(Λ)),
 )
 
 """
-    Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, λ::CGLParams)
+    Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 This function computes the Jacobian of [`Q_hat_infinity`](@ref) w.r.t. the
 parameter `γ₂`.
@@ -58,19 +58,19 @@ function Q_hat_infinity_jacobian(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
 )
-    (; d, σ) = λ
-    c = _c(κ, ϵ, λ)
+    (; d, σ) = Λ
+    c = _c(κ, ϵ, Λ)
 
     # Precompute functions as well as function and norm bounds
-    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, λ)
-    C = FunctionBounds_hat(κ, ϵ, ξ₁, λ)
-    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, λ, C)
+    F = FunctionEnclosures_hat(κ, ϵ, ξ₁, Λ)
+    C = FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
 
     # Enclosure of Q_hat and Q_hat_dγ₂
-    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
-    I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, λ, F, C, norms)
+    I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
+    I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
     I_P_hat = zero(Acb)
     I_P_hat_dγ₂ = zero(Acb)

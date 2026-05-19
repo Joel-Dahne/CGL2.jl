@@ -4,7 +4,7 @@ function branch_eigenvalue_approximation(
     κs::Vector{T},
     ϵs::Vector{T},
     ξ₁s::Vector{T},
-    λ::CGLParams{T};
+    Λ::CGLParams{T};
     verbose = false,
 ) where {T}
     res = map(μs, γs, κs, ϵs, ξ₁s) do μ, γ, κ, ϵ, ξ₁
@@ -13,39 +13,39 @@ function branch_eigenvalue_approximation(
         ###
         # Step 1: Compute p_Q_0
         ###
-        pQ0 = p_Q_0(γ, κ, ϵ, ξ₁, λ)
+        pQ0 = p_Q_0(γ, κ, ϵ, ξ₁, Λ)
 
         ###
         # Step 2.1: Solve for γ₁, giving asymptotic behavior of Q_hat at infinity
         ###
-        a, b, c = _abc(κ, ϵ, λ)
+        a, b, c = _abc(κ, ϵ, Λ)
         γ₁ = pQ0 / (-c)^-a
 
-        @assert p_Q_hat(γ₁, κ, ϵ, λ) ≈ pQ0
+        @assert p_Q_hat(γ₁, κ, ϵ, Λ) ≈ pQ0
 
         ###
         # Step 2.2: Solve for ν and γ₂
         ###
-        ν, γ₂ = G_hat_approximate(γ₁, κ, ϵ, ξ₁, λ)
+        ν, γ₂ = G_hat_approximate(γ₁, κ, ϵ, ξ₁, Λ)
 
-        @assert isapprox(norm(G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)), 0, atol = 1e-9)
+        @assert isapprox(norm(G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)), 0, atol = 1e-9)
 
         ###
         # Step 3.1: Find approximate eigenvalue from finite difference method
         ###
-        λs = filter(
+        Λs = filter(
             lambda -> imag(lambda) > 0,
-            linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, λ)[1],
+            linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, Λ)[1],
         )
 
-        lambda_approx = λs[findmax(real, λs)[2]]
+        lambda_approx = Λs[findmax(real, Λs)[2]]
 
         ###
-        # Step 3: Solve for Z and λ
+        # Step 3: Solve for Z and Λ
         ###
-        x, c, lambda = H_approximate(lambda_approx, ν, κ, ϵ, ξ₁, λ)
+        x, c, lambda = H_approximate(lambda_approx, ν, κ, ϵ, ξ₁, Λ)
 
-        @assert isapprox(norm(H(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, λ)), 0, atol = 1e-9)
+        @assert isapprox(norm(H(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)), 0, atol = 1e-9)
         @assert isapprox(lambda, lambda_approx, rtol = 1e-3)
 
         (x, c, lambda)
