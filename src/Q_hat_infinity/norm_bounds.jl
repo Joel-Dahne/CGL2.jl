@@ -143,7 +143,7 @@ function norm_bound_Q_hat(
         # ρ_bound] and return the first value on which f is negative.
         # This doesn't give a tight enclosure, but is good enough
         # since this case doesn't occur in most cases.
-        ρs = range(Arb(0), Arb(ρ_bound), 20)[2:end-1]
+        ρs = range(Arb(0), Arb(ρ_bound), 20)[2:(end-1)]
 
         i = findfirst(ρ -> Arblib.isnegative(f(ρ)), ρs)
 

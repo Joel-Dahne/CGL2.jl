@@ -1,149 +1,224 @@
+"""
+    FunctionBounds(κ, ϵ, ξ₁, Λ, CU::UBounds; include_dκ = false, include_dϵ = false)
+
+Contains the constants involved in asymptotic bounds for functions
+that are needed in the enclosure of `Q` at infinity. It consists of
+the bounds from Lemma REF(lemma:bounds-list).
+
+It contains asymptotic bounds for the functions
+
+- [`P](@ref)
+- [`P_dξ`](@ref)
+- [`P_dξ_dξ`](@ref)
+- [`P_dξ_dξ_dξ`](@ref)
+- [`E`](@ref)
+- [`E_dξ`](@ref)
+- [`E_dξ_dξ`](@ref)
+- [`E_dξ_dξ_dξ`](@ref)
+- [`J_P`](@ref)
+- [`J_P_dξ`](@ref)
+- [`J_P_dξ_dξ`](@ref)
+- [`J_E`](@ref)
+- [`J_E_dξ`](@ref)
+- [`J_E_dξ_dξ`](@ref)
+
+If `include_dκ = true` the also include bounds for:
+
+- [`P_dκ`](@ref)
+- [`P_dξ_dκ`](@ref)
+- [`P_dξ_dξ_dκ`](@ref)
+- [`E_dκ`](@ref)
+- [`E_dξ_dκ`](@ref)
+- [`D`](@ref)
+- [`D_dξ`](@ref)
+- [`D_dξ_dξ`](@ref)
+- [`J_P_dκ`](@ref)
+- [`J_E_dκ`](@ref)
+
+If `include_dϵ = true` the also include enclosures for:
+
+- [`P_dϵ`](@ref)
+- [`P_dξ_dϵ`](@ref)
+- [`P_dξ_dξ_dϵ`](@ref)
+- [`E_dϵ`](@ref)
+- [`E_dξ_dϵ`](@ref)
+- [`H`](@ref)
+- [`H_dξ`](@ref)
+- [`H_dξ_dξ`](@ref)
+- [`J_P_dϵ`](@ref)
+- [`J_E_dϵ`](@ref)
+
+Note that the conditions on the parameters that are required for these
+bounds to be valid are all checked in the construction of the
+`CU:UBounds` argument.
+"""
 struct FunctionBounds
+    # Always included
     P::Arb
     P_dξ::Arb
     P_dξ_dξ::Arb
     P_dξ_dξ_dξ::Arb
-    P_dκ::Arb
-    P_dξ_dκ::Arb
-    P_dξ_dξ_dκ::Arb
-    P_dϵ::Arb
-    P_dξ_dϵ::Arb
-    P_dξ_dξ_dϵ::Arb
     E::Arb
     E_dξ::Arb
     E_dξ_dξ::Arb
     E_dξ_dξ_dξ::Arb
-    E_dκ::Arb
-    E_dξ_dκ::Arb
-    E_dϵ::Arb
-    E_dξ_dϵ::Arb
     J_P::Arb
     J_P_dξ::Arb
     J_P_dξ_dξ::Arb
-    J_P_dκ::Arb
-    J_P_dϵ::Arb
     J_E::Arb
     J_E_dξ::Arb
     J_E_dξ_dξ::Arb
+    # Included when include_dκ = true (otherwise indeterminate)
+    P_dκ::Arb
+    P_dξ_dκ::Arb
+    P_dξ_dξ_dκ::Arb
+    E_dκ::Arb
+    E_dξ_dκ::Arb
+    J_P_dκ::Arb
     J_E_dκ::Arb
-    J_E_dϵ::Arb
     D::Arb
     D_dξ::Arb
     D_dξ_dξ::Arb
+    # Included when include_dϵ = true (otherwise indeterminate)
+    P_dϵ::Arb
+    P_dξ_dϵ::Arb
+    P_dξ_dξ_dϵ::Arb
+    E_dϵ::Arb
+    E_dξ_dϵ::Arb
+    J_P_dϵ::Arb
+    J_E_dϵ::Arb
     H::Arb
     H_dξ::Arb
     H_dξ_dξ::Arb
 
-    function FunctionBounds(
-        κ::Arb,
-        ϵ::Arb,
-        ξ₁::Arb,
-        λ::CGLParams{Arb},
-        CU::UBounds;
-        include_dκ::Bool = false,
-        include_dϵ::Bool = false,
+    FunctionBounds() = new(
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
+        indeterminate(Arb),
     )
-        C = new(
-            C_P(κ, ϵ, ξ₁, λ, CU),
-            C_P_dξ(κ, ϵ, ξ₁, λ, CU),
-            C_P_dξ_dξ(κ, ϵ, ξ₁, λ),
-            C_P_dξ_dξ_dξ(κ, ϵ, ξ₁, λ),
-            include_dκ ? C_P_dκ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dκ ? C_P_dξ_dκ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dκ ? C_P_dξ_dξ_dκ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dϵ ? C_P_dϵ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dϵ ? C_P_dξ_dϵ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dϵ ? C_P_dξ_dξ_dϵ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            C_E(κ, ϵ, ξ₁, λ, CU),
-            C_E_dξ(κ, ϵ, ξ₁, λ, CU),
-            C_E_dξ_dξ(κ, ϵ, ξ₁, λ, CU),
-            C_E_dξ_dξ_dξ(κ, ϵ, ξ₁, λ, CU),
-            include_dκ ? C_E_dκ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dκ ? C_E_dξ_dκ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dϵ ? C_E_dϵ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            include_dϵ ? C_E_dξ_dϵ(κ, ϵ, ξ₁, λ, CU) : indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-            indeterminate(κ),
-        )
-
-        BW = abs(B_W(κ, ϵ, λ))
-        if include_dκ
-            BW_dκ = abs(B_W_dκ(κ, ϵ, λ))
-        end
-        if include_dϵ
-            BW_dϵ = abs(B_W_dϵ(κ, ϵ, λ))
-        end
-
-        C.J_P[] = C_J_P(κ, ϵ, ξ₁, λ, C, BW)
-        C.J_P_dξ[] = C_J_P_dξ(κ, ϵ, ξ₁, λ, C, BW)
-        C.J_P_dξ_dξ[] = C_J_P_dξ_dξ(κ, ϵ, ξ₁, λ, C, BW)
-        if include_dκ
-            C.J_P_dκ[] = C_J_P_dκ(κ, ϵ, ξ₁, λ, C, BW, BW_dκ)
-        end
-        if include_dϵ
-            C.J_P_dϵ[] = C_J_P_dϵ(κ, ϵ, ξ₁, λ, C, BW, BW_dϵ)
-        end
-
-        C.J_E[] = C_J_E(κ, ϵ, ξ₁, λ, C, BW)
-        C.J_E_dξ[] = C_J_E_dξ(κ, ϵ, ξ₁, λ, BW)
-        C.J_E_dξ_dξ[] = C_J_E_dξ_dξ(κ, ϵ, ξ₁, λ, BW)
-        if include_dκ
-            C.J_E_dκ[] = C_J_E_dκ(κ, ϵ, ξ₁, λ, CU, BW, BW_dκ)
-        end
-        if include_dϵ
-            C.J_E_dϵ[] = C_J_E_dϵ(κ, ϵ, ξ₁, λ, CU, BW, BW_dϵ)
-        end
-
-        if include_dκ
-            C.D[] = C_D(κ, ϵ, ξ₁, λ, C, BW, BW_dκ)
-            C.D_dξ[] = C_D_dξ(κ, ϵ, ξ₁, λ, C, BW, BW_dκ)
-            C.D_dξ_dξ[] = C_D_dξ_dξ(κ, ϵ, ξ₁, λ, C, BW, BW_dκ)
-        end
-
-        if include_dϵ
-            C.H[] = C_H(κ, ϵ, ξ₁, λ, C, BW, BW_dϵ)
-            C.H_dξ[] = C_H_dξ(κ, ϵ, ξ₁, λ, C, BW, BW_dϵ)
-            C.H_dξ_dξ[] = C_H_dξ_dξ(κ, ϵ, ξ₁, λ, C, BW, BW_dϵ)
-        end
-
-        return C
-    end
 end
 
-function C_P(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function FunctionBounds(
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    Λ::CGLParams{Arb},
+    CU::UBounds;
+    include_dκ::Bool = false,
+    include_dϵ::Bool = false,
+)
+    C = FunctionBounds()
+
+    BW = abs(B_W(κ, ϵ, Λ))
+
+    C.P[] = C_P(κ, ϵ, ξ₁, Λ, CU)
+    C.P_dξ[] = C_P_dξ(κ, ϵ, ξ₁, Λ, CU)
+    C.P_dξ_dξ[] = C_P_dξ_dξ(κ, ϵ, ξ₁, Λ)
+    C.P_dξ_dξ_dξ[] = C_P_dξ_dξ_dξ(κ, ϵ, ξ₁, Λ)
+
+    C.E[] = C_E(κ, ϵ, ξ₁, Λ, CU)
+    C.E_dξ[] = C_E_dξ(κ, ϵ, ξ₁, Λ, CU)
+    C.E_dξ_dξ[] = C_E_dξ_dξ(κ, ϵ, ξ₁, Λ, CU)
+    C.E_dξ_dξ_dξ[] = C_E_dξ_dξ_dξ(κ, ϵ, ξ₁, Λ, CU)
+
+    C.J_P[] = C_J_P(κ, ϵ, ξ₁, Λ, C, BW)
+    C.J_P_dξ[] = C_J_P_dξ(κ, ϵ, ξ₁, Λ, C, BW)
+    C.J_P_dξ_dξ[] = C_J_P_dξ_dξ(κ, ϵ, ξ₁, Λ, C, BW)
+
+    C.J_E[] = C_J_E(κ, ϵ, ξ₁, Λ, C, BW)
+    C.J_E_dξ[] = C_J_E_dξ(κ, ϵ, ξ₁, Λ, BW)
+    C.J_E_dξ_dξ[] = C_J_E_dξ_dξ(κ, ϵ, ξ₁, Λ, BW)
+
+    if include_dκ
+        BW_dκ = abs(B_W_dκ(κ, ϵ, Λ))
+
+        C.P_dκ[] = C_P_dκ(κ, ϵ, ξ₁, Λ, CU)
+        C.P_dξ_dκ[] = C_P_dξ_dκ(κ, ϵ, ξ₁, Λ, CU)
+        C.P_dξ_dξ_dκ[] = C_P_dξ_dξ_dκ(κ, ϵ, ξ₁, Λ, CU)
+
+        C.E_dκ[] = C_E_dκ(κ, ϵ, ξ₁, Λ, CU)
+        C.E_dξ_dκ[] = C_E_dξ_dκ(κ, ϵ, ξ₁, Λ, CU)
+
+        C.J_P_dκ[] = C_J_P_dκ(κ, ϵ, ξ₁, Λ, C, BW, BW_dκ)
+        C.J_E_dκ[] = C_J_E_dκ(κ, ϵ, ξ₁, Λ, CU, BW, BW_dκ)
+
+        C.D[] = C_D(κ, ϵ, ξ₁, Λ, C, BW, BW_dκ)
+        C.D_dξ[] = C_D_dξ(κ, ϵ, ξ₁, Λ, C, BW, BW_dκ)
+        C.D_dξ_dξ[] = C_D_dξ_dξ(κ, ϵ, ξ₁, Λ, C, BW, BW_dκ)
+    end
+
+    if include_dϵ
+        BW_dϵ = abs(B_W_dϵ(κ, ϵ, Λ))
+
+        C.P_dϵ[] = C_P_dϵ(κ, ϵ, ξ₁, Λ, CU)
+        C.P_dξ_dϵ[] = C_P_dξ_dϵ(κ, ϵ, ξ₁, Λ, CU)
+        C.P_dξ_dξ_dϵ[] = C_P_dξ_dξ_dϵ(κ, ϵ, ξ₁, Λ, CU)
+
+        C.E_dϵ[] = C_E_dϵ(κ, ϵ, ξ₁, Λ, CU)
+        C.E_dξ_dϵ[] = C_E_dξ_dϵ(κ, ϵ, ξ₁, Λ, CU)
+
+        C.J_P_dϵ[] = C_J_P_dϵ(κ, ϵ, ξ₁, Λ, C, BW, BW_dϵ)
+        C.J_E_dϵ[] = C_J_E_dϵ(κ, ϵ, ξ₁, Λ, CU, BW, BW_dϵ)
+
+        C.H[] = C_H(κ, ϵ, ξ₁, Λ, C, BW, BW_dϵ)
+        C.H_dξ[] = C_H_dξ(κ, ϵ, ξ₁, Λ, C, BW, BW_dϵ)
+        C.H_dξ_dξ[] = C_H_dξ_dξ(κ, ϵ, ξ₁, Λ, C, BW, BW_dϵ)
+    end
+
+    return C
+end
+
+function C_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     return CU.U_a_b * abs(c^-a)
 end
 
-function C_E(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     return CU.U_bma_b * abs((-c)^(a - b))
 end
 
-function C_P_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_P_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     return abs(2c^-a) * CU.U_dz_a_b
 end
 
-function C_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
+function C_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
     z₁ = c * ξ₁^2
     n = 5
 
@@ -156,8 +231,8 @@ function C_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     return abs(2a * c^-a) * (S + R * abs(z₁)^-n)
 end
 
-function C_P_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, λ)
+function C_P_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+    a, b, c = _abc(κ, ϵ, Λ)
     z₁ = c * ξ₁^2
     n = 5
 
@@ -170,8 +245,8 @@ function C_P_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb})
     return abs(4a * (a + 1) * c^-a) * (S + R * abs(z₁)^-n)
 end
 
-function C_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     C1 = abs((-c)^(a - b)) * CU.U_bma_b
     C2 = abs((-c)^(a - b - 1)) * CU.U_dz_bma_b
@@ -179,8 +254,8 @@ function C_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     return abs(2c) * C1 + abs(2c) * C2 * ξ₁^-2
 end
 
-function C_E_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     C1 = abs((-c)^(a - b)) * CU.U_bma_b
     C2 = abs((-c)^(a - b - 1)) * CU.U_dz_bma_b
@@ -191,8 +266,8 @@ function C_E_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBoun
            abs(4c^2) * C3 * ξ₁^-4
 end
 
-function C_E_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c = _abc(κ, ϵ, λ)
+function C_E_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c = _abc(κ, ϵ, Λ)
 
     C1 = abs((-c)^(a - b)) * CU.U_bma_b
     C2 = abs((-c)^(a - b - 1)) * CU.U_dz_bma_b
@@ -206,8 +281,8 @@ function C_E_dξ_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::U
 end
 
 # IMPROVE: This upper bound can be improved
-function C_P_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+function C_P_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = CU.U_dz_a_b * abs(c^(-a - 1) * c_dκ)
 
@@ -216,8 +291,8 @@ function C_P_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
     return C1 / log(ξ₁) + C2
 end
 
-function C_E_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+function C_E_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = CU.U_bma_b * abs((-c)^(a - b) * c_dκ)
 
@@ -229,8 +304,8 @@ function C_E_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
 end
 
 # IMPROVE: This upper bound can be improved
-function C_P_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+function C_P_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = CU.U_dz_a_b * abs(c^(-a - 1) * 2c_dκ)
 
@@ -243,8 +318,8 @@ function C_P_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBoun
     return C1 / log(ξ₁) + C2 / log(ξ₁) + C3 + C4 / log(ξ₁)
 end
 
-function C_E_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+function C_E_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = 2CU.U_bma_b * abs((-c)^(a - b) * c_dκ) * (abs(c) + ξ₁^-2)
 
@@ -270,8 +345,8 @@ function C_E_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBoun
 end
 
 # IMPROVE: This upper bound can be improved
-function C_P_dξ_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+function C_P_dξ_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = CU.U_dz_a_b * abs(c^(-a - 1) * 2c_dκ)
 
@@ -296,16 +371,16 @@ function C_P_dξ_dξ_dκ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::U
            C7
 end
 
-function C_P_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+function C_P_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C = CU.U_dz_a_b * abs(c^(-a - 1) * c_dϵ)
 
     return C
 end
 
-function C_E_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+function C_E_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = CU.U_bma_b * abs((-c)^(a - b) * c_dϵ)
 
@@ -315,8 +390,8 @@ function C_E_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
 end
 
 # IMPROVE: This upper bound can be improved
-function C_P_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+function C_P_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = CU.U_dz_a_b * abs(c^(-a - 1) * 2c_dϵ)
 
@@ -325,8 +400,8 @@ function C_P_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBoun
     return C1 + C2
 end
 
-function C_E_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+function C_E_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = 2CU.U_bma_b * abs((-c)^(a - b) * c_dϵ) * (abs(c) + ξ₁^-2)
 
@@ -338,8 +413,8 @@ function C_E_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBoun
 end
 
 # IMPROVE: This upper bound can be improved
-function C_P_dξ_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::UBounds)
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+function C_P_dξ_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = CU.U_dz_a_b * abs(c^(-a - 1) * 2c_dϵ)
 
@@ -350,20 +425,20 @@ function C_P_dξ_dξ_dϵ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, CU::U
     return C1 + C2 + C3
 end
 
-C_J_P(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb) = BW * C.P
+C_J_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb) = BW * C.P
 
-C_J_E(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb) = BW * C.E
+C_J_E(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb) = BW * C.E
 
-function C_J_P_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb)
-    _, _, c = _abc(κ, ϵ, λ)
-    (; d) = λ
+function C_J_P_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb)
+    c = _c(κ, ϵ, Λ)
+    (; d) = Λ
 
     return BW * (C.P * (abs(2c) + (d - 1) * ξ₁^-2) + C.P_dξ * ξ₁^-2)
 end
 
-function C_J_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, BW::Arb)
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d) = λ
+function C_J_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, BW::Arb)
+    a, b, c = _abc(κ, ϵ, Λ)
+    (; d) = Λ
     z₁ = -c * ξ₁^2
     n = 5
 
@@ -376,9 +451,9 @@ function C_J_E_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, BW::Arb)
     return BW * abs((-c)^(a - b)) * (S + R * abs(z₁)^-n)
 end
 
-function C_J_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb)
-    _, _, c = _abc(κ, ϵ, λ)
-    (; d) = λ
+function C_J_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds, BW::Arb)
+    c = _c(κ, ϵ, Λ)
+    (; d) = Λ
 
     return BW * (
         C.P * (abs(4c^2) + abs(2c) * (2d - 1) * ξ₁^-2 + (d - 1) * (d - 2) * ξ₁^-4) +
@@ -387,9 +462,9 @@ function C_J_P_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, C::Func
     )
 end
 
-function C_J_E_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, λ::CGLParams{Arb}, BW::Arb)
-    a, b, c = _abc(κ, ϵ, λ)
-    (; d) = λ
+function C_J_E_dξ_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, BW::Arb)
+    a, b, c = _abc(κ, ϵ, Λ)
+    (; d) = Λ
     z₁ = -c * ξ₁^2
     n = 5
 
@@ -413,12 +488,12 @@ function C_J_P_dκ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dκ::Arb,
 )
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = C.P * (abs(c_dκ) * BW + BW_dκ * ξ₁^-2)
 
@@ -432,12 +507,12 @@ function C_J_E_dκ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     CU::UBounds,
     BW::Arb,
     BW_dκ::Arb,
 )
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = BW * abs((-c)^(a - b) * a_dκ) * (2 + abs(log(-c)) / log(ξ₁)) * CU.U_da_bma_b
 
@@ -452,12 +527,12 @@ function C_J_P_dϵ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dϵ::Arb,
 )
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = C.P * (abs(c_dϵ) * BW + BW_dϵ * ξ₁^-2)
 
@@ -471,12 +546,12 @@ function C_J_E_dϵ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     CU::UBounds,
     BW::Arb,
     BW_dϵ::Arb,
 )
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = BW_dϵ * abs((-c)^(a - b)) * CU.U_bma_b
 
@@ -489,12 +564,12 @@ function C_D(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dκ::Arb,
 )
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = abs(c_dκ) * BW * C.P
 
@@ -509,12 +584,12 @@ function C_D_dξ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dκ::Arb,
 )
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = abs(c_dκ) * BW * C.P_dξ
 
@@ -533,12 +608,12 @@ function C_D_dξ_dξ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dκ::Arb,
 )
-    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, λ)
+    a, a_dκ, b, c, c_dκ = _abc_dκ(κ, ϵ, Λ)
 
     C1 = abs(c_dκ) * BW * C.P_dξ_dξ
 
@@ -561,12 +636,12 @@ function C_H(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dϵ::Arb,
 )
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = abs(c_dϵ) * BW * C.P
 
@@ -581,12 +656,12 @@ function C_H_dξ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dϵ::Arb,
 )
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = abs(c_dϵ) * BW * C.P_dξ
 
@@ -605,12 +680,12 @@ function C_H_dξ_dξ(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    λ::CGLParams{Arb},
+    Λ::CGLParams{Arb},
     C::FunctionBounds,
     BW::Arb,
     BW_dϵ::Arb,
 )
-    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, λ)
+    a, b, c, c_dϵ = _abc_dϵ(κ, ϵ, Λ)
 
     C1 = abs(c_dϵ) * BW * C.P_dξ_dξ
 
@@ -622,7 +697,7 @@ function C_H_dξ_dξ(
 
     C5 = BW * C.P_dξ_dξ_dϵ
 
-    C6 = 2BW * C.P_dξ_dϵ
+    C6 = 4BW * C.P_dξ_dϵ
 
     C7 = 6BW * C.P_dϵ
 

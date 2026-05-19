@@ -8,7 +8,7 @@ https://doi.org/10.1002/cpa.3006.
 A figure similar to Figure 3.1 can be produced with
 ```
 brs = tmap(1:8) do j
-        CGL.CGLBranch.branch_epsilon(CGL.CGLBranch.sverak_initial(j, 1)...)
+        CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 1)...)
 end
 pl = plot()
 foreach(br -> plot!(pl, br), brs)
@@ -18,7 +18,7 @@ pl
 For Figure 3.6 you would get
 ```
 brs3 = tmap(1:5) do j
-    CGL.CGLBranch.branch_epsilon(CGL.CGLBranch.sverak_initial(j, 3)...)
+    CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 3)...)
 end
 pl = plot()
 foreach(br -> plot!(pl, br), brs)

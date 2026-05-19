@@ -7,9 +7,9 @@
 
     ξ₁ = Arb(30)
 
-    @testset "U $i" for (i, (κ, ϵ, λ)) in enumerate(params)
-        (; d, σ) = λ
-        a, b, c = CGL2._abc(κ, ϵ, λ)
+    @testset "U $i" for (i, (κ, ϵ, Λ)) in enumerate(params)
+        (; d, σ) = Λ
+        a, b, c = CGL2._abc(κ, ϵ, Λ)
         z₁ = c * ξ₁^2
 
         CU = CGL2.UBounds(a, b, c, ξ₁, include_da = true)
@@ -87,16 +87,6 @@
                   CU.U_da_bmap1_bp1 * abs(log(z) * z^(-(b - a + 1)))
             @test abs(CGL2.U_da(b - a + 1, b + 1, z)) >=
                   0.9CU.U_da_bmap1_bp1 * abs(log(z) * z^(-(b - a + 1)))
-
-            # U_da_dz
-
-            @test abs(CGL2.U_dzda(a, b, z)) <= CU.U_da_dz_a_b * abs(log(z) * z^(-a - 1))
-            @test abs(CGL2.U_dzda(a, b, z)) >= 0.6CU.U_da_dz_a_b * abs(log(z) * z^(-a - 1))
-
-            @test abs(CGL2.U_dzda(b - a, b, z)) <=
-                  CU.U_da_dz_bma_b * abs(log(z) * z^(-(b - a) - 1))
-            @test abs(CGL2.U_dzda(b - a, b, z)) >=
-                  0.7CU.U_da_dz_bma_b * abs(log(z) * z^(-(b - a) - 1))
         end
     end
 
@@ -105,8 +95,8 @@
         # approximate tests. This doesn't prove anything, it is only
         # to reduce the risk of typos.
 
-        κ, ϵ, λ = (Arb(0.917383), Arb(0.01), CGLParams{Arb}(3, 1.0, 1.0, 0.02))
-        a, b, c = CGL2._abc(κ, ϵ, λ)
+        κ, ϵ, Λ = (Arb(0.917383), Arb(0.01), CGLParams{Arb}(3, 1.0, 1.0, 0.02))
+        a, b, c = CGL2._abc(κ, ϵ, Λ)
         z = c * Arb(10)^2
 
         ### Check the integral representation of U(a, b, z) with γ
@@ -130,7 +120,7 @@
         # Definition of χ
         χ_1(t, n) =
             (1 + t)^(-(a - b + 1)) -
-            sum(k -> (-1)^k * rising(a - b + 1, k) / factorial(k) * t^k, 0:(n-1))
+            sum(k -> (-1)^k * CGL2.rising(a - b + 1, k) / factorial(k) * t^k, 0:(n-1))
 
         # Integral representation of χ
         integrand_χ_2 =

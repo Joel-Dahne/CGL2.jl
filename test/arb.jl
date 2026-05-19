@@ -20,3 +20,12 @@
         CGL2.abspow(x, add_error(y + 1e-13, Mag(1e-13))),
     )
 end
+
+@testset "rising" begin
+    @test CGL2.rising(Arb(5), Arb(3)) == 210
+    @test CGL2.rising(Arb(5), 3) == 210
+    @test CGL2.rising(ArbSeries((5, 1)), 3) == ArbSeries((210, 107))
+    @test CGL2.rising(5.0, 3.0) == 210
+    @test CGL2.rising(5.0, 3) == 210
+    @test CGL2.rising(5, 3) == 210
+end
