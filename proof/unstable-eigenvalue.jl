@@ -19,7 +19,7 @@ end
 # ╔═╡ e914aa7a-31fe-11f1-b1c4-7dea491a45e5
 begin
     using Pkg
-    Pkg.activate(".", io = devnull)
+    Pkg.activate("..", io = devnull)
     using ArbExtras
     using Arblib
     using CairoMakie
