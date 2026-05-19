@@ -349,7 +349,7 @@ function expand_uniqueness(
             root = setball.(Arb, root_mid, ρ * root_radius)
             # Check if enclosure of Jacobian is invertible by checking
             # if determinant is non-zero.
-            return !Arblib.contains_zero(det(ArbMatrix(df(root))))
+            !Arblib.contains_zero(det(ArbMatrix(df(root))))
         end
     # Needed for searchsortedfirst to work correctly. It applies
     # is_ok also to the true argument.
