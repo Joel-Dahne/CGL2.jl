@@ -67,6 +67,9 @@ we take
 ```
 ρ = (1 - C_T_12 * ξ₁^-2)^-1 * max(C_E_1 * abs(c[1]), C_E_2 * abs(c[2]))
 ```
+
+From Proposition REF(prop:Z-fixed-point) we then have that the norm of
+`Z` is bounded by `ρ`.
 """
 function norm_bound_Z(
     c_0::SVector{2,Acb},
