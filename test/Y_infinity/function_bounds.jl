@@ -62,7 +62,7 @@
         ## I_N
         ####
 
-        # TODO: This is not quite correct since γ₁ and γ₂ only
+        # NOTE: This is not quite correct since γ₁ and γ₂ only
         # parametrize Q_hat_infinity at ξ₁ and not at ξ > ξ₁. The
         # difference should however be of lower order and it still
         # gives some information as a test.
