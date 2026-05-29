@@ -125,10 +125,10 @@ function Q_hat_zero_jacobian_taylor(
         _Q_zero_taylor_remainder(a, b, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     remainder_dν_real, remainder_derivative_dν_real =
-        _Q_zero_taylor_remainder_dμ(a_dν_real, b_dν_real, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
+        _Q_zero_taylor_remainder_dμ(a, b, a_dν_real, b_dν_real, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     remainder_dν_imag, remainder_derivative_dν_imag =
-        _Q_zero_taylor_remainder_dμ(a_dν_imag, b_dν_imag, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
+        _Q_zero_taylor_remainder_dμ(a, b, a_dν_imag, b_dν_imag, -κ, ϵ, ξ₀, CGLParams(Λ, ω = -Λ.ω))
 
     a0, a1 = Arblib.evaluate2(a, ξ₀)
     b0, b1 = Arblib.evaluate2(b, ξ₀)
