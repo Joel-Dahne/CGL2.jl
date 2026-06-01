@@ -72,8 +72,7 @@ include("Q_hat_infinity/Q_hat.jl")
 include("G_hat.jl")
 include("G_hat_solve.jl")
 
-include("linearization/linearization.jl")
-include("linearization/eigenvalues.jl")
+include("eigenvalues_finite_difference.jl")
 
 include("Y_zero/Y.jl")
 include("Y_zero/Y_float.jl")

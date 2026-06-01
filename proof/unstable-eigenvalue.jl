@@ -284,7 +284,7 @@ The first step is to compute an approximate solution using a finite-difference m
 # Find approximation using finite differences
 ΛsF64 = filter(
     lambda -> imag(lambda) > 0,
-    CGL2.linearization_eigenvalues_real_1(
+    CGL2.eigenvalues_finite_difference(
         ComplexF64(ν),
         Float64(κ),
         Float64(ϵ),
