@@ -56,7 +56,6 @@ include("refine_approximation.jl")
 include("G.jl")
 include("G_solve.jl")
 
-include("Q_hat_zero/equation.jl")
 include("Q_hat_zero/Q_hat.jl")
 include("Q_hat_zero/Q_hat_float.jl")
 include("Q_hat_zero/Q_hat_taylor.jl")

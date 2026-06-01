@@ -12,11 +12,13 @@ box they form. This means you still get something that resembles an
 enclosure.
 """
 function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
+    # We use the fact that the equation is identical to the one for Q,
+    # except for the change in sign for κ and ω.
     prob = ODEProblem{false}(
-        cgl_hat_equation_real,
+        cgl_equation_real,
         SVector(ν_real, ν_imag, 0, 0),
         (zero(ξ₁), ξ₁),
-        (κ, ϵ, Λ),
+        (-κ, ϵ, CGLParams(Λ, ω = -Λ.ω)),
     )
 
     # Used to exit early in extreme cases. Sometimes the
@@ -37,35 +39,6 @@ function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::F
     )
 
     return sol.u[end]
-end
-
-function Q_hat_zero_float(
-    ν_real::Arb,
-    ν_imag::Arb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb};
-    tol::Float64 = 1e-11,
-)
-    ξ₁ = Float64(ξ₁)
-    Λ = CGLParams{Float64}(Λ)
-
-    ν_reals = iswide(ν_real) ? collect(Float64.(getinterval(ν_real))) : [Float64(ν_real)]
-    ν_imags = iswide(ν_imag) ? collect(Float64.(getinterval(ν_imag))) : [Float64(ν_imag)]
-    κs = iswide(κ) ? collect(Float64.(getinterval(κ))) : [Float64(κ)]
-    ϵs = iswide(ϵ) ? collect(Float64.(getinterval(ϵ))) : [Float64(ϵ)]
-
-    us = map(Iterators.product(ν_reals, ν_imags, κs, ϵs)) do (ν_real, ν_imag, κ, ϵ)
-        Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ; tol)
-    end
-
-    return SVector(
-        Arb(extrema(getindex.(us, 1))),
-        Arb(extrema(getindex.(us, 2))),
-        Arb(extrema(getindex.(us, 3))),
-        Arb(extrema(getindex.(us, 4))),
-    )
 end
 
 """
@@ -105,11 +78,13 @@ function Q_hat_zero_float_curve(
     tol::Float64 = 1e-11,
     saveat = [],
 )
+    # We use the fact that the equation is identical to the one for Q,
+    # except for the change in sign for κ and ω.
     prob = ODEProblem{false}(
-        cgl_hat_equation_real,
+        cgl_equation_real,
         SVector(ν_real, ν_imag, 0, 0),
         (zero(ξ₁), ξ₁),
-        (κ, ϵ, Λ),
+        (-κ, ϵ, CGLParams(Λ, ω = -Λ.ω)),
     )
 
     sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)
