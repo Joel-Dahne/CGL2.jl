@@ -9,20 +9,29 @@ using capd::autodiff::Node;
 // VECTOR FIELD DEFINITIONS
 // ===========================================================================
 
-// Generic version of the vector field as a first-order real system.
-// TODO: More description?
+// Generic version of the linearized CGL vector field as a first-order real system.
+// Integrates the Q_hat forward ODE and the linearized equation simultaneously.
+// State: in = [a, b, alpha, beta, Y_r_1, Y_r_2, Y_i_1, Y_i_2, Z_r_1, Z_r_2, Z_i_1, Z_i_2,
+//              lambda_real, lambda_imag, kappa, epsilon], where a + i*b = Q_hat,
+// alpha + i*beta = Q_hat', Y_r_j + i*Y_i_j and Z_r_j + i*Z_i_j are the real/imaginary
+// parts of Y_j and Z_j = Y_j'. Params: [omega, sigma, delta, d].
+// Outputs [Q_hat ODE, Y' = Z, Z' = M1*Y + M2*Z, 0, 0, 0, 0]
+// (lambda, kappa, epsilon are kept constant).
 void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
 {
+  // Parameters
   Node omega = params[0];
   Node sigma = params[1];
   Node delta = params[2];
   Node d = params[3];
 
+  // Values for forward solution
   Node a = in[0];
   Node b = in[1];
   Node alpha = in[2];
   Node beta = in[3];
 
+  // Values for linear equation
   Node Y_r_1 = in[4];
   Node Y_r_2 = in[5];
   Node Y_i_1 = in[6];
@@ -32,12 +41,15 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   Node Z_i_1 = in[10];
   Node Z_i_2 = in[11];
 
+  // Parameters that have wide enclosures
   Node lambda_real = in[12];
   Node lambda_imag = in[13];
   Node kappa = in[14];
   Node epsilon = in[15];
 
   // Compute forward ODE
+  // Note that this is the same as in Q_zero.cpp, except changing the
+  // signs for kappa and omega.
   Node mkappa = -kappa;
   Node momega = -omega;
 
@@ -68,27 +80,27 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
 
   // Compute J_N
   Node a2b2_sigmam1 = exp((sigma - 1) * log((a^2) + (b^2)));
-  Node N1_a = -a2b2_sigmam1 * (delta * (1 + 2 * sigma) * (a^2) + 2 * sigma * a * b + delta * (b^2));
-  Node N1_b = -a2b2_sigmam1 * ((a^2) + 2 * delta * sigma * a * b + (1 + 2 * sigma) * (b^2));
-  Node N2_a = a2b2_sigmam1 * ((1 + 2 * sigma) * (a^2) - 2 * delta * sigma * a * b + (b^2));
-  Node N2_b = -a2b2_sigmam1 * (delta * (a^2) - 2 * sigma * a * b + delta * (1 + 2 * sigma) * (b^2));
-
-  // The indexing notation _ij corresponds to the Julia indexing convention.
+  Node J_N_11 = -a2b2_sigmam1 * (delta * (1 + 2 * sigma) * (a^2) + 2 * sigma * a * b + delta * (b^2));
+  Node J_N_12 = -a2b2_sigmam1 * ((a^2) + 2 * delta * sigma * a * b + (1 + 2 * sigma) * (b^2));
+  Node J_N_21 = a2b2_sigmam1 * ((1 + 2 * sigma) * (a^2) - 2 * delta * sigma * a * b + (b^2));
+  Node J_N_22 = -a2b2_sigmam1 * (delta * (a^2) - 2 * sigma * a * b + delta * (1 + 2 * sigma) * (b^2));
 
   // M1
-  Node M1_11_real = (-epsilon * (kappa / sigma + N1_a - lambda_real) - N2_a - omega) / (1 + (epsilon^2));
+  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - \lambda I) in the paper
+  Node M1_11_real = (-epsilon * (kappa / sigma + J_N_11 - lambda_real) - J_N_21 - omega) / (1 + (epsilon^2));
   Node M1_11_imag = epsilon * lambda_imag / (1 + (epsilon^2));
 
-  Node M1_12_real = (-kappa / sigma - epsilon * (N1_b - omega) - N2_b + lambda_real) / (1 + (epsilon^2));
+  Node M1_12_real = (-kappa / sigma - epsilon * (J_N_12 - omega) - J_N_22 + lambda_real) / (1 + (epsilon^2));
   Node M1_12_imag = lambda_imag / (1 + (epsilon^2));
 
-  Node M1_21_real = (kappa / sigma - epsilon * (N2_a + omega) + N1_a - lambda_real) / (1 + (epsilon^2));
+  Node M1_21_real = (kappa / sigma - epsilon * (J_N_21 + omega) + J_N_11 - lambda_real) / (1 + (epsilon^2));
   Node M1_21_imag = -lambda_imag / (1 + (epsilon^2));
 
-  Node M1_22_real = (-epsilon * (kappa / sigma + N2_b - lambda_real) + N1_b - omega) / (1 + (epsilon^2));
+  Node M1_22_real = (-epsilon * (kappa / sigma + J_N_22 - lambda_real) + J_N_12 - omega) / (1 + (epsilon^2));
   Node M1_22_imag = epsilon * lambda_imag / (1 + (epsilon^2));
 
   // M2
+  // This corresponds to -A^{-1}(B_{1}\xi + B_{2}\xi^{-1}) in the paper
   Node M2_11 = kappa / (1 + (epsilon^2)) * (-epsilon) * xi - (d - 1) / xi;
   Node M2_12 = kappa / (1 + (epsilon^2)) * (-1) * xi;
   Node M2_21 = -M2_12;
@@ -110,81 +122,9 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   out[15] = 0 * epsilon;
 }
 
-// Specialization for d == 1: the -(d-1)/xi * (...) singular term vanishes.
-// TODO: More description?
-void vectorField_d1(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
-{
-  Node omega = params[0];
-  Node sigma = params[1];
-  Node delta = params[2];
-
-  Node Y_r_1 = in[4];
-  Node Y_r_2 = in[5];
-  Node Y_i_1 = in[6];
-  Node Y_i_2 = in[7];
-  Node Z_r_1 = in[8];
-  Node Z_r_2 = in[9];
-  Node Z_i_1 = in[10];
-  Node Z_i_2 = in[11];
-  Node lambda_real = in[12];
-  Node lambda_imag = in[13];
-  Node kappa = in[14];
-  Node epsilon = in[15];
-
-  // FIXME: Implement these
-  Node N1_a_real = 0 * delta;
-  Node N1_a_imag = 0 * delta;
-  Node N1_b_real = 0 * delta;
-  Node N1_b_imag = 0 * delta;
-  Node N2_a_real = 0 * delta;
-  Node N2_a_imag = 0 * delta;
-  Node N2_b_real = 0 * delta;
-  Node N2_b_imag = 0 * delta;
-
-  // M1
-  // The indices 11, 12, 21 and 22 correspond to Julia indices
-  Node M1_11_real = (-epsilon * (kappa / sigma + N1_a_real - lambda_real) - N2_a_real - omega) / (1 + (epsilon^2));
-  Node M1_11_imag = (-epsilon * (N1_a_imag - lambda_imag) - N2_a_imag) / (1 + (epsilon^2));
-
-  Node M1_12_real = (-kappa / sigma - epsilon * (N1_b_real - omega) - N2_b_real + lambda_real) / (1 + (epsilon^2));
-  Node M1_12_imag = (-epsilon * N1_b_imag - N2_b_imag + lambda_imag) / (1 + (epsilon^2));
-
-  Node M1_21_real = (kappa / sigma - epsilon * (N2_a_real + omega) + N1_a_real - lambda_real) / (1 + (epsilon^2));
-  Node M1_21_imag = (epsilon * N2_a_imag + N1_a_imag - lambda_imag) / (1 + (epsilon^2));
-
-  Node M1_22_real = (-epsilon * (kappa / sigma + N2_b_real - lambda_real) + N1_b_real - omega) / (1 + (epsilon^2));
-  Node M1_22_imag = (-epsilon * (N2_b_imag - lambda_imag) - N1_b_imag) / (1 + (epsilon^2));
-
-  // M2
-  Node M2_11 = kappa / (1 + (epsilon^2)) * (-epsilon) * xi;
-  Node M2_12 = kappa / (1 + (epsilon^2)) * (-1) * xi;
-  Node M2_21 = -M2_12;
-  Node M2_22 = M2_11;
-
-  // TODO: Implement forward ODE
-  out[0] = 0 * in[0];
-  out[1] = 0 * in[1];
-  out[2] = 0 * in[2];
-  out[3] = 0 * in[3];
-
-  out[4] = Z_r_1;
-  out[5] = Z_r_2;
-  out[6] = Z_i_1;
-  out[7] = Z_i_2;
-
-  out[8] = M1_11_real * Y_r_1 + M1_12_real * Y_r_2 - (M1_11_imag * Y_i_1 + M1_12_imag * Y_i_2) + M2_11 * Z_r_1 + M2_12 * Z_r_2;
-  out[9] = M1_21_real * Y_r_1 + M1_22_real * Y_r_2 - (M1_21_imag * Y_i_1 + M1_22_imag * Y_i_2) + M2_21 * Z_r_1 + M2_22 * Z_r_2;
-  out[10] = M1_11_imag * Y_r_1 + M1_12_imag * Y_r_2 + M1_11_real * Y_i_1 + M1_12_real * Y_i_2 + M2_11 * Z_i_1 + M2_12 * Z_i_2;
-  out[11] = M1_21_imag * Y_r_1 + M1_22_imag * Y_r_2 + M1_21_real * Y_i_1 + M1_22_real * Y_i_2 + M2_21 * Z_i_1 + M2_22 * Z_i_2;
-
-  out[12] = 0 * lambda_real;
-  out[13] = 0 * lambda_imag;
-  out[14] = 0 * kappa;
-  out[15] = 0 * epsilon;
-}
-
-// specialization for d == 3, omega == 1, sigma == 1, delta == 0.
-// TODO: More description?
+// Specialization for d == 3, omega == 1, sigma == 1, delta == 0.
+// Integrates the Q_hat ODE and the linearized equation
+// simultaneously. No params required.
 void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node* /*params*/, int /*noParams*/)
 {
   Node a = in[0];
@@ -211,6 +151,8 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
   Node a2b2 = a2 + b2;
 
   // Compute forward ODE
+  // Note that this is the same as in Q_zero.cpp, except changing the
+  // signs for kappa and omega.
   Node F1 = -2 / xi * (alpha + epsilon * beta) -
       kappa * xi * beta -
       kappa * b -
@@ -233,27 +175,27 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
   // Compute linearized ODE
 
   // Compute J_N
-  Node N1_a = -2 * a * b;
-  Node N1_b = -(a2 + 3 * b2);
-  Node N2_a = 3 * a2 + b2;
-  Node N2_b = -N1_a;
-
-  // The indexing notation _ij corresponds to the Julia indexing convention.
+  Node J_N_11 = -2 * a * b;
+  Node J_N_12 = -(a2 + 3 * b2);
+  Node J_N_21 = 3 * a2 + b2;
+  Node J_N_22 = -J_N_11;
 
   // M1
-  Node M1_11_real = (-epsilon * (kappa + N1_a - lambda_real) - N2_a - 1) / one_p_epsilon2;
+  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - \lambda I) in the paper
+  Node M1_11_real = (-epsilon * (kappa + J_N_11 - lambda_real) - J_N_21 - 1) / one_p_epsilon2;
   Node M1_11_imag = (epsilon * lambda_imag) / one_p_epsilon2;
 
-  Node M1_12_real = (-kappa - epsilon * (N1_b - 1) - N2_b + lambda_real) / one_p_epsilon2;
+  Node M1_12_real = (-kappa - epsilon * (J_N_12 - 1) - J_N_22 + lambda_real) / one_p_epsilon2;
   Node M1_12_imag = lambda_imag / one_p_epsilon2;
 
-  Node M1_21_real = (kappa - epsilon * (N2_a + 1) + N1_a - lambda_real) / one_p_epsilon2;
+  Node M1_21_real = (kappa - epsilon * (J_N_21 + 1) + J_N_11 - lambda_real) / one_p_epsilon2;
   Node M1_21_imag = -M1_12_imag;
 
-  Node M1_22_real = (-epsilon * (kappa + N2_b - lambda_real) + N1_b - 1) / one_p_epsilon2;
+  Node M1_22_real = (-epsilon * (kappa + J_N_22 - lambda_real) + J_N_12 - 1) / one_p_epsilon2;
   Node M1_22_imag = M1_11_imag;
 
   // M2
+  // This corresponds to -A^{-1}(B_{1}\xi + B_{2}\xi^{-1}) in the paper
   Node M2_11 = -kappa / one_p_epsilon2 * epsilon * xi - 2 / xi;
   Node M2_12 = -kappa / one_p_epsilon2 * xi;
   Node M2_21 = -M2_12;
@@ -286,13 +228,7 @@ IMap build_vector_field(int d, interval omega, interval sigma, interval delta, i
 
     bool d3_opt = (d == 3) && (omega == 1) && (sigma == 1) && (delta == 0);
 
-    if (d == 1) {
-	// Generic version for d = 1
-        vf = IMap(vectorField_d1, dim, dim, 3);
-        vf.setParameter(0, omega);
-	vf.setParameter(1, sigma);
-	vf.setParameter(2, delta);
-    } else if (d3_opt) {
+    if (d3_opt) {
 	// Specialized for the case considered in the paper
         vf = IMap(vectorField_d3_optimized, dim, dim, 0);
     } else {
@@ -307,8 +243,9 @@ IMap build_vector_field(int d, interval omega, interval sigma, interval delta, i
     return vf;
 }
 
-// Integrate the CGL ODE from xi_0 to xi_1 and print the result to stdout.
-// Outputs [a, b, alpha, beta] at xi_1 as intervals, one per line.
+// Integrate the linearized CGL ODE from xi_0 to xi_1 and print the result to stdout.
+// Outputs the 8 components [Y_r_1, Y_r_2, Y_i_1, Y_i_2, Z_r_1, Z_r_2, Z_i_1, Z_i_2]
+// at xi_1 as intervals, one per line.
 // Returns 0 on success, 1 on solver error (outputs NaN intervals).
 int Y_zero(
     /** Initial value Q_hat(xi_0) **/
