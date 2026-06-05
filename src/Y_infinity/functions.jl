@@ -12,7 +12,6 @@ Contains enclosures of the functions
 - [`K_1_dξ`](@ref)
 - [`K_2_dξ`](@ref)
 - [`I_N`](@ref)
-- [`I_N_dξ`](@ref)
 
 when evaluated at `ξ₁`.
 """
@@ -26,7 +25,6 @@ struct FunctionEnclosures_Y
     K_1_dξ::Diagonal{Acb,SVector{2,Acb}}
     K_2_dξ::Diagonal{Acb,SVector{2,Acb}}
     I_N::SMatrix{2,2,Acb}
-    I_N_dξ::SMatrix{2,2,Acb}
 end
 
 function FunctionEnclosures_Y(
@@ -51,7 +49,6 @@ function FunctionEnclosures_Y(
         K_1_dξ(ξ₁, lambda, κ, ϵ, Λ),
         K_2_dξ(ξ₁, lambda, κ, ϵ, Λ),
         I_N(Q_hat, Λ),
-        I_N_dξ(Q_hat, Q_hat_dξ, Λ),
     )
 end
 
@@ -150,18 +147,6 @@ function I_N(Q_hat, Λ::CGLParams{T}) where {T}
         conj(-im * Q_hat^2),
         -im * Q_hat^2,
         -2im * abs2(Q_hat),
-    )
-end
-
-function I_N_dξ(Q_hat, Q_hat_dξ, Λ::CGLParams{T}) where {T}
-    @assert isone(Λ.σ)
-    @assert iszero(Λ.δ)
-
-    return SMatrix{2,2}(
-        4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
-        conj(-2im * Q_hat * Q_hat_dξ),
-        -2im * Q_hat * Q_hat_dξ,
-        -4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
     )
 end
 
@@ -267,4 +252,16 @@ function J_E_2_dξ(ξ, lambda, κ, ϵ, Λ::CGLParams)
            ) *
            exp(conj(c) * ξ^2) *
            ξ^d
+end
+
+function I_N_dξ(Q_hat, Q_hat_dξ, Λ::CGLParams{T}) where {T}
+    @assert isone(Λ.σ)
+    @assert iszero(Λ.δ)
+
+    return SMatrix{2,2}(
+        4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
+        conj(-2im * Q_hat * Q_hat_dξ),
+        -2im * Q_hat * Q_hat_dξ,
+        -4im * (real(Q_hat) * real(Q_hat_dξ) + imag(Q_hat) * imag(Q_hat_dξ)),
+    )
 end

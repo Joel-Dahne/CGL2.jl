@@ -6,13 +6,12 @@
     ϵ = Arb(0.15002213424487343)
     ξ₁ = Arb(15)
     Λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
-    v = Arb("0.1")
     (; d, σ) = Λ
     _, _, c = CGL2._abc(κ, ϵ, Λ)
     A = SMatrix{2,2}(ϵ, 1, -1, ϵ)
     M = SMatrix{2,2}(im, 1, -im, 1)
 
-    C_Y = CGL2.FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, v, Λ)
+    C_Y = CGL2.FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     norm_inf = CGL2.norm_inf
 
@@ -55,7 +54,7 @@
     J_E_2_dξ = CGL2.J_E_2_dξ
 
     K_1, K_2 = CGL2.K_1, CGL2.K_2
-    K_1_dξ, K_2_dξ = CGL2.K_1_dξ, CGL2.K_2_dξ
+    K_2_dξ = CGL2.K_2_dξ
 
     for ξ in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* ξ₁
         ####
@@ -70,9 +69,6 @@
 
         @test norm_inf(CGL2.I_N(Q_hat, Λ)) <= C_Y.I_N * ξ^-2
         @test norm_inf(CGL2.I_N(Q_hat, Λ)) >= 0.8C_Y.I_N * ξ^-2
-        # IMPROVE: We could maybe improve on this bound?
-        @test norm_inf(CGL2.I_N_dξ(Q_hat, Q_hat_dξ, Λ)) <= C_Y.I_N_dξ * ξ^-3
-        @test norm_inf(CGL2.I_N_dξ(Q_hat, Q_hat_dξ, Λ)) >= 0.6C_Y.I_N_dξ * ξ^-3
 
         ####
         ## E_1 and E_2
@@ -189,15 +185,6 @@
               C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
         @test norm_inf(K_2(ξ, lambda, κ, ϵ, Λ), 2) >=
               0.85C_Y.K_2_2 * ξ^(1 / σ - real(lambda) / κ - 1)
-
-        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, Λ), 1) <=
-              C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, Λ), 1) >=
-              0.4C_Y.K_2_dξ_1 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, Λ), 2) <=
-              C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
-        @test norm_inf(K_2_dξ(ξ, lambda, κ, ϵ, Λ), 2) >=
-              0.5C_Y.K_2_dξ_2 * ξ^(1 / σ - real(lambda) / κ - 2)
 
         #####
         ## H_OJ

@@ -1,5 +1,5 @@
 """
-    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, Λ, Z, F_Z, C_Z, norms_Z)
+    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, Λ, Z, F_Z, C_Z, norms_Z)
 
 Compute an enclosure of ``I_{K_2}(ξ)`` at the point `ξ = ξ₁`.
 
@@ -19,7 +19,6 @@ function I_K_2_enclosure(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     Λ::CGLParams{Arb},
     Z::SVector{2,Acb},
     F_Z::FunctionEnclosures_Y,
@@ -33,12 +32,7 @@ function I_K_2_enclosure(
         # This is the wide case. The bound is computed using
         # REF(lemma:I_K_1-I_K_2-bounds)
 
-        exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
-
-        # These are the requirements of Lemma REF(lemma:I_K_1-I_K_2-bounds)
-        @assert v > 0
-        @assert real(c) > 0
-        @assert exponent < 0
+        exponent = 2 / σ - d - 2real(lambda) / κ - 4
 
         I_K_2_1_bound = C_Z.I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
         I_K_2_2_bound = C_Z.I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
@@ -51,7 +45,6 @@ function I_K_2_enclosure(
     # The requirements of Lemma REF(TODO) related to Lemma REF(TODO)
     # are checked in the computation of C_Z. The other requirements
     # are:
-    @assert v > 0
     @assert real(c) > 0
 
     H = F_Z.K_2 * F_Z.I_N
@@ -60,10 +53,10 @@ function I_K_2_enclosure(
     # Bound remainder term
     C_Z_1 =
         C_Z.E_1 * abs(c_0[1]) +
-        (C_Z.E_1 * C_Z.I_K_1_1 + C_Z.P_1 * C_Z.I_K_2_1 * ξ₁^-2) * ξ₁^(v - 2) * norms_Z.Z
+        (C_Z.E_1 * C_Z.I_K_1_1 + C_Z.P_1 * C_Z.I_K_2_1 * ξ₁^-2) * ξ₁^-2 * norms_Z.Z
     C_Z_2 =
         C_Z.E_2 * abs(c_0[2]) +
-        (C_Z.E_2 * C_Z.I_K_1_2 + C_Z.P_2 * C_Z.I_K_2_2 * ξ₁^-2) * ξ₁^(v - 2) * norms_Z.Z
+        (C_Z.E_2 * C_Z.I_K_1_2 + C_Z.P_2 * C_Z.I_K_2_2 * ξ₁^-2) * ξ₁^-2 * norms_Z.Z
 
     C_exp_Z_1_dξ =
         C_Z.exp_E_1_dξ * abs(c_0[1]) +
@@ -72,7 +65,7 @@ function I_K_2_enclosure(
             C_Z.E_1 * C_Z.K_1_1 * C_Z.I_N +
             C_Z.exp_P_1_dξ * C_Z.I_K_2_1 +
             C_Z.P_1 * C_Z.K_2_1 * C_Z.I_N
-        ) * ξ₁^(v - 2)
+        ) * ξ₁^-2
     C_exp_Z_2_dξ =
         C_Z.exp_E_2_dξ * abs(c_0[2]) +
         (
@@ -80,7 +73,7 @@ function I_K_2_enclosure(
             C_Z.E_2 * C_Z.K_1_2 * C_Z.I_N +
             C_Z.exp_P_2_dξ * C_Z.I_K_2_2 +
             C_Z.P_2 * C_Z.K_2_2 * C_Z.I_N
-        ) * ξ₁^(v - 2)
+        ) * ξ₁^-2
 
     C_D_11 = C_Z.H_11 * C_Z_1
     C_D_12 = C_Z.H_12 * C_Z_2

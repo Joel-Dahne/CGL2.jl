@@ -43,11 +43,8 @@ struct FunctionBounds_Y
     K_1_2::Arb
     K_2_1::Arb
     K_2_2::Arb
-    K_2_dξ_1::Arb
-    K_2_dξ_2::Arb
     # Lemma REF(lemma:bound-I_N)
     I_N::Arb
-    I_N_dξ::Arb
     # Lemma REF(lemma:I_K_1-I_K_2-bounds)
     I_K_1_1::Arb
     I_K_1_2::Arb
@@ -102,9 +99,6 @@ struct FunctionBounds_Y
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
-        indeterminate(Arb),
-        indeterminate(Arb),
-        indeterminate(Arb),
     )
 end
 
@@ -115,7 +109,6 @@ function FunctionBounds_Y(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     Λ::CGLParams{Arb};
 )
     (; d, σ, δ) = Λ
@@ -128,17 +121,15 @@ function FunctionBounds_Y(
     # Ubounds.
     ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
 
-    # This arethe only direct condition for Lemma
-    # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat and
-    # C_Q_hat_dξ and checked by their respective methods.
+    # These are the only direct condition for Lemma
+    # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat is
+    # checked by its method.
     isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
     iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
 
     # These are requirements of Lemmas REF(lemma:I_K_1-I_K_2-bounds)
-    exponent = 2 / σ - d - 2real(lambda) / κ + v - 4
+    exponent = 2 / σ - d - 2real(lambda) / κ - 4
     real(c) > 0 || throw(ArgumentError("real(c) > 0 not satisfied"))
-    v > 0 || throw(ArgumentError("v > 0 not satisfied"))
-    v - 2 < 0 || throw(ArgumentError("v - 2 < 0 not satisfied"))
     exponent < 0 || throw(ArgumentError("exponent < 0 not satisfied"))
 
     # The requirements for Lemma REF(lemma:Z-fixed-point-bounds) are
@@ -181,26 +172,22 @@ function FunctionBounds_Y(
     C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, Λ, C)
     C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, Λ, C)
 
-    C.K_2_dξ_1[] = C_K_2_dξ_1(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.K_2_dξ_2[] = C_K_2_dξ_2(lambda, κ, ϵ, ξ₁, Λ, C)
-
     # Lemma REF(lemma:bound-I_N)
 
     C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
     C_Q_hat_dξ = CGL2.C_Q_hat_dξ(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
     C.I_N[] = C_I_N(C_Q_hat)
-    C.I_N_dξ[] = C_I_N_dξ(C_Q_hat, C_Q_hat_dξ)
 
     # Lemma REF(lemma:I_K_1-I_K_2-bounds)
 
-    C.I_K_1_1[] = C_I_K_1_1(v, C)
-    C.I_K_1_2[] = C_I_K_1_2(v, C)
+    C.I_K_1_1[] = C_I_K_1_1(C)
+    C.I_K_1_2[] = C_I_K_1_2(C)
     C.I_K_2_1[] = C_I_K_2_1(κ, ϵ, Λ, C)
     C.I_K_2_2[] = C_I_K_2_2(κ, ϵ, Λ, C)
 
     # Lemma REF(lemma:Z-fixed-point-bounds)
 
-    C.T_12[] = C_T_12(lambda, κ, ϵ, ξ₁, v, Λ, C)
+    C.T_12[] = C_T_12(lambda, κ, ϵ, ξ₁, Λ, C)
 
     # Lemma REF(lemma:H-bounds)
 
@@ -446,42 +433,18 @@ function C_K_2_2(
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2
 end
 
-function C_K_2_dξ_1(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return inv(sqrt(1 + ϵ^2)) * C.J_E_1_dξ
-end
-
-function C_K_2_dξ_2(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return inv(sqrt(1 + ϵ^2)) * C.J_E_2_dξ
-end
-
 # Lemma REF(lemma:bound-I_N)
 
 C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
 
-C_I_N_dξ(C_Q_hat::Arb, C_Q_hat_dξ::Arb) = 6C_Q_hat * C_Q_hat_dξ
-
 # Lemma REF(lemma:I_K_1-I_K_2-bounds)
 
-function C_I_K_1_1(v::Arb, C_Y::FunctionBounds_Y)
-    return C_Y.K_1_1 * C_Y.I_N / abs(v - 2)
+function C_I_K_1_1(C_Y::FunctionBounds_Y)
+    return C_Y.K_1_1 * C_Y.I_N / 2
 end
 
-function C_I_K_1_2(v::Arb, C_Y::FunctionBounds_Y)
-    return C_Y.K_1_2 * C_Y.I_N / abs(v - 2)
+function C_I_K_1_2(C_Y::FunctionBounds_Y)
+    return C_Y.K_1_2 * C_Y.I_N / 2
 end
 
 function C_I_K_2_1(κ::Arb, ϵ::Arb, Λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
@@ -501,7 +464,6 @@ function C_T_12(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     Λ::CGLParams{Arb},
     C_Z::FunctionBounds_Y,
 )

@@ -15,23 +15,22 @@ function Y_infinity(
     ξ₁::Arb,
     Λ::CGLParams{Arb},
 )
-    v = Arb("0.1")
     c = _c(κ, ϵ, Λ)
 
     # Precompute functions as well as function and norm bounds
     F_Z = FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
-    C_Z = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, v, Λ)
+    C_Z = FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
-    norms_Z = NormBounds_Y(c_0, lambda, κ, ϵ, ξ₁, v, Λ, C_Z)
+    norms_Z = NormBounds_Y(c_0, lambda, κ, ϵ, ξ₁, Λ, C_Z)
 
     # Compute zeroth order bounds
-    Z = add_error.(zero(c_0), norms_Z.Z * exp(-real(c) * ξ₁^2) * ξ₁^v)
+    Z = add_error.(zero(c_0), norms_Z.Z * exp(-real(c) * ξ₁^2))
     dZ = indeterminate.(c_0)
 
     # Improve bounds iteratively.
     for _ = 1:5
-        I_K_2 = I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, v, Λ, Z, F_Z, C_Z, norms_Z)
+        I_K_2 = I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, Λ, Z, F_Z, C_Z, norms_Z)
 
         Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 

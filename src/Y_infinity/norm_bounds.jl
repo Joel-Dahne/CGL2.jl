@@ -26,7 +26,6 @@ function NormBounds_Y(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     Λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
@@ -40,13 +39,13 @@ function NormBounds_Y(
     # REF(prop:Z-fixed-point) are checked by the norm_bound_Z
     # function.
 
-    norms.Z[] = norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, v, Λ, C)
+    norms.Z[] = norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, Λ, C)
 
     return norms
 end
 
 """
-    norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, v, Λ, C)
+    norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, Λ, C)
 
 To apply the fixed point theorem in Proposition
 REF(prop:Z-fixed-point) we need to find `ρ` satisfying the inequality
@@ -77,14 +76,11 @@ function norm_bound_Z(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    v::Arb,
     Λ::CGLParams{Arb},
     C::FunctionBounds_Y,
 )
     if C.T_12 * ξ₁^-2 < 1
-        return inv(1 - C.T_12 * ξ₁^-2) *
-               max(C.E_1 * abs(c_0[1]), C.E_2 * abs(c_0[2])) *
-               ξ₁^-v
+        return inv(1 - C.T_12 * ξ₁^-2) * max(C.E_1 * abs(c_0[1]), C.E_2 * abs(c_0[2]))
     else
         throw(ErrorException("could not verify T_12 * ξ₁^-2 < 1"))
     end
