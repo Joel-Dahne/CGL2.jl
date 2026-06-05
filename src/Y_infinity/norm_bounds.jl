@@ -4,7 +4,7 @@
 Contains bounds for the norm of `Z`.
 
 The bound is based on Lemma REF(lemma:Z-fixed-point-bounds) and
-Proposition REF(prop:Y-fixed-point).
+Proposition REF(prop:fixed-point-Z).
 
 It checks all the conditions on the parameters that these lemmas
 assume. If any of these conditions are not satisfied it will throw an
@@ -51,7 +51,7 @@ To apply the fixed point theorem in Proposition
 REF(prop:Z-fixed-point) we need to find `ρ` satisfying the inequality
 
 ```
-max(C_E_1 * abs(c[1]), C_E_2 * abs(c[2])) + C_T_12 * ξ₁^-2 * ρ <= ρ
+max(C_E_1 * abs(c_0[1]), C_E_2 * abs(c_0[2])) + C_T_12 * ξ₁^-2 * ρ <= ρ
 ```
 
 and
@@ -64,7 +64,7 @@ The second inequality means that the first inequality is satisfied if
 we take
 
 ```
-ρ = (1 - C_T_12 * ξ₁^-2)^-1 * max(C_E_1 * abs(c[1]), C_E_2 * abs(c[2]))
+ρ = (1 - C_T_12 * ξ₁^-2)^-1 * max(C_E_1 * abs(c_0[1]), C_E_2 * abs(c_0[2]))
 ```
 
 From Proposition REF(prop:Z-fixed-point) we then have that the norm of

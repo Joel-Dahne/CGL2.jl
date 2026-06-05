@@ -15,37 +15,25 @@ function Y_infinity(
     ξ₁::Arb,
     Λ::CGLParams{Arb},
 )
-    c = _c(κ, ϵ, Λ)
-
     # Precompute functions as well as function and norm bounds
     F_Z = FunctionEnclosures_Y(λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
-
     C_Z = FunctionBounds_Y(λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
-
     norms_Z = NormBounds_Y(c_0, λ, κ, ϵ, ξ₁, Λ, C_Z)
 
-    # Compute zeroth order bounds
-    Z = add_error.(zero(c_0), norms_Z.Z * exp(-real(c) * ξ₁^2))
-    dZ = indeterminate.(c_0)
+    # Compute an enclosure of Z
+    I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, C_Z, norms_Z)
 
-    # Improve bounds iteratively.
-    for _ = 1:5
-        I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, C_Z, norms_Z)
+    Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 
-        Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
+    # Compute an enclosure of Z'
+    I_K_1_dξ = F_Z.K_1 * F_Z.I_N * Z
+    I_K_2_dξ = -F_Z.K_2 * F_Z.I_N * Z
 
-        I_K_1_dξ = F_Z.K_1 * F_Z.I_N * Z
-        I_K_2_dξ = -F_Z.K_2 * F_Z.I_N * Z
+    dZ = F_Z.E_12_dξ * c_0 + F_Z.E_12 * I_K_1_dξ + F_Z.P_12_dξ * I_K_2 + F_Z.P_12 * I_K_2_dξ
 
-        dZ =
-            F_Z.E_12_dξ * c_0 +
-            F_Z.E_12 * I_K_1_dξ +
-            F_Z.P_12_dξ * I_K_2 +
-            F_Z.P_12 * I_K_2_dξ
-    end
-
-    M = SMatrix{2,2}(im, 1, -im, 1)
-    Y = M * Z
-    dY = M * dZ
+    # Convert from Z to Y
+    V = SMatrix{2,2}(im, 1, -im, 1)
+    Y = V * Z
+    dY = V * dZ
     return vcat(Y, dY)
 end

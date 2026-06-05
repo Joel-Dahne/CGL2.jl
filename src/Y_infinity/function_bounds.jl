@@ -80,18 +80,18 @@ function FunctionBounds_Y(
     # REF(lemma:P_i_E_i-bounds) and REF(lemma:I_K_1-I_K_2-bounds).
     # The conditions related to the bounds for U are checked by
     # Ubounds.
-    ξ₁ > 1 || throw(ArgumentError("ξ₁ > 1 not satisfied"))
+    @assert ξ₁ > 1
 
     # These are the only direct conditions for Lemma
     # REF(lemma:bound-I_N). Note that the conditions for C_Q_hat is
     # checked by its method.
-    isone(σ) || throw(ArgumentError("σ = 1 not satisfied"))
-    iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
+    @assert isone(σ)
+    @assert iszero(δ)
 
     # These are requirements of Lemmas REF(lemma:I_K_1-I_K_2-bounds)
     exponent = 2 / σ - d - 2real(λ) / κ - 4
-    real(c) > 0 || throw(ArgumentError("real(c) > 0 not satisfied"))
-    exponent < 0 || throw(ArgumentError("exponent < 0 not satisfied"))
+    @assert real(c) > 0
+    @assert exponent < 0
 
     # The requirements for Lemma REF(lemma:Z-fixed-point-bounds) are
     # the same as for REF(lemma:I_K_1-I_K_2-bounds).
@@ -161,39 +161,32 @@ function C_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_con
     return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + λ / 2κ))
 end
 
-function C_J_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return abs(B_W_1(λ, κ, ϵ, Λ)) * C.E_1
-end
+C_J_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    abs(B_W_1(λ, κ, ϵ, Λ)) * C.E_1
 
-function C_J_E_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return abs(B_W_2(λ, κ, ϵ, Λ)) * C.E_2
-end
+C_J_E_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    abs(B_W_2(λ, κ, ϵ, Λ)) * C.E_2
 
-function C_J_P_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return abs(B_W_1(λ, κ, ϵ, Λ)) * C.P_1
-end
 
-function C_J_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return abs(B_W_2(λ, κ, ϵ, Λ)) * C.P_2
-end
+C_J_P_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    abs(B_W_1(λ, κ, ϵ, Λ)) * C.P_1
+
+C_J_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    abs(B_W_2(λ, κ, ϵ, Λ)) * C.P_2
 
 # Lemma REF(lemma:bound-K_1-K_2)
 
-function C_K_1_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return inv(sqrt(1 + ϵ^2)) * C.J_P_1
-end
+C_K_1_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    inv(sqrt(1 + ϵ^2)) * C.J_P_1
 
-function C_K_1_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return inv(sqrt(1 + ϵ^2)) * C.J_P_2
-end
+C_K_1_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    inv(sqrt(1 + ϵ^2)) * C.J_P_2
 
-function C_K_2_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return inv(sqrt(1 + ϵ^2)) * C.J_E_1
-end
+C_K_2_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    inv(sqrt(1 + ϵ^2)) * C.J_E_1
 
-function C_K_2_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
-    return inv(sqrt(1 + ϵ^2)) * C.J_E_2
-end
+C_K_2_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =
+    inv(sqrt(1 + ϵ^2)) * C.J_E_2
 
 # Lemma REF(lemma:bound-I_N)
 
@@ -201,13 +194,8 @@ C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
 
 # Lemma REF(lemma:I_K_1-I_K_2-bounds)
 
-function C_I_K_1_1(C_Y::FunctionBounds_Y)
-    return C_Y.K_1_1 * C_Y.I_N / 2
-end
-
-function C_I_K_1_2(C_Y::FunctionBounds_Y)
-    return C_Y.K_1_2 * C_Y.I_N / 2
-end
+C_I_K_1_1(C_Y::FunctionBounds_Y) = C_Y.K_1_1 * C_Y.I_N / 2
+C_I_K_1_2(C_Y::FunctionBounds_Y) = C_Y.K_1_2 * C_Y.I_N / 2
 
 function C_I_K_2_1(κ::Arb, ϵ::Arb, Λ::CGLParams{Arb}, C_Y::FunctionBounds_Y)
     c = _c(κ, ϵ, Λ)

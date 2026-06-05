@@ -33,7 +33,7 @@ function FunctionEnclosures_Y(
     Λ::CGLParams{Arb},
 )
     # Compute enclosure of forward solution
-    Q_hat, Q_hat_dξ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
+    Q_hat, _ = Q_hat_infinity(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     return FunctionEnclosures_Y(
         Diagonal(SVector(E_1(ξ₁, λ, κ, ϵ, Λ), E_2(ξ₁, λ, κ, ϵ, Λ))),
@@ -148,7 +148,8 @@ function K_2(ξ, λ, κ, ϵ, Λ::CGLParams)
     ) / (1 + ϵ^2)
 end
 
-function I_N(Q_hat, Λ::CGLParams{T}) where {T}
+function I_N(Q_hat, Λ::CGLParams)
+    # The formula below assumes σ = 1 and δ = 0
     @assert isone(Λ.σ)
     @assert iszero(Λ.δ)
 

@@ -1,5 +1,5 @@
 """
-    I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, C_Z, norms_Z)
+    I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, C_Z, norms_Z)
 
 Compute an enclosure of ``I_{K_2}(ξ)`` at the point `ξ = ξ₁`.
 
@@ -12,7 +12,6 @@ function I_K_2_enclosure(
     ϵ::Arb,
     ξ₁::Arb,
     Λ::CGLParams{Arb},
-    Z::SVector{2,Acb},
     C_Z::FunctionBounds_Y,
     norms_Z::NormBounds_Y,
 )
