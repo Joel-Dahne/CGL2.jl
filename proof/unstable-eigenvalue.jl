@@ -134,12 +134,10 @@ CGL2.format_interval_precise(κ)
 # ╔═╡ 3032a818-401b-416a-9d74-1340a98df7db
 md"""
 Finally, we compute an enclosure of the coefficient ``p_Q`` determining the leading order asymptotic at infinity.
-
-TODO: Rename `p_Q_0` to `p_Q`?
 """
 
 # ╔═╡ f044e3bf-87b5-4d4f-8bcd-b0ec3f816676
-p_Q = CGL2.p_Q_0(γ, κ, ϵ, ξ₁, Λ)
+p_Q_0 = CGL2.p_Q_0(γ, κ, ϵ, ξ₁, Λ)
 
 # ╔═╡ 5888a3a0-7064-4b6b-9428-42fcb61d396a
 md"""
@@ -147,7 +145,7 @@ Print a formatted enclosure for inclusion in the paper.
 """
 
 # ╔═╡ fd9e8538-381b-44c4-a737-c03f9ad4b590
-CGL2.format_interval_precise(p_Q)
+CGL2.format_interval_precise(p_Q_0)
 
 # ╔═╡ 48ddc751-4a96-4a04-8e71-040430d203f6
 let
@@ -179,7 +177,7 @@ Next we prove the existance of a forward self-similar solution with the same asy
 a, b, c = CGL2._abc(κ, ϵ, Λ)
 
 # ╔═╡ c2f067f3-4a78-4048-834d-186ec249350e
-γ₁ = p_Q / (-c)^-a
+γ₁ = p_Q_0 / (-c)^-a
 
 # ╔═╡ 40f63eb4-5ece-44e7-835a-b33f97e309bd
 @assert_proof isfinite(γ₁)
@@ -339,11 +337,11 @@ We can then plot the square and the approximate eigenvalue.
 # ╔═╡ 356dc846-b0fc-4743-997a-73d9b9bf7bcf
 let
     fig = Figure(; fontsize)
-    ax = Axis(fig[1, 1], xlabel = L"\mathrm{Re}(\λ)", ylabel = L"\mathrm{Im}(\λ)")
+    ax = Axis(fig[1, 1], xlabel = L"\mathrm{Re}(\lambda)", ylabel = L"\mathrm{Im}(\lambda)")
     xlims!(ax, -0.005, 0.04)
     corner_list = [corner_bl, corner_br, corner_tr, corner_tl, corner_bl]
     lines!(ax, real.(corner_list), imag.(corner_list), linewidth = 3)
-    scatter!(ax, [real(λ_approx)], [imag(λ_approx)], color = :red, label = L"\λ_0")
+    scatter!(ax, [real(λ_approx)], [imag(λ_approx)], color = :red, label = L"\lambda_0")
     axislegend(ax)
     save_figures && save("figures/contour.pdf", fig)
     fig
@@ -399,16 +397,16 @@ Compute ``H`` for each piece.
 """
 
 # ╔═╡ 340f6f00-629a-4c52-8f07-baf6568a2957
-H_square_bottom = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_bottom)
+H_square_bottom = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_bottom)
 
 # ╔═╡ 060bd72c-1e0f-47cf-bbf1-f03c6e8c3599
-H_square_right = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_right)
+H_square_right = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_right)
 
 # ╔═╡ da7f234b-b681-4956-ba49-7f2ac6b363c2
-H_square_top = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_top)
+H_square_top = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_top)
 
 # ╔═╡ 942b9ffc-f12a-4c3c-9002-ffb69c784fd1
-H_square_left = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_left)
+H_square_left = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_left)
 
 # ╔═╡ 193f2a06-c0d3-45f5-8a2f-ba65d5a41ab3
 to_rect(x::Arb, y::Arb) = Rect2d(lbound(x), lbound(y), 2radius(x), 2radius(y))
@@ -446,8 +444,8 @@ let
     fig = Figure(; fontsize)
     ax = Axis(
         fig[1, 1],
-        xlabel = L"\mathrm{Re}(H(\λ))",
-        ylabel = L"\mathrm{Im}(H(\λ))",
+        xlabel = L"\mathrm{Re}(H(\lambda))",
+        ylabel = L"\mathrm{Im}(H(\lambda))",
         xticks = [-2e-20, 0, 2e-20],
         yticks = [-2e-20, 0, 2e-20],
     )
