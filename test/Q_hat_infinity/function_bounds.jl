@@ -10,8 +10,8 @@
 
     C = CGL2.FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
 
-    P_hat, P_hat_dξ = CGL2.P_hat, CGL2.P_hat_dξ
-    E_hat, E_hat_dξ = CGL2.E_hat, CGL2.E_hat_dξ
+    P_hat = CGL2.P_hat
+    E_hat = CGL2.E_hat
     J_P_hat = CGL2.J_P_hat
     J_E_hat = CGL2.J_E_hat
 
@@ -23,19 +23,11 @@
         @test abs(P_hat(ξ, κ, ϵ, Λ)) <= C.P_hat * ξ^(-1 / σ)
         @test abs(P_hat(ξ, κ, ϵ, Λ)) >= 0.99C.P_hat * ξ^(-1 / σ)
 
-        @test abs(P_hat_dξ(ξ, κ, ϵ, Λ)) <= C.P_hat_dξ * ξ^(-1 / σ - 1)
-        @test abs(P_hat_dξ(ξ, κ, ϵ, Λ)) >= 0.95C.P_hat_dξ * ξ^(-1 / σ - 1)
-
         ####
         ## E_hat
         ####
         @test abs(E_hat(ξ, κ, ϵ, Λ)) <= C.E_hat * exp(-real(c) * ξ^2) * ξ^(1 / σ - d)
         @test abs(E_hat(ξ, κ, ϵ, Λ)) >= 0.95C.E_hat * exp(-real(c) * ξ^2) * ξ^(1 / σ - d)
-
-        @test abs(E_hat_dξ(ξ, κ, ϵ, Λ)) <=
-              C.E_hat_dξ * exp(-real(c) * ξ^2) * ξ^(1 / σ - d + 1)
-        @test abs(E_hat_dξ(ξ, κ, ϵ, Λ)) >=
-              0.95C.E_hat_dξ * exp(-real(c) * ξ^2) * ξ^(1 / σ - d + 1)
 
         ######
         ## J_P_hat

@@ -122,8 +122,7 @@ function FunctionBounds_Y(
 
     # Lemma REF(lemma:bound-I_N)
 
-    C_Q_hat = CGL2.C_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
-    C.I_N[] = C_I_N(C_Q_hat)
+    C.I_N[] = C_I_N(γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
     # Lemma REF(lemma:I_K_1-I_K_2-bounds)
 
@@ -190,7 +189,13 @@ C_K_2_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBo
 
 # Lemma REF(lemma:bound-I_N)
 
-C_I_N(C_Q_hat::Arb) = 3C_Q_hat^2
+function C_I_N(C_Q_hat::Arb)
+    # Compute a bound for the norm of Q_hat
+    C = FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
+    norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
+
+    return 3norms.Q_hat^2
+end
 
 # Lemma REF(lemma:I_K_1-I_K_2-bounds)
 

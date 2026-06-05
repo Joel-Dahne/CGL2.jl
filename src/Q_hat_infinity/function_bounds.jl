@@ -18,9 +18,7 @@ assume to hold.
 struct FunctionBounds_hat
     # Lemma REF(lemma:P_hat-E_hat-bounds)
     P_hat::Arb
-    P_hat_dξ::Arb
     E_hat::Arb
-    E_hat_dξ::Arb
     J_P_hat::Arb
     J_E_hat::Arb
     # Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
@@ -30,8 +28,6 @@ struct FunctionBounds_hat
     T_hat::Arb
 
     FunctionBounds_hat() = new(
-        indeterminate(Arb),
-        indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
         indeterminate(Arb),
@@ -65,10 +61,8 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     C_hat = FunctionBounds_hat()
 
     C_hat.P_hat[] = C_P_hat(κ, ϵ, ξ₁, Λ, CU_hat)
-    C_hat.P_hat_dξ[] = C_P_hat_dξ(κ, ϵ, ξ₁, Λ, CU_hat)
 
     C_hat.E_hat[] = C_E_hat(κ, ϵ, ξ₁, Λ, CU_hat)
-    C_hat.E_hat_dξ[] = C_E_hat_dξ(κ, ϵ, ξ₁, Λ, CU_hat)
 
     C_hat.J_E_hat[] = C_J_E_hat(κ, ϵ, ξ₁, Λ, C_hat)
     C_hat.J_P_hat[] = C_J_P_hat(κ, ϵ, ξ₁, Λ, C_hat)
@@ -86,19 +80,9 @@ function C_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBoun
     return CU_hat.U_a_b * abs((-c)^-a)
 end
 
-function C_P_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, Λ)
-    return CU_hat.U_dz_a_b * abs(2(-c)^-a)
-end
-
 function C_E_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
     return CU_hat.U_bma_b * abs(c^(a - b))
-end
-
-function C_E_hat_dξ(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_hat::UBounds)
-    a, b, c = _abc(κ, ϵ, Λ)
-    return 2(CU_hat.U_bma_b * abs(c) + CU_hat.U_dz_bma_b * ξ₁^-2) * abs(c^(a - b))
 end
 
 C_J_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_hat::FunctionBounds_hat) =
