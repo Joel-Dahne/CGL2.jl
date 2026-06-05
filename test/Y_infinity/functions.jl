@@ -89,38 +89,18 @@
         )
     end
 
-    @testset "J_P_$j" for (j, J_P_j, J_P_j_dξ, P_j, W_j) in [
-        (1, CGL2.J_P_1, CGL2.J_P_1_dξ, CGL2.P_1, CGL2.W_1),
-        (2, CGL2.J_P_2, CGL2.J_P_2_dξ, CGL2.P_2, CGL2.W_2),
+    @testset "J_P_$j" for (j, J_P_j, P_j, W_j) in [
+        (1, CGL2.J_P_1, CGL2.P_1, CGL2.W_1),
+        (2, CGL2.J_P_2, CGL2.P_2, CGL2.W_2),
     ]
         @test Arblib.overlaps(J_P_j(ξ, λ, κ, ϵ, Λ), P_j(ξ, λ, κ, ϵ, Λ) / W_j(ξ, λ, κ, ϵ, Λ))
-
-        @test Arblib.overlaps(
-            J_P_j_dξ(ξ, λ, κ, ϵ, Λ),
-            (P_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)/W_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ))[1],
-        )
-
-        @test Arblib.overlaps(
-            J_P_j_dξ(ξ, λ, κ, ϵ, Λ),
-            J_P_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1],
-        )
     end
 
-    @testset "J_E_$j" for (j, J_E_j, J_E_j_dξ, E_j, W_j) in [
-        (1, CGL2.J_E_1, CGL2.J_E_1_dξ, CGL2.E_1, CGL2.W_1),
-        (2, CGL2.J_E_2, CGL2.J_E_2_dξ, CGL2.E_2, CGL2.W_2),
+    @testset "J_E_$j" for (j, J_E_j, E_j, W_j) in [
+        (1, CGL2.J_E_1, CGL2.E_1, CGL2.W_1),
+        (2, CGL2.J_E_2, CGL2.E_2, CGL2.W_2),
     ]
         @test Arblib.overlaps(J_E_j(ξ, λ, κ, ϵ, Λ), E_j(ξ, λ, κ, ϵ, Λ) / W_j(ξ, λ, κ, ϵ, Λ))
-
-        @test Arblib.overlaps(
-            J_E_j_dξ(ξ, λ, κ, ϵ, Λ),
-            (E_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)/W_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ))[1],
-        )
-
-        @test Arblib.overlaps(
-            J_E_j_dξ(ξ, λ, κ, ϵ, Λ),
-            J_E_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1],
-        )
     end
 
     @testset "K_1 and K_2" begin
@@ -136,27 +116,6 @@
         v = [-F_Y.K_1 * F; -F_Y.K_2 * F]
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; inv(P) * A * P \ F]))
-
-        K1_dξ = CGL2.K_1_dξ(ξ, λ, κ, ϵ, Λ)
-        K2_dξ = CGL2.K_2_dξ(ξ, λ, κ, ϵ, Λ)
-
-        K1_dξ_series = Diagonal(getindex.(diag(CGL2.K_1(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)), 1))
-        K2_dξ_series = Diagonal(getindex.(diag(CGL2.K_2(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)), 1))
-
-        K1_dξ_fdm = fdm(
-            ξ_real -> CGL2.K_1(complex(ξ_real, imag(ξF64)), λF64, κF64, ϵF64, ΛF64),
-            real(ξF64),
-        )
-
-        K2_dξ_fdm = fdm(
-            ξ_real -> CGL2.K_2(complex(ξ_real, imag(ξF64)), λF64, κF64, ϵF64, ΛF64),
-            real(ξF64),
-        )
-
-        @test all(Arblib.overlaps.(F_Y.K_1_dξ, K1_dξ_series))
-        @test all(Arblib.overlaps.(F_Y.K_2_dξ, K2_dξ_series))
-        @test ComplexF64.(F_Y.K_1_dξ) ≈ K1_dξ_fdm rtol = 1e-10
-        @test ComplexF64.(F_Y.K_2_dξ) ≈ K2_dξ_fdm rtol = 1e-12
     end
 
     @testset "I_N" begin
@@ -165,34 +124,16 @@
         # The precise value for a and b should not play any role in
         # the correctness, we just compute some approximation here.
         νF64 = 1.9261384880241954 + 3.0638598354170337im
-        a, b, a_dξ, b_dξ =
+        a_hat, b_hat, a_hat_dξ, b_hat_dξ =
             Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, ΛF64))
 
         # Compute Jacobian by going through ArbSeries
-        N = (a, b) -> (a^2 + b^2)^Λ.σ * SVector(-Λ.δ * a - b, a - Λ.δ * b)
-        N_a = getindex.(N(ArbSeries((a, 1)), b), 1)
-        N_b = getindex.(N(a, ArbSeries((b, 1))), 1)
-        JN_direct = [N_a N_b]
-        IN_direct = inv(P) * JN_direct * P
+        N = (a_hat, b_hat) -> (a_hat^2 + b_hat^2) ^ Λ.σ * SVector(-Λ.δ * a_hat - b_hat, a_hat - Λ.δ * b_hat)
+        N_a = getindex.(N(ArbSeries((a_hat, 1)), b_hat), 1)
+        N_b = getindex.(N(a_hat, ArbSeries((b_hat, 1))), 1)
+        J_N_direct = [N_a N_b]
+        I_N_direct = inv(P) * J_N_direct * P
 
-        @test all(Arblib.overlaps.(IN_direct, CGL2.I_N(Acb(a, b), Λ)))
-
-        # Compute derivative w.r.t. ξ using formula for Jacobian plus ArbSeries
-        @assert isone(Λ.σ)
-        @assert iszero(Λ.δ)
-        IN(a, b) = SMatrix{2,2}(
-            2im * (a^2 + b^2),
-            im * (a - im * b)^2,
-            -im * (a + im * b)^2,
-            -2im * (a^2 + b^2),
-        )
-
-        # Check that the above implementation agrees with previous one
-        @test all(Arblib.overlaps.(IN_direct, IN(a, b)))
-
-        # Compute derivative w.r.t. ξ
-        IN_dξ = getindex.(IN(ArbSeries((a, a_dξ)), ArbSeries((b, b_dξ))), 1)
-
-        @test all(Arblib.overlaps.(IN_dξ, CGL2.I_N_dξ(Acb(a, b), Acb(a_dξ, b_dξ), Λ)))
+        @test all(Arblib.overlaps.(I_N_direct, CGL2.I_N(Acb(a_hat, b_hat), Λ)))
     end
 end

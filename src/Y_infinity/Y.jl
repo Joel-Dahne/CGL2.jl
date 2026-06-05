@@ -30,7 +30,7 @@ function Y_infinity(
 
     # Improve bounds iteratively.
     for _ = 1:5
-        I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, F_Z, C_Z, norms_Z)
+        I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, C_Z, norms_Z)
 
         Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 
