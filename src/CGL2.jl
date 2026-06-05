@@ -87,7 +87,4 @@ include("Y_infinity/Y.jl")
 
 include("H.jl")
 
-include("branch_eigenvalue/branch_eigenvalue_approximation.jl")
-include("branch_eigenvalue/branch_eigenvalue_points.jl")
-
 end # module CGL2
