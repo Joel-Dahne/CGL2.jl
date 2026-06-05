@@ -1,6 +1,6 @@
 @testset "functions" begin
     # IMPROVE: Test for more parameters
-    lambda = Acb(0.19028080950252219, 2.769747313863597)
+    λ = Acb(0.19028080950252219, 2.769747313863597)
     γ₁ = Acb(0.1979686615344728, 0.15613711743772288)
     γ₂ = Acb(-116.03421868436834, 101.21494871936197)
     ξ = Arb(30)
@@ -12,10 +12,10 @@
     ξF64 = Float64(ξ)
     κF64 = Float64(κ)
     ϵF64 = Float64(ϵ)
-    lambdaF64 = ComplexF64(lambda)
+    λF64 = ComplexF64(λ)
     ΛF64 = CGLParams{Float64}(Λ)
 
-    F_Y = CGL2.FunctionEnclosures_Y(lambda, γ₁, γ₂, κ, ϵ, ξ, Λ)
+    F_Y = CGL2.FunctionEnclosures_Y(λ, γ₁, γ₂, κ, ϵ, ξ, Λ)
 
     # Function for computing derivative using finite differences.
     fdm = central_fdm(5, 1)
@@ -24,7 +24,7 @@
 
     @testset "P_$j" for (j, P_j, P_j_dξ) in
                         [(1, CGL2.P_1, CGL2.P_1_dξ), (2, CGL2.P_2, CGL2.P_2_dξ)]
-        Pj_series = P_j(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, Λ)
+        Pj_series = P_j(ArbSeries((ξ, 1, 0)), λ, κ, ϵ, Λ)
         Pj = Pj_series[0]
         Pj_dξ = Pj_series[1]
         Pj_dξ_dξ = 2Pj_series[2]
@@ -34,28 +34,25 @@
             @test Arblib.contains_zero(
                 (ϵ + im) * Pj_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Pj_dξ +
-                (κ / σ + ω * im - lambda) * Pj,
+                (κ / σ + ω * im - λ) * Pj,
             )
         else
             @test Arblib.contains_zero(
                 (ϵ - im) * Pj_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Pj_dξ +
-                (κ / σ - ω * im - lambda) * Pj,
+                (κ / σ - ω * im - λ) * Pj,
             )
         end
 
-        @test Arblib.overlaps(
-            P_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, Λ)[1],
-            P_j_dξ(ξ, lambda, κ, ϵ, Λ),
-        )
+        @test Arblib.overlaps(P_j(ArbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1], P_j_dξ(ξ, λ, κ, ϵ, Λ))
 
-        @test P_j_dξ(ξ, lambda, κ, ϵ, Λ) ≈
-              fdm(ξ -> P_j(ξ, lambdaF64, κF64, ϵF64, ΛF64), ξF64) rtol = 1e-12
+        @test P_j_dξ(ξ, λ, κ, ϵ, Λ) ≈ fdm(ξ -> P_j(ξ, λF64, κF64, ϵF64, ΛF64), ξF64) rtol =
+            1e-12
     end
 
     @testset "E_$j" for (j, E_j, E_j_dξ) in
                         [(1, CGL2.E_1, CGL2.E_1_dξ), (2, CGL2.E_2, CGL2.E_2_dξ)]
-        Ej_series = E_j(ArbSeries((ξ, 1, 0)), lambda, κ, ϵ, Λ)
+        Ej_series = E_j(ArbSeries((ξ, 1, 0)), λ, κ, ϵ, Λ)
         Ej = Ej_series[0]
         Ej_dξ = Ej_series[1]
         Ej_dξ_dξ = 2Ej_series[2]
@@ -65,23 +62,20 @@
             @test Arblib.contains_zero(
                 (ϵ + im) * Ej_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Ej_dξ +
-                (κ / σ + ω * im - lambda) * Ej,
+                (κ / σ + ω * im - λ) * Ej,
             )
         else
             @test Arblib.contains_zero(
                 (ϵ - im) * Ej_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Ej_dξ +
-                (κ / σ - ω * im - lambda) * Ej,
+                (κ / σ - ω * im - λ) * Ej,
             )
         end
 
-        @test Arblib.overlaps(
-            E_j(ArbSeries((ξ, 1)), lambda, κ, ϵ, Λ)[1],
-            E_j_dξ(ξ, lambda, κ, ϵ, Λ),
-        )
+        @test Arblib.overlaps(E_j(ArbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1], E_j_dξ(ξ, λ, κ, ϵ, Λ))
 
-        @test E_j_dξ(ξ, lambda, κ, ϵ, Λ) ≈
-              fdm(ξ -> E_j(ξ, lambdaF64, κF64, ϵF64, ΛF64), ξF64) rtol = 1e-10
+        @test E_j_dξ(ξ, λ, κ, ϵ, Λ) ≈ fdm(ξ -> E_j(ξ, λF64, κF64, ϵF64, ΛF64), ξF64) rtol =
+            1e-10
     end
 
     @testset "W_$j" for (j, W_j, P_j, P_j_dξ, E_j, E_j_dξ) in [
@@ -89,9 +83,9 @@
         (2, CGL2.W_2, CGL2.P_2, CGL2.P_2_dξ, CGL2.E_2, CGL2.E_2_dξ),
     ]
         @test Arblib.overlaps(
-            W_j(ξ, lambda, κ, ϵ, Λ),
-            P_j(ξ, lambda, κ, ϵ, Λ) * E_j_dξ(ξ, lambda, κ, ϵ, Λ) -
-            P_j_dξ(ξ, lambda, κ, ϵ, Λ) * E_j(ξ, lambda, κ, ϵ, Λ),
+            W_j(ξ, λ, κ, ϵ, Λ),
+            P_j(ξ, λ, κ, ϵ, Λ) * E_j_dξ(ξ, λ, κ, ϵ, Λ) -
+            P_j_dξ(ξ, λ, κ, ϵ, Λ) * E_j(ξ, λ, κ, ϵ, Λ),
         )
     end
 
@@ -99,25 +93,16 @@
         (1, CGL2.J_P_1, CGL2.J_P_1_dξ, CGL2.P_1, CGL2.W_1),
         (2, CGL2.J_P_2, CGL2.J_P_2_dξ, CGL2.P_2, CGL2.W_2),
     ]
+        @test Arblib.overlaps(J_P_j(ξ, λ, κ, ϵ, Λ), P_j(ξ, λ, κ, ϵ, Λ) / W_j(ξ, λ, κ, ϵ, Λ))
+
         @test Arblib.overlaps(
-            J_P_j(ξ, lambda, κ, ϵ, Λ),
-            P_j(ξ, lambda, κ, ϵ, Λ) / W_j(ξ, lambda, κ, ϵ, Λ),
+            J_P_j_dξ(ξ, λ, κ, ϵ, Λ),
+            (P_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)/W_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ))[1],
         )
 
         @test Arblib.overlaps(
-            J_P_j_dξ(ξ, lambda, κ, ϵ, Λ),
-            (P_j(
-                AcbSeries((ξ, 1)),
-                lambda,
-                κ,
-                ϵ,
-                Λ,
-            )/W_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ))[1],
-        )
-
-        @test Arblib.overlaps(
-            J_P_j_dξ(ξ, lambda, κ, ϵ, Λ),
-            J_P_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ)[1],
+            J_P_j_dξ(ξ, λ, κ, ϵ, Λ),
+            J_P_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1],
         )
     end
 
@@ -125,25 +110,16 @@
         (1, CGL2.J_E_1, CGL2.J_E_1_dξ, CGL2.E_1, CGL2.W_1),
         (2, CGL2.J_E_2, CGL2.J_E_2_dξ, CGL2.E_2, CGL2.W_2),
     ]
+        @test Arblib.overlaps(J_E_j(ξ, λ, κ, ϵ, Λ), E_j(ξ, λ, κ, ϵ, Λ) / W_j(ξ, λ, κ, ϵ, Λ))
+
         @test Arblib.overlaps(
-            J_E_j(ξ, lambda, κ, ϵ, Λ),
-            E_j(ξ, lambda, κ, ϵ, Λ) / W_j(ξ, lambda, κ, ϵ, Λ),
+            J_E_j_dξ(ξ, λ, κ, ϵ, Λ),
+            (E_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)/W_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ))[1],
         )
 
         @test Arblib.overlaps(
-            J_E_j_dξ(ξ, lambda, κ, ϵ, Λ),
-            (E_j(
-                AcbSeries((ξ, 1)),
-                lambda,
-                κ,
-                ϵ,
-                Λ,
-            )/W_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ))[1],
-        )
-
-        @test Arblib.overlaps(
-            J_E_j_dξ(ξ, lambda, κ, ϵ, Λ),
-            J_E_j(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ)[1],
+            J_E_j_dξ(ξ, λ, κ, ϵ, Λ),
+            J_E_j(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)[1],
         )
     end
 
@@ -161,23 +137,19 @@
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; inv(P) * A * P \ F]))
 
-        K1_dξ = CGL2.K_1_dξ(ξ, lambda, κ, ϵ, Λ)
-        K2_dξ = CGL2.K_2_dξ(ξ, lambda, κ, ϵ, Λ)
+        K1_dξ = CGL2.K_1_dξ(ξ, λ, κ, ϵ, Λ)
+        K2_dξ = CGL2.K_2_dξ(ξ, λ, κ, ϵ, Λ)
 
-        K1_dξ_series =
-            Diagonal(getindex.(diag(CGL2.K_1(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ)), 1))
-        K2_dξ_series =
-            Diagonal(getindex.(diag(CGL2.K_2(AcbSeries((ξ, 1)), lambda, κ, ϵ, Λ)), 1))
+        K1_dξ_series = Diagonal(getindex.(diag(CGL2.K_1(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)), 1))
+        K2_dξ_series = Diagonal(getindex.(diag(CGL2.K_2(AcbSeries((ξ, 1)), λ, κ, ϵ, Λ)), 1))
 
         K1_dξ_fdm = fdm(
-            ξ_real ->
-                CGL2.K_1(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, ΛF64),
+            ξ_real -> CGL2.K_1(complex(ξ_real, imag(ξF64)), λF64, κF64, ϵF64, ΛF64),
             real(ξF64),
         )
 
         K2_dξ_fdm = fdm(
-            ξ_real ->
-                CGL2.K_2(complex(ξ_real, imag(ξF64)), lambdaF64, κF64, ϵF64, ΛF64),
+            ξ_real -> CGL2.K_2(complex(ξ_real, imag(ξF64)), λF64, κF64, ϵF64, ΛF64),
             real(ξF64),
         )
 

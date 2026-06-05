@@ -33,27 +33,24 @@ function branch_eigenvalue_approximation(
         ###
         # Step 3.1: Find approximate eigenvalue from finite difference method
         ###
-        Λs = filter(
-            lambda -> imag(lambda) > 0,
-            linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, Λ)[1],
-        )
+        Λs = filter(λ -> imag(λ) > 0, linearization_eigenvalues_real_1(ν, κ, ϵ, ξ₁, Λ)[1])
 
-        lambda_approx = Λs[findmax(real, Λs)[2]]
+        λ_approx = Λs[findmax(real, Λs)[2]]
 
         ###
         # Step 3: Solve for Z and Λ
         ###
-        x, c, lambda = H_approximate(lambda_approx, ν, κ, ϵ, ξ₁, Λ)
+        x, c, λ = H_approximate(λ_approx, ν, κ, ϵ, ξ₁, Λ)
 
-        @assert isapprox(norm(H(x, c, lambda, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)), 0, atol = 1e-9)
-        @assert isapprox(lambda, lambda_approx, rtol = 1e-3)
+        @assert isapprox(norm(H(x, c, λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)), 0, atol = 1e-9)
+        @assert isapprox(λ, λ_approx, rtol = 1e-3)
 
-        (x, c, lambda)
+        (x, c, λ)
     end
 
     xs = getindex.(res, 1)
     cs = getindex.(res, 2)
-    lambdas = getindex.(res, 3)
+    λs = getindex.(res, 3)
 
-    return xs, cs, lambdas
+    return xs, cs, λs
 end

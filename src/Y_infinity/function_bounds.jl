@@ -1,5 +1,5 @@
 """
-    FunctionBounds_Y(lambda, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
+    FunctionBounds_Y(λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
 Contains the constants involved in asymptotic bounds for functions
 that are needed in the enclosure of `Q_hat` at infinity.
@@ -103,7 +103,7 @@ struct FunctionBounds_Y
 end
 
 function FunctionBounds_Y(
-    lambda::Acb,
+    λ::Acb,
     γ₁::Acb,
     γ₂::Acb,
     κ::Arb,
@@ -128,7 +128,7 @@ function FunctionBounds_Y(
     iszero(δ) || throw(ArgumentError("δ = 0 not satisfied"))
 
     # These are requirements of Lemmas REF(lemma:I_K_1-I_K_2-bounds)
-    exponent = 2 / σ - d - 2real(lambda) / κ - 4
+    exponent = 2 / σ - d - 2real(λ) / κ - 4
     real(c) > 0 || throw(ArgumentError("real(c) > 0 not satisfied"))
     exponent < 0 || throw(ArgumentError("exponent < 0 not satisfied"))
 
@@ -137,40 +137,40 @@ function FunctionBounds_Y(
 
     C = FunctionBounds_Y()
 
-    CU = UBounds(a - lambda / 2κ, b, -c, ξ₁, include_da = true)
-    CU_conj = UBounds(conj(a) - lambda / 2κ, b, -conj(c), ξ₁, include_da = true)
+    CU = UBounds(a - λ / 2κ, b, -c, ξ₁, include_da = true)
+    CU_conj = UBounds(conj(a) - λ / 2κ, b, -conj(c), ξ₁, include_da = true)
 
     # Lemma REF(lemma:P_i_E_i-bounds)
 
-    C.E_1[] = C_E_1(lambda, κ, ϵ, ξ₁, Λ, CU)
-    C.E_2[] = C_E_2(lambda, κ, ϵ, ξ₁, Λ, CU_conj)
-    C.P_1[] = C_P_1(lambda, κ, ϵ, ξ₁, Λ, CU)
-    C.P_2[] = C_P_2(lambda, κ, ϵ, ξ₁, Λ, CU_conj)
+    C.E_1[] = C_E_1(λ, κ, ϵ, ξ₁, Λ, CU)
+    C.E_2[] = C_E_2(λ, κ, ϵ, ξ₁, Λ, CU_conj)
+    C.P_1[] = C_P_1(λ, κ, ϵ, ξ₁, Λ, CU)
+    C.P_2[] = C_P_2(λ, κ, ϵ, ξ₁, Λ, CU_conj)
 
-    C.E_1_dξ[] = C_E_1_dξ(lambda, κ, ϵ, ξ₁, Λ, CU)
-    C.E_2_dξ[] = C_E_2_dξ(lambda, κ, ϵ, ξ₁, Λ, CU_conj)
-    C.P_1_dξ[] = C_P_1_dξ(lambda, κ, ϵ, ξ₁, Λ, CU)
-    C.P_2_dξ[] = C_P_2_dξ(lambda, κ, ϵ, ξ₁, Λ, CU_conj)
+    C.E_1_dξ[] = C_E_1_dξ(λ, κ, ϵ, ξ₁, Λ, CU)
+    C.E_2_dξ[] = C_E_2_dξ(λ, κ, ϵ, ξ₁, Λ, CU_conj)
+    C.P_1_dξ[] = C_P_1_dξ(λ, κ, ϵ, ξ₁, Λ, CU)
+    C.P_2_dξ[] = C_P_2_dξ(λ, κ, ϵ, ξ₁, Λ, CU_conj)
 
-    C.exp_E_1_dξ[] = C_exp_E_1_dξ(lambda, κ, ϵ, ξ₁, Λ, CU)
-    C.exp_E_2_dξ[] = C_exp_E_2_dξ(lambda, κ, ϵ, ξ₁, Λ, CU_conj)
-    C.exp_P_1_dξ[] = C_exp_P_1_dξ(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.exp_P_2_dξ[] = C_exp_P_2_dξ(lambda, κ, ϵ, ξ₁, Λ, C)
+    C.exp_E_1_dξ[] = C_exp_E_1_dξ(λ, κ, ϵ, ξ₁, Λ, CU)
+    C.exp_E_2_dξ[] = C_exp_E_2_dξ(λ, κ, ϵ, ξ₁, Λ, CU_conj)
+    C.exp_P_1_dξ[] = C_exp_P_1_dξ(λ, κ, ϵ, ξ₁, Λ, C)
+    C.exp_P_2_dξ[] = C_exp_P_2_dξ(λ, κ, ϵ, ξ₁, Λ, C)
 
-    C.J_E_1[] = C_J_E_1(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.J_E_2[] = C_J_E_2(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.J_P_1[] = C_J_P_1(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.J_P_2[] = C_J_P_2(lambda, κ, ϵ, ξ₁, Λ, C)
+    C.J_E_1[] = C_J_E_1(λ, κ, ϵ, ξ₁, Λ, C)
+    C.J_E_2[] = C_J_E_2(λ, κ, ϵ, ξ₁, Λ, C)
+    C.J_P_1[] = C_J_P_1(λ, κ, ϵ, ξ₁, Λ, C)
+    C.J_P_2[] = C_J_P_2(λ, κ, ϵ, ξ₁, Λ, C)
 
-    C.J_E_1_dξ[] = C_J_E_1_dξ(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.J_E_2_dξ[] = C_J_E_2_dξ(lambda, κ, ϵ, ξ₁, Λ, C)
+    C.J_E_1_dξ[] = C_J_E_1_dξ(λ, κ, ϵ, ξ₁, Λ, C)
+    C.J_E_2_dξ[] = C_J_E_2_dξ(λ, κ, ϵ, ξ₁, Λ, C)
 
     # Lemma REF(lemma:bound-K_1-K_2)
 
-    C.K_1_1[] = C_K_1_1(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.K_1_2[] = C_K_1_2(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.K_2_1[] = C_K_2_1(lambda, κ, ϵ, ξ₁, Λ, C)
-    C.K_2_2[] = C_K_2_2(lambda, κ, ϵ, ξ₁, Λ, C)
+    C.K_1_1[] = C_K_1_1(λ, κ, ϵ, ξ₁, Λ, C)
+    C.K_1_2[] = C_K_1_2(λ, κ, ϵ, ξ₁, Λ, C)
+    C.K_2_1[] = C_K_2_1(λ, κ, ϵ, ξ₁, Λ, C)
+    C.K_2_2[] = C_K_2_2(λ, κ, ϵ, ξ₁, Λ, C)
 
     # Lemma REF(lemma:bound-I_N)
 
@@ -187,84 +187,77 @@ function FunctionBounds_Y(
 
     # Lemma REF(lemma:Z-fixed-point-bounds)
 
-    C.T_12[] = C_T_12(lambda, κ, ϵ, ξ₁, Λ, C)
+    C.T_12[] = C_T_12(λ, κ, ϵ, ξ₁, Λ, C)
 
     # Lemma REF(lemma:H-bounds)
 
-    C.H_11[] = C_H_11(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
-    C.H_12[] = C_H_12(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
-    C.H_21[] = C_H_21(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
-    C.H_22[] = C_H_22(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
-    C.H_11_dξ[] = C_H_11_dξ(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
-    C.H_12_dξ[] = C_H_12_dξ(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
-    C.H_21_dξ[] = C_H_21_dξ(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
-    C.H_22_dξ[] = C_H_22_dξ(lambda, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_11[] = C_H_11(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
+    C.H_12[] = C_H_12(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
+    C.H_21[] = C_H_21(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
+    C.H_22[] = C_H_22(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat)
+    C.H_11_dξ[] = C_H_11_dξ(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_12_dξ[] = C_H_12_dξ(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_21_dξ[] = C_H_21_dξ(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
+    C.H_22_dξ[] = C_H_22_dξ(λ, κ, ϵ, ξ₁, Λ, C, C_Q_hat, C_Q_hat_dξ)
 
     return C
 end
 
 # Lemma REF(lemma:P_i_E_i-bounds)
 
-function C_E_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+function C_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU.U_bma_b * abs(c^(-b + a - lambda / 2κ))
+    return CU.U_bma_b * abs(c^(-b + a - λ / 2κ))
 end
 
-function C_E_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
+function C_E_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU_conj.U_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return CU_conj.U_bma_b * abs(conj(c)^(-b + conj(a) - λ / 2κ))
 end
 
-function C_P_1(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+function C_P_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU.U_a_b * abs((-c)^(-a + lambda / 2κ))
+    return CU.U_a_b * abs((-c)^(-a + λ / 2κ))
 end
 
-function C_P_2(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
+function C_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + lambda / 2κ))
+    return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + λ / 2κ))
 end
 
-function C_E_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+function C_E_1_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return 2(CU.U_bma_b * abs(c) + CU.U_dz_bma_b * ξ₁^-2) * abs(c^(-b + a - lambda / 2κ))
+    return 2(CU.U_bma_b * abs(c) + CU.U_dz_bma_b * ξ₁^-2) * abs(c^(-b + a - λ / 2κ))
 end
 
-function C_E_2_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
+function C_E_2_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
     return 2(CU_conj.U_bma_b * abs(conj(c)) + CU_conj.U_dz_bma_b * ξ₁^-2) *
-           abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+           abs(conj(c)^(-b + conj(a) - λ / 2κ))
 end
 
-function C_P_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+function C_P_1_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return 2CU.U_dz_a_b * abs((-c)^(-a + lambda / 2κ))
+    return 2CU.U_dz_a_b * abs((-c)^(-a + λ / 2κ))
 end
 
-function C_P_2_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
+function C_P_2_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return 2CU_conj.U_dz_a_b * abs((-conj(c))^(-conj(a) + lambda / 2κ))
+    return 2CU_conj.U_dz_a_b * abs((-conj(c))^(-conj(a) + λ / 2κ))
 end
 
-function C_exp_E_1_dξ(lambda::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
+function C_exp_E_1_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return 2CU.U_dz_bma_b * abs(c^(-b + a - lambda / 2κ))
+    return 2CU.U_dz_bma_b * abs(c^(-b + a - λ / 2κ))
 end
 
-function C_exp_E_2_dξ(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    CU_conj::UBounds,
-)
+function C_exp_E_2_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return 2CU_conj.U_dz_bma_b * abs(conj(c)^(-b + conj(a) - lambda / 2κ))
+    return 2CU_conj.U_dz_bma_b * abs(conj(c)^(-b + conj(a) - λ / 2κ))
 end
 
 function C_exp_P_1_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -276,7 +269,7 @@ function C_exp_P_1_dξ(
 end
 
 function C_exp_P_2_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -287,61 +280,26 @@ function C_exp_P_2_dξ(
     return 2abs(c) * C.P_2 + C.P_2_dξ * ξ₁^-2
 end
 
-function C_J_E_1(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return abs(B_W_1(lambda, κ, ϵ, Λ)) * C.E_1
+function C_J_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
+    return abs(B_W_1(λ, κ, ϵ, Λ)) * C.E_1
 end
 
-function C_J_E_2(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return abs(B_W_2(lambda, κ, ϵ, Λ)) * C.E_2
+function C_J_E_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
+    return abs(B_W_2(λ, κ, ϵ, Λ)) * C.E_2
 end
 
-function C_J_P_1(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return abs(B_W_1(lambda, κ, ϵ, Λ)) * C.P_1
+function C_J_P_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
+    return abs(B_W_1(λ, κ, ϵ, Λ)) * C.P_1
 end
 
-function C_J_P_2(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
-    return abs(B_W_2(lambda, κ, ϵ, Λ)) * C.P_2
+function C_J_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
+    return abs(B_W_2(λ, κ, ϵ, Λ)) * C.P_2
 end
 
-function C_J_E_1_dξ(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_J_E_1_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     (; d) = Λ
     a, b, c = _abc(κ, ϵ, Λ)
-    a_tilde = b - a + lambda / 2κ
+    a_tilde = b - a + λ / 2κ
     z₁ = c * ξ₁^2
     n = 5
 
@@ -353,21 +311,14 @@ function C_J_E_1_dξ(
         abs(d - 1) * C_R_U(n, a_tilde, b, z₁) +
         2abs(a_tilde) * C_R_U(n, a_tilde + 1, b + 1, z₁)
 
-    return abs(B_W_1(lambda, κ, ϵ, Λ)) * abs(c^-a_tilde) * (S + R * abs(z₁)^-n)
+    return abs(B_W_1(λ, κ, ϵ, Λ)) * abs(c^-a_tilde) * (S + R * abs(z₁)^-n)
 end
 
-function C_J_E_2_dξ(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_J_E_2_dξ(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     (; d) = Λ
     a, b, c = _abc(κ, ϵ, Λ)
     c_conj = conj(c)
-    a_tilde_conj = b - conj(a) + lambda / 2κ
+    a_tilde_conj = b - conj(a) + λ / 2κ
     z₁_conj = c_conj * ξ₁^2
     n = 5
 
@@ -382,54 +333,24 @@ function C_J_E_2_dξ(
         abs(d - 1) * C_R_U(n, a_tilde_conj, b, z₁_conj) +
         2abs(a_tilde_conj) * C_R_U(n, a_tilde_conj + 1, b + 1, z₁_conj)
 
-    return abs(B_W_2(lambda, κ, ϵ, Λ)) *
-           abs(c_conj^-a_tilde_conj) *
-           (S + R * abs(z₁_conj)^-n)
+    return abs(B_W_2(λ, κ, ϵ, Λ)) * abs(c_conj^-a_tilde_conj) * (S + R * abs(z₁_conj)^-n)
 end
 
 # Lemma REF(lemma:bound-K_1-K_2)
 
-function C_K_1_1(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_K_1_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     return inv(sqrt(1 + ϵ^2)) * C.J_P_1
 end
 
-function C_K_1_2(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_K_1_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     return inv(sqrt(1 + ϵ^2)) * C.J_P_2
 end
 
-function C_K_2_1(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_K_2_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     return inv(sqrt(1 + ϵ^2)) * C.J_E_1
 end
 
-function C_K_2_2(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C::FunctionBounds_Y,
-)
+function C_K_2_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y)
     return inv(sqrt(1 + ϵ^2)) * C.J_E_2
 end
 
@@ -459,14 +380,7 @@ end
 
 # Lemma REF(lemma:Z-fixed-point-bounds)
 
-function C_T_12(
-    lambda::Acb,
-    κ::Arb,
-    ϵ::Arb,
-    ξ₁::Arb,
-    Λ::CGLParams{Arb},
-    C_Z::FunctionBounds_Y,
-)
+function C_T_12(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C_Z::FunctionBounds_Y)
     return max(C_Z.E_1 * C_Z.I_K_1_1, C_Z.E_2 * C_Z.I_K_1_2) +
            max(C_Z.P_1 * C_Z.I_K_2_1, C_Z.P_2 * C_Z.I_K_2_2) * ξ₁^-2
 end
@@ -474,7 +388,7 @@ end
 # Lemma REF(lemma:H-bounds)
 
 function C_H_11(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -486,7 +400,7 @@ function C_H_11(
 end
 
 function C_H_12(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -498,7 +412,7 @@ function C_H_12(
 end
 
 function C_H_21(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -510,7 +424,7 @@ function C_H_21(
 end
 
 function C_H_22(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -522,7 +436,7 @@ function C_H_22(
 end
 
 function C_H_11_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -535,7 +449,7 @@ function C_H_11_dξ(
 end
 
 function C_H_12_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -548,7 +462,7 @@ function C_H_12_dξ(
 end
 
 function C_H_21_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -561,7 +475,7 @@ function C_H_21_dξ(
 end
 
 function C_H_22_dξ(
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,

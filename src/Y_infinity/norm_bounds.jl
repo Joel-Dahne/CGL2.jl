@@ -22,7 +22,7 @@ end
 
 function NormBounds_Y(
     c_0::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -39,13 +39,13 @@ function NormBounds_Y(
     # REF(prop:Z-fixed-point) are checked by the norm_bound_Z
     # function.
 
-    norms.Z[] = norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, Λ, C)
+    norms.Z[] = norm_bound_Z(c_0, λ, κ, ϵ, ξ₁, Λ, C)
 
     return norms
 end
 
 """
-    norm_bound_Z(c_0, lambda, κ, ϵ, ξ₁, Λ, C)
+    norm_bound_Z(c_0, λ, κ, ϵ, ξ₁, Λ, C)
 
 To apply the fixed point theorem in Proposition
 REF(prop:Z-fixed-point) we need to find `ρ` satisfying the inequality
@@ -72,7 +72,7 @@ From Proposition REF(prop:Z-fixed-point) we then have that the norm of
 """
 function norm_bound_Z(
     c_0::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,

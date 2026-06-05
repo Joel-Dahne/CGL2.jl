@@ -13,7 +13,7 @@ function branch_eigenvalue_points(
 
     xs = getindex.(res, 1)
     cs = getindex.(res, 2)
-    lambdas = getindex.(res, 3)
+    λs = getindex.(res, 3)
 
-    return xs, cs, lambdas
+    return xs, cs, λs
 end

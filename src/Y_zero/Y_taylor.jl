@@ -13,7 +13,7 @@ function _Y_zero_taylor_remainder_check_conditions(
     b_hat::ArbSeries,
     Y1::AcbSeries,
     Y2::AcbSeries,
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     Λ::CGLParams{Arb},
@@ -45,7 +45,7 @@ function _Y_zero_taylor_remainder_check_conditions(
     D =
         (1 + abs(ϵ)) / (1 + ϵ^2) * (
             abs(κ) / (N + d) +
-            (abs(ω) + abs(lambda)) / ((N + 2) * (N + d)) +
+            (abs(ω) + abs(λ)) / ((N + 2) * (N + d)) +
             6(1 + abs(δ)) * (
                 1 // 8 +
                 1 // 2N +
@@ -61,7 +61,7 @@ end
     _Y_zero_taylor_remainder(
         Y1::AcbSeries,
         Y2::AcbSeries,
-        lambda::Acb,
+        λ::Acb,
         ν::Acb,
         κ::Arb,
         ϵ::Arb,
@@ -77,7 +77,7 @@ Lemma REF(lemma:tail-bound-Y).
 function _Y_zero_taylor_remainder(
     Y1::AcbSeries,
     Y2::AcbSeries,
-    lambda::Acb,
+    λ::Acb,
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -144,7 +144,7 @@ function _Y_zero_taylor_remainder(
         b_hat,
         Y1,
         Y2,
-        lambda,
+        λ,
         κ,
         ϵ,
         Λ,
@@ -162,7 +162,7 @@ function _Y_zero_taylor_remainder(
 end
 
 """
-    Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ::CGLParams; degree = 20)
+    Y_zero_taylor(Y₀, λ, ν, κ, ϵ, ξ₀, Λ::CGLParams; degree = 20)
 
 Compute the solution to the ODE on the interval ``[0, ξ₀]``. Returns a
 vector with four complex values, the first two are the values at `ξ₀`
@@ -174,7 +174,7 @@ for handling the removable singularity at `ξ = 0`.
 """
 function Y_zero_taylor(
     Y₀::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -185,7 +185,7 @@ function Y_zero_taylor(
     # Compute expansion
     Y1, Y2 = cgl_linearization_equation_taylor(
         SVector{2,NTuple{2,Acb}}((Y₀[1], 0), (Y₀[2], 0)),
-        lambda,
+        λ,
         ν,
         κ,
         ϵ,
@@ -193,8 +193,7 @@ function Y_zero_taylor(
         degree,
     )
 
-    remainder, remainder_derivative =
-        _Y_zero_taylor_remainder(Y1, Y2, lambda, ν, κ, ϵ, ξ₀, Λ)
+    remainder, remainder_derivative = _Y_zero_taylor_remainder(Y1, Y2, λ, ν, κ, ϵ, ξ₀, Λ)
 
     Y10, Y11 = Arblib.evaluate2(Y1, ξ₀)
     Y20, Y21 = Arblib.evaluate2(Y2, ξ₀)

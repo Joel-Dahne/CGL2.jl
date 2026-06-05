@@ -25,7 +25,7 @@ the second two are their derivatives.
 function _Y_zero_capd(
     Q_hat_ξ₀::SVector{4,Arb},
     Y_ξ₀::SVector{4,Acb},
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₀::Arb,
@@ -60,7 +60,7 @@ function _Y_zero_capd(
             println(io, "[$(inf(imag(Y_ξ₀[4]))), $(sup(imag(Y_ξ₀[4])))]")
             # Write parameters
             println(io, Λ.d)
-            for x in [real(lambda), imag(lambda), κ, ϵ, Λ.ω, Λ.σ, Λ.δ]
+            for x in [real(λ), imag(λ), κ, ϵ, Λ.ω, Λ.σ, Λ.δ]
                 println(io, "[$(_inf(x)), $(_sup(x))]")
             end
             # Write integration interval
@@ -102,7 +102,7 @@ function _Y_zero_capd(
 end
 
 """
-    Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol, degree = 20)
+    Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol, degree = 20)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
 initial values given by `Y₀`. Returns a vector with four complex
@@ -123,7 +123,7 @@ once more, iterating like this for a maximum of a few times.
 """
 function Y_zero_capd(
     Y₀::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -137,14 +137,14 @@ function Y_zero_capd(
         @assert 0 < ξ₀ < ξ₁
         # Integrate system on [0, ξ₀] using Taylor expansion at zero
         Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, Λ)
-        Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ; degree)
+        Y_ξ₀ = Y_zero_taylor(Y₀, λ, ν, κ, ϵ, ξ₀, Λ; degree)
         if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀))
             iterations = 0
             while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, Y_ξ₀)) && iterations < 5
                 iterations += 1
                 ξ₀ /= 2
                 Q_hat_ξ₀ = Q_hat_zero_taylor(real(ν), imag(ν), κ, ϵ, ξ₀, Λ)
-                Y_ξ₀ = Y_zero_taylor(Y₀, lambda, ν, κ, ϵ, ξ₀, Λ; degree)
+                Y_ξ₀ = Y_zero_taylor(Y₀, λ, ν, κ, ϵ, ξ₀, Λ; degree)
             end
             iterations == 5 && @debug "Non-finite enclosure for smallest ξ₀" ξ₀
         end
@@ -155,5 +155,5 @@ function Y_zero_capd(
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
-    return _Y_zero_capd(Q_hat_ξ₀, Y_ξ₀, lambda, κ, ϵ, ξ₀, ξ₁, Λ; tol)
+    return _Y_zero_capd(Q_hat_ξ₀, Y_ξ₀, λ, κ, ϵ, ξ₀, ξ₁, Λ; tol)
 end

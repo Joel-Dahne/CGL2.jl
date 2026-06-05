@@ -1,6 +1,6 @@
 """
-    cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ)
-    cgl_linearization_equation(YZ, (lambda, κ, ϵ, Q_hat, Λ), ξ)
+    cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ)
+    cgl_linearization_equation(YZ, (λ, κ, ϵ, Q_hat, Λ), ξ)
 
 Evaluate the right hand side of the forward ODE when written as a four
 dimensional complex system. It is evaluated at the point `Y` and time
@@ -9,7 +9,7 @@ dimensional complex system. It is evaluated at the point `Y` and time
 For `Λ.d != 1` there is a removable singularity at `ξ = 0`. To return
 a finite value we in this case required that `Y[3] = Y[4] = 0`.
 """
-function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
+function cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
     (; d, ω, σ, δ) = Λ
     Y = SVector(YZ[1], YZ[2])
     Z = SVector(YZ[3], YZ[4])
@@ -31,7 +31,7 @@ function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ::CGLParams
     end
 
     dY = Z
-    dZ = -A_inv * (C + J_N - lambda * I) * Y
+    dZ = -A_inv * (C + J_N - λ * I) * Y
     if iszero(ξ)
         @assert iszero(Z)
     else
@@ -42,8 +42,8 @@ function cgl_linearization_equation(YZ, lambda, κ, ϵ, ξ, Q_hat, Λ::CGLParams
 end
 
 # For use with ODEProblem
-cgl_linearization_equation(u, (lambda, κ, ϵ, Q_hat, Λ), ξ) =
-    cgl_linearization_equation(u, lambda, κ, ϵ, ξ, Q_hat, Λ)
+cgl_linearization_equation(u, (λ, κ, ϵ, Q_hat, Λ), ξ) =
+    cgl_linearization_equation(u, λ, κ, ϵ, ξ, Q_hat, Λ)
 
 """
     _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, Λ; degree)
@@ -91,7 +91,7 @@ function _cgl_linearization_equation_taylor_J_N_taylor(
 end
 
 """
-    cgl_linearization_equation_taylor(Y_0, lambda, ν, κ, ϵ, Λ; degree)
+    cgl_linearization_equation_taylor(Y_0, λ, ν, κ, ϵ, Λ; degree)
 
 Compute the Taylor expansions of `Y`. The expansion is centered at the
 point `ξ = 0`, with the leading coefficients given by `Y_0` and the
@@ -99,7 +99,7 @@ linear are zero.
 """
 function cgl_linearization_equation_taylor(
     Y_0::SVector{2,NTuple{2,Acb}},
-    lambda::Acb,
+    λ::Acb,
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -121,8 +121,8 @@ function cgl_linearization_equation_taylor(
         # Explicit value for above inverse multiplied with n * B₁ + C - λ * I
         M =
             @SMatrix[
-                (ϵ * (n * κ + κ / σ - lambda) + ω) (n * κ + κ / σ - lambda - ϵ * ω);
-                (-n * κ - κ / σ + lambda + ϵ * ω) (ϵ * (n * κ + κ / σ - lambda) + ω)
+                (ϵ * (n * κ + κ / σ - λ) + ω) (n * κ + κ / σ - λ - ϵ * ω);
+                (-n * κ - κ / σ + λ + ϵ * ω) (ϵ * (n * κ + κ / σ - λ) + ω)
             ] / ((n + 2) * (n + d) * (1 + ϵ^2))
 
         Y1[n+2], Y2[n+2] = -M * SVector(Y1[n], Y2[n]) - inv_rhs * SVector(v[1][n], v[2][n])

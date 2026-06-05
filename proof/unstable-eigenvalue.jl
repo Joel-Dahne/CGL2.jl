@@ -282,8 +282,8 @@ The first step is to compute an approximate solution using a finite-difference m
 
 # ╔═╡ f1ea08ed-8969-448f-859b-8aea8ba546de
 # Find approximation using finite differences
-ΛsF64 = filter(
-    lambda -> imag(lambda) > 0,
+λsF64 = filter(
+    λ -> imag(λ) > 0,
     CGL2.eigenvalues_finite_difference(
         ComplexF64(ν),
         Float64(κ),
@@ -294,7 +294,7 @@ The first step is to compute an approximate solution using a finite-difference m
 )
 
 # ╔═╡ 21cf1d05-df4a-4853-b1be-66bb66e5b35f
-lambda_approx = Acf(ΛsF64[findmax(real, ΛsF64)[2]])
+λ_approx = Acf(λsF64[findmax(real, λsF64)[2]])
 
 # ╔═╡ 71b8a3b1-3227-44b9-8f06-50c9192ac96f
 md"""
@@ -302,7 +302,7 @@ Print a 16 digit approximation for inclusion in the paper.
 """
 
 # ╔═╡ 7d38f474-0f8a-4bc4-8f33-fbb31c540703
-string(lambda_approx, digits = 8)
+string(λ_approx, digits = 8)
 
 # ╔═╡ 4ed7e92b-0205-4774-a4a2-42587d385db4
 md"""
@@ -320,16 +320,16 @@ To plot the square we compute enclosures of the corners.
 """
 
 # ╔═╡ eb8e5ece-2782-4f2d-b519-93a9f336e5d4
-corner_bl = lambda_approx + Acb(-r, -r)
+corner_bl = λ_approx + Acb(-r, -r)
 
 # ╔═╡ ea45a2a5-7e79-44fc-a490-ac4889aa3b1f
-corner_br = lambda_approx + Acb(r, -r)
+corner_br = λ_approx + Acb(r, -r)
 
 # ╔═╡ 0f5d4f04-0aee-4582-a504-868816112aa4
-corner_tl = lambda_approx + Acb(-r, r)
+corner_tl = λ_approx + Acb(-r, r)
 
 # ╔═╡ 933ced1e-a9a6-495b-865e-d9a8a3cf7436
-corner_tr = lambda_approx + Acb(r, r)
+corner_tr = λ_approx + Acb(r, r)
 
 # ╔═╡ 04b37248-22a5-4fb8-8d0c-a4dbf29a58e4
 md"""
@@ -339,17 +339,11 @@ We can then plot the square and the approximate eigenvalue.
 # ╔═╡ 356dc846-b0fc-4743-997a-73d9b9bf7bcf
 let
     fig = Figure(; fontsize)
-    ax = Axis(fig[1, 1], xlabel = L"\mathrm{Re}(\lambda)", ylabel = L"\mathrm{Im}(\lambda)")
+    ax = Axis(fig[1, 1], xlabel = L"\mathrm{Re}(\λ)", ylabel = L"\mathrm{Im}(\λ)")
     xlims!(ax, -0.005, 0.04)
     corner_list = [corner_bl, corner_br, corner_tr, corner_tl, corner_bl]
     lines!(ax, real.(corner_list), imag.(corner_list), linewidth = 3)
-    scatter!(
-        ax,
-        [real(lambda_approx)],
-        [imag(lambda_approx)],
-        color = :red,
-        label = L"\lambda_0",
-    )
+    scatter!(ax, [real(λ_approx)], [imag(λ_approx)], color = :red, label = L"\λ_0")
     axislegend(ax)
     save_figures && save("figures/contour.pdf", fig)
     fig
@@ -361,7 +355,7 @@ For printing the enclosure in the paper, the simplest approach is to construct a
 """
 
 # ╔═╡ f951ad64-9b79-477e-83fb-28fa2bba6e2a
-CGL2.format_interval_precise(add_error(Acb(lambda_approx), r), min_digits = 4)
+CGL2.format_interval_precise(add_error(Acb(λ_approx), r), min_digits = 4)
 
 # ╔═╡ 93d9e75b-5861-4653-8786-439a35008d00
 md"""
@@ -388,16 +382,16 @@ We then use these to construct the pieces for the different sides of the square.
 """
 
 # ╔═╡ 3e493c1b-b786-4cd3-b321-0de29ae04bf0
-Λs_bottom = corner_bl .+ ts_bottom .* (corner_br - corner_bl)
+λs_bottom = corner_bl .+ ts_bottom .* (corner_br - corner_bl)
 
 # ╔═╡ 7d7217b1-5186-4d2f-97ab-f2581add502e
-Λs_right = corner_br .+ (ts_right .- 1) .* (corner_tr - corner_br)
+λs_right = corner_br .+ (ts_right .- 1) .* (corner_tr - corner_br)
 
 # ╔═╡ c0a0d2fd-9a35-4028-b4e6-dbcf4e777613
-Λs_top = corner_tr .+ (ts_top .- 2) .* (corner_tl - corner_tr)
+λs_top = corner_tr .+ (ts_top .- 2) .* (corner_tl - corner_tr)
 
 # ╔═╡ ca27e948-94c4-44a9-93c8-8b83493eb479
-Λs_left = corner_tl .+ (ts_left .- 3) .* (corner_bl - corner_tl)
+λs_left = corner_tl .+ (ts_left .- 3) .* (corner_bl - corner_tl)
 
 # ╔═╡ 6f7407fb-8d41-451a-a220-80bdcc1fe881
 md"""
@@ -405,16 +399,16 @@ Compute ``H`` for each piece.
 """
 
 # ╔═╡ 340f6f00-629a-4c52-8f07-baf6568a2957
-H_square_bottom = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_bottom)
+H_square_bottom = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_bottom)
 
 # ╔═╡ 060bd72c-1e0f-47cf-bbf1-f03c6e8c3599
-H_square_right = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_right)
+H_square_right = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_right)
 
 # ╔═╡ da7f234b-b681-4956-ba49-7f2ac6b363c2
-H_square_top = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_top)
+H_square_top = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_top)
 
 # ╔═╡ 942b9ffc-f12a-4c3c-9002-ffb69c784fd1
-H_square_left = tmap(lambda -> CGL2.H(Acb(lambda), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), Λs_left)
+H_square_left = tmap(λ -> CGL2.H(Acb(λ), ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_left)
 
 # ╔═╡ 193f2a06-c0d3-45f5-8a2f-ba65d5a41ab3
 to_rect(x::Arb, y::Arb) = Rect2d(lbound(x), lbound(y), 2radius(x), 2radius(y))
@@ -452,8 +446,8 @@ let
     fig = Figure(; fontsize)
     ax = Axis(
         fig[1, 1],
-        xlabel = L"\mathrm{Re}(H(\lambda))",
-        ylabel = L"\mathrm{Im}(H(\lambda))",
+        xlabel = L"\mathrm{Re}(H(\λ))",
+        ylabel = L"\mathrm{Im}(H(\λ))",
         xticks = [-2e-20, 0, 2e-20],
         yticks = [-2e-20, 0, 2e-20],
     )

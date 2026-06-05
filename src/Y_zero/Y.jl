@@ -1,6 +1,6 @@
 """
-    Y_zero(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
-    Y_zero(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero(Y₀, λ, ν, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
+    Y_zero(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]`` with
 initial values given by `Y₀`. Returns a vector with four complex
@@ -9,7 +9,7 @@ are the derivatives.
 """
 function Y_zero(
     Y₀::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
@@ -17,12 +17,12 @@ function Y_zero(
     Λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
 ) where {Arb}
-    return Y_zero_capd(Y₀, lambda, ν, κ, ϵ, ξ₁, Λ; tol)
+    return Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ; tol)
 end
 
 function Y_zero(
     Y₀::SVector{2,ComplexF64},
-    lambda::ComplexF64,
+    λ::ComplexF64,
     ν::ComplexF64,
     κ::Float64,
     ϵ::Float64,
@@ -32,12 +32,12 @@ function Y_zero(
 )
     Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ)
 
-    return Y_zero(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ)
+    return Y_zero(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ)
 end
 
 function Y_zero(
     Y₀::SVector{2,ComplexF64},
-    lambda::ComplexF64,
+    λ::ComplexF64,
     κ::Float64,
     ϵ::Float64,
     ξ₁::Float64,
@@ -45,5 +45,5 @@ function Y_zero(
     Λ::CGLParams{Float64};
     tol::Float64 = 1e-11,
 )
-    return Y_zero_float(Y₀, lambda, κ, ϵ, ξ₁, Q_hat, Λ; tol)
+    return Y_zero_float(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ; tol)
 end

@@ -1,5 +1,5 @@
 """
-    I_K_2_enclosure(c_0, lambda, κ, ϵ, ξ₁, Λ, Z, F_Z, C_Z, norms_Z)
+    I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, F_Z, C_Z, norms_Z)
 
 Compute an enclosure of ``I_{K_2}(ξ)`` at the point `ξ = ξ₁`.
 
@@ -15,7 +15,7 @@ TODO: Add more documentation once the Lemma is finalized.
 """
 function I_K_2_enclosure(
     c_0::SVector{2,Acb},
-    lambda::Acb,
+    λ::Acb,
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
@@ -32,7 +32,7 @@ function I_K_2_enclosure(
         # This is the wide case. The bound is computed using
         # REF(lemma:I_K_1-I_K_2-bounds)
 
-        exponent = 2 / σ - d - 2real(lambda) / κ - 4
+        exponent = 2 / σ - d - 2real(λ) / κ - 4
 
         I_K_2_1_bound = C_Z.I_K_2_1 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
         I_K_2_2_bound = C_Z.I_K_2_2 * exp(-real(c) * ξ₁^2) * ξ₁^exponent * norms_Z.Z
@@ -85,7 +85,7 @@ function I_K_2_enclosure(
     C_D_21_dξ = C_Z.H_21_dξ * C_Z_1 + C_Z.H_21 * C_exp_Z_1_dξ
     C_D_22_dξ = C_Z.H_22_dξ * C_Z_2 + C_Z.H_22 * C_exp_Z_2_dξ
 
-    β = 2 / σ - d - 2real(lambda) / κ - 5
+    β = 2 / σ - d - 2real(λ) / κ - 5
     # Enclosure of integral of exp(-real(c)η^2) * η^β from ξ₁ to infinity
     integral_exponential = inv(2real(c)^((β + 1) / 2)) * gamma((β + 1) / 2, real(c) * ξ₁^2)
     I_K_2_11_bound = (C_D_11 + C_D_11_dξ) * integral_exponential
