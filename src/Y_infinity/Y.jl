@@ -21,7 +21,7 @@ function Y_infinity(
     norms_Z = NormBounds_Y(c_0, λ, κ, ϵ, ξ₁, Λ, C_Z)
 
     # Compute an enclosure of Z
-    I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, Z, C_Z, norms_Z)
+    I_K_2 = I_K_2_enclosure(c_0, λ, κ, ϵ, ξ₁, Λ, C_Z, norms_Z)
 
     Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 

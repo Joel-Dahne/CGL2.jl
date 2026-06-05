@@ -6,7 +6,9 @@
     γ₂ = Acb(-116.03, 101.21)
     κ = Arb(0.80)
     ϵ = Arb(0.15)
-    ξ₁ = Arb(30)
+    # We use a relatively large value for ξ₁ to reduce the errors when
+    # we check if it solves the equation.
+    ξ₁ = Arb(50)
     Λ = CGLParams{Arb}(3, 1, 1, 0)
 
     # Function for computing derivative using finite differences.
@@ -21,7 +23,7 @@
     # Check that the derivative computed with finite differences
     # agree. Note that the precision is quite low, so rtol is
     # relatively large.
-    @test ComplexF64.(res[3:4]) ≈ resF64_dξ[1:2] rtol = 1e-3
+    @test ComplexF64.(res[3:4]) ≈ resF64_dξ[1:2] rtol = 1e-5
 
     # Check if the finite difference value approximately satisfies the
     # equation
@@ -50,5 +52,5 @@
     # input.
     @test norm(
         ComplexF64.(A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - λ * I) * Y),
-    ) < 1e-5max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
+    ) < 2e-6max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
 end
