@@ -45,6 +45,7 @@ import CGL2: D, D_dξ, D_dξ_dξ, H, H_dξ, H_dξ_dξ
         include("Q_hat_zero/Q_hat.jl")
 
         include("Q_hat_infinity/functions.jl")
+        include("Q_hat_infinity/function_bounds.jl")
         include("Q_hat_infinity/I_E_hat.jl")
     end
 
