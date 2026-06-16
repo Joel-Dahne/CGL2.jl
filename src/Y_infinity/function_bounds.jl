@@ -189,7 +189,7 @@ C_K_2_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBo
 
 # Lemma REF(lemma:bound-I_N)
 
-function C_I_N(C_Q_hat::Arb)
+function C_I_N(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     # Compute a bound for the norm of Q_hat
     C = FunctionBounds_hat(κ, ϵ, ξ₁, Λ)
     norms = NormBounds_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
