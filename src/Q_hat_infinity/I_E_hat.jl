@@ -5,7 +5,7 @@ Compute an enclosure of the integral in `η` from `ξ₁` to infinity of
 the function
 
 ```
-J_E_hat(η) * abs(P(η))^2 * P(η)
+J_E_hat(η) * abs(P_hat(η))^2 * P_hat(η)
 ```
 
 The approach is based on Lemma REF(lemma:integral-J_E_hat-P_hat). The

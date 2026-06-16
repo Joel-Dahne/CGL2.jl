@@ -1,4 +1,25 @@
-# TODO: Add tests and documentation for this function
+"""
+    integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
+
+Compute an enclosure of the integral in `η` from `ξ₁` to infinity of
+the function
+
+```
+J_E(η) * abs(P(η))^2 * P(η)
+```
+
+The approach is based on Lemma REF(lemma:integral-J_E-P). The lemma
+reduces it to the integral with the integrand given by a product of
+asymptotic series with remainder terms. To enclose the integral we
+compute the coefficients in the series and bounds for the remainder
+terms.
+
+The multiplication of the series is handled using nested for loops.
+For terms in the product where at least one of the factors is a
+remainder term we compute a bound for the absolute value. For terms
+were all factors are from the series we enclose the integral by
+integrating it explicitly.
+"""
 function integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, Λ)
     (; d, σ) = Λ
@@ -57,11 +78,17 @@ function integral_J_E_P(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     return B_W(κ, ϵ, Λ) * (-c)^(a - b) * abs(c^-a)^2 * c^-a * I_U
 end
 
+"""
+    I_E_infty_enclosure(γ, κ, ϵ, ξ₁, Λ)
+
+Compute an enclosure of ``I_{E,∞}`` from Lemma REF(lemma:p_Q_0). The
+enclosure is based on Lemma REF(lemma:I_E_infty).
+"""
 function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, Λ)
-    v = Arb("0.001")
     (; σ) = Λ
 
+    v = Arb(0) # v is zero in the entire section
     CU = UBounds(a, b, c, ξ₁)
     C = FunctionBounds(κ, ϵ, ξ₁, Λ, CU)
     CI = IBounds(κ, ϵ, ξ₁, v, Λ, C)
@@ -69,7 +96,7 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParam
 
     I_E_main = abs(γ)^2 * γ * integral_J_E_P(κ, ϵ, ξ₁, Λ)
 
-    C_R_Q = (C.P * CI.I_E + C.E * CI.I_P) * norms.Q^(2σ + 1) * ξ₁^((2σ + 1) * v - 2)
+    C_R_Q = (C.P * CI.I_E + C.E * CI.I_P) * norms.Q^(2σ + 1) * ξ₁^-2
     R_I_E_bound =
         C.J_E * (3abs(γ)^2 * C.P^2 * C_R_Q + 3abs(γ) * C.P * C_R_Q^2 + C_R_Q^3) / (2 / σ) *
         ξ₁^(-2 / σ)
@@ -78,11 +105,14 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParam
     return I_E_main + R_I_E
 end
 
+"""
+    p_Q_0(γ, κ, ϵ, ξ₁, Λ)
+
+Compute the coefficient ``p_{Q,0}`` from Lemma REF(lemma:p_Q_0). It is
+the coefficient for the leading order term in the asymptotic expansion
+of `Q`.
+"""
 function p_Q_0(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     a, b, c = _abc(κ, ϵ, Λ)
     return c^-a * (γ + I_E_infty_enclosure(γ, κ, ϵ, ξ₁, Λ))
 end
-
-# IMPROVE: Do we need this function?
-p_Q_0(γ::ComplexF64, κ::Float64, ϵ::Float64, ξ₁::Float64, Λ::CGLParams{Float64}) =
-    Float64(p_Q_0(Acb(γ), Arb(κ), Arb(ϵ), Arb(ξ₁), CGLParams{Arb}(Λ)))
