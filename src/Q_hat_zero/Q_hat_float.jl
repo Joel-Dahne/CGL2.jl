@@ -34,7 +34,7 @@ function Q_hat_zero_float(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; tol::F
         abstol = tol,
         reltol = tol,
         save_everystep = false,
-        verbose = false;
+        verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         unstable_check,
     )
 
@@ -87,7 +87,14 @@ function Q_hat_zero_float_curve(
         (-κ, ϵ, CGLParams(Λ, ω = -Λ.ω)),
     )
 
-    sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)
+    sol = solve(
+        prob,
+        Vern7(),
+        abstol = tol,
+        reltol = tol,
+        verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
+        saveat,
+    )
 
     return sol
 end

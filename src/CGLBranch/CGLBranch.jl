@@ -36,6 +36,9 @@ using NonlinearSolve
 using OrdinaryDiffEqVerner
 using StaticArrays
 
+import DiffEqBase
+import SciMLLogging
+
 @kwdef struct Params
     d::Int = 1
     σ::Float64 = 2.3
@@ -191,14 +194,14 @@ function G(μ, κ, ϵ, ω, Λ::Params)
             (zero(ξ₁), ξ₁),
             (κ, ϵ, ω, Λ),
         )
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 4000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     elseif d == 3 && σ == 1 && Λ.δ == 0
         prob = ODEProblem{false}(
@@ -207,29 +210,29 @@ function G(μ, κ, ϵ, ω, Λ::Params)
             (zero(ξ₁), ξ₁),
             (κ, ϵ, ω, Λ),
         )
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     else
         prob = ODEProblem{false}(system, SVector(μ, 0, 0, 0), (zero(ξ₁), ξ₁), (κ, ϵ, ω, Λ))
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     end
 
-    a, b, α, β = sol[end]::SVector{4,promote_type(typeof(κ), typeof(ϵ))}
+    a, b, α, β = sol.u[end]::SVector{4,promote_type(typeof(κ), typeof(ϵ))}
 
     order = 2 # Order of approximation to use
 
@@ -268,7 +271,7 @@ function G(μ, κ, ϵ, ω, Λ::Params)
             F_γ(γ, (Q_0, p, e, I_P_witout_γ, σ)) =
                 Q_0 - (γ * p + e * I_P_witout_γ * abs(γ)^2σ * γ)
             prob_γ = NonlinearProblem{false}(F_γ, Q_0 / p, (Q_0, p, e, I_P_witout_γ, σ))
-            sol_γ = NonlinearSolve.solve(
+            sol_γ = solve(
                 prob_γ,
                 NewtonRaphson(),
                 maxiters = 20, # Should be enough to saturate converge
@@ -316,14 +319,14 @@ function G_asym(μ, κ, ϵ, ω, Λ::Params)
             (zero(ξ₁), ξ₁),
             (κ, ϵ, ω, Λ),
         )
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 4000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     elseif d == 3 && σ == 1 && Λ.δ == 0
         prob = ODEProblem{false}(
@@ -332,29 +335,29 @@ function G_asym(μ, κ, ϵ, ω, Λ::Params)
             (zero(ξ₁), ξ₁),
             (κ, ϵ, ω, Λ),
         )
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     else
         prob = ODEProblem{false}(system, SVector(μ, 0, 0, 0), (zero(ξ₁), ξ₁), (κ, ϵ, ω, Λ))
-        sol = NonlinearSolve.solve(
+        sol = solve(
             prob,
             Vern7(),
             abstol = 1e-9,
             reltol = 1e-9,
             maxiters = 8000,
             save_everystep = false,
-            verbose = false,
+            verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         )
     end
 
-    a, b, α, β = sol[end]::SVector{4,promote_type(typeof(κ), typeof(ϵ))}
+    a, b, α, β = sol.u[end]::SVector{4,promote_type(typeof(κ), typeof(ϵ))}
 
     order = 2 # Order of approximation to use
 
@@ -385,7 +388,7 @@ function G_asym(μ, κ, ϵ, ω, Λ::Params)
                 )
             prob_c_0 =
                 NonlinearProblem{false}(F_c_0, Q_0 / ξ₁^-2a, (Q_0, ξ₁, a, ϵ, σ, κ))
-            sol_c_0 = NonlinearSolve.solve(
+            sol_c_0 = solve(
                 prob_c_0,
                 NewtonRaphson(),
                 maxiters = 20, # Should be enough to saturate converge

@@ -30,7 +30,7 @@ function Y_zero_float(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float6
         abstol = tol,
         reltol = tol,
         save_everystep = false,
-        verbose = false;
+        verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
         unstable_check,
     )
 
@@ -64,7 +64,14 @@ function Y_zero_float_curve(
         (λ, κ, ϵ, Q_hat, Λ),
     )
 
-    sol = solve(prob, Vern7(), abstol = tol, reltol = tol, verbose = false; saveat)
+    sol = solve(
+        prob,
+        Vern7(),
+        abstol = tol,
+        reltol = tol,
+        verbose = DiffEqBase.DEVerbosity(SciMLLogging.None());
+        saveat,
+    )
 
     return sol
 end

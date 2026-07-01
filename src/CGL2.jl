@@ -11,9 +11,11 @@ using StaticArrays
 
 import Arpack
 import BlockArrays
+import DiffEqBase
 import ForwardDiff
 import IntervalArithmetic: Interval, interval, nai, inf, sup
 import ProgressLogging: @progress, @withprogress, @logprogress
+import SciMLLogging
 import SparseArrays
 
 include("CGLBranch/CGLBranch.jl")

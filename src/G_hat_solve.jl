@@ -36,7 +36,7 @@ function G_hat_approximate(
     converged = NonlinearSolve.SciMLBase.successful_retcode(sol)
 
     ν, γ₂ = if converged
-        sol[1], sol[2]
+        sol.u[1], sol.u[2]
     else
         zero(γ₁), zero(γ₁)
     end
