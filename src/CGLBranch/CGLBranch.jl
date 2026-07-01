@@ -6,23 +6,31 @@ corresponding to Figures 3.1 and 3.6 in
 https://doi.org/10.1002/cpa.3006.
 
 A figure similar to Figure 3.1 can be produced with
+
 ```
 brs = tmap(1:8) do j
-        CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 1)...)
+    CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 1)...)
 end
-pl = plot()
-foreach(br -> plot!(pl, br), brs)
-pl
+
+using CairoMakie
+fig = Figure();
+ax = Axis(fig[1, 1], xlabel = "ϵ", ylabel = "κ")
+foreach(br -> lines!(ax, br.branch.param, br.branch.κ), brs)
+fig
 ```
 
 For Figure 3.6 you would get
+
 ```
 brs3 = tmap(1:5) do j
     CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 3)...)
 end
-pl = plot()
-foreach(br -> plot!(pl, br), brs)
-pl
+
+using CairoMakie
+fig = Figure();
+ax = Axis(fig[1, 1], xlabel = "ϵ", ylabel = "κ")
+foreach(br -> lines!(ax, br.branch.param, br.branch.κ), brs3)
+fig
 ```
 
 The above examples do the continuation in `ϵ`. It is also possible to
