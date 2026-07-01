@@ -2,20 +2,15 @@ module CGL2
 
 using ArbExtras
 using Arblib
-using CSV
-using DataFrames
 using LinearAlgebra
 using NonlinearSolve
-using OhMyThreads: tmap, tforeach
-using OrdinaryDiffEqRosenbrock
+using OhMyThreads: tmap
 using OrdinaryDiffEqVerner
 using SpecialFunctions
 using StaticArrays
 
 import Arpack
 import BlockArrays
-import Dates
-import Distributed
 import ForwardDiff
 import IntervalArithmetic: Interval, interval, nai, inf, sup
 import ProgressLogging: @progress, @withprogress, @logprogress

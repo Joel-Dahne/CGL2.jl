@@ -33,7 +33,6 @@ module CGLBranch
 
 using BifurcationKit
 using NonlinearSolve
-using OrdinaryDiffEqRosenbrock
 using OrdinaryDiffEqVerner
 using StaticArrays
 
