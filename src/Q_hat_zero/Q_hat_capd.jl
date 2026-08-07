@@ -1,5 +1,5 @@
 """
-    Q_hat_zero_capd(ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
+    Q_hat_zero_capd(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
 
 Compute the solution to the ODE on the interval ``[0, ξ₁]``. Returns a
 vector with four real values, the first two are the real and imaginary
@@ -52,10 +52,10 @@ function Q_hat_zero_capd(
 end
 
 """
-    Q_hat_zero_jacobian_capd(ν, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
+    Q_hat_zero_jacobian_capd(ν_real, ν_imag, κ, ϵ, ξ₁, Λ::CGLParams; ξ₀, tol)
 
 This function computes the Jacobian of [`Q_hat_zero_capd`](@ref)
-w.r.t. the parameter `ν`.
+w.r.t. the parameters `ν_real` and `ν_imag`.
 
 In general it works similarly to [`Q_hat_zero_capd`](@ref).
 """
