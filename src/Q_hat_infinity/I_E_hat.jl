@@ -105,7 +105,7 @@ function I_E_hat_enclosure(
     # checked internally by the function C_R_Q_hat.
     @assert isone(σ)
 
-    I_E_hat_main = abs(γ₁)^2 * γ₁ * integral_J_E_hat_P_hat(κ, ϵ, ξ₁, Λ)
+    I_E_hat_main = -abs(γ₁)^2 * γ₁ * integral_J_E_hat_P_hat(κ, ϵ, ξ₁, Λ)
 
     C_R_Q_hat = CGL2.C_R_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
     R_I_E_hat_bound =

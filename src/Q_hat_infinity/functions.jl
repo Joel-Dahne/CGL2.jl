@@ -83,7 +83,8 @@ function B_W_hat(κ, ϵ, Λ::CGLParams)
     (; δ) = Λ
     a, b, c = _abc(κ, ϵ, Λ)
     sgn = c isa AcbSeries ? sign(imag(c[0])) : sign(imag(c))
-    return -_complex(δ, -1) / κ * exp(sgn * im * (b - a) * π) * (-c)^b
+    # Note that (1 + im * δ) / (im * κ) = (δ - im) / κ
+    return _complex(δ, -1) / κ * exp(sgn * im * (b - a) * π) * (-c)^b
 end
 
 function J_E_hat(ξ, κ, ϵ, Λ::CGLParams)

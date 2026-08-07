@@ -21,8 +21,8 @@ function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ
     Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
 
     # Enclosure of Q_hat_dξ
-    I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
-    I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
+    I_E_hat_dξ = F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+    I_P_hat_dξ = -F.J_P_hat * abs(Q_hat)^2σ * Q_hat
 
     Q_hat_dξ =
         γ₁ * F.P_hat_dξ +
@@ -79,15 +79,15 @@ function Q_hat_infinity_jacobian(
     Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
 
     # Enclosure of Q_hat_dξ_dγ₂
-    I_E_hat_dξ = -F.J_E_hat * abs(Q_hat)^2σ * Q_hat
-    I_P_hat_dξ = F.J_P_hat * abs(Q_hat)^2σ * Q_hat
+    I_E_hat_dξ = F.J_E_hat * abs(Q_hat)^2σ * Q_hat
+    I_P_hat_dξ = -F.J_P_hat * abs(Q_hat)^2σ * Q_hat
 
     I_E_hat_dξ_dγ₂ =
-        -F.J_E_hat *
+        F.J_E_hat *
         abs(Q_hat)^(2σ - 2) *
         (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
     I_P_hat_dξ_dγ₂ =
-        F.J_P_hat *
+        -F.J_P_hat *
         abs(Q_hat)^(2σ - 2) *
         (2σ * real(conj(Q_hat) * Q_hat_dγ₂) * Q_hat + abs(Q_hat)^2 * Q_hat_dγ₂)
 

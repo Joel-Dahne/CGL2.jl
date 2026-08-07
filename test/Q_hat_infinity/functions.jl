@@ -45,7 +45,7 @@
     @testset "J_E_hat" begin
         @test Arblib.overlaps(
             J_E_hat(ξ, κ, ϵ, Λ),
-            -(1 + im * δ) / (1 - im * ϵ) * E_hat(ξ, κ, ϵ, Λ) / W_hat(ξ, κ, ϵ, Λ),
+            (1 + im * δ) / (1 - im * ϵ) * E_hat(ξ, κ, ϵ, Λ) / W_hat(ξ, κ, ϵ, Λ),
         )
 
         @test Arblib.overlaps(
@@ -57,7 +57,7 @@
     @testset "J_P_hat" begin
         @test Arblib.overlaps(
             J_P_hat(ξ, κ, ϵ, Λ),
-            -(1 + im * δ) / (1 - im * ϵ) * P_hat(ξ, κ, ϵ, Λ) / W_hat(ξ, κ, ϵ, Λ),
+            (1 + im * δ) / (1 - im * ϵ) * P_hat(ξ, κ, ϵ, Λ) / W_hat(ξ, κ, ϵ, Λ),
         )
 
         @test Arblib.overlaps(
