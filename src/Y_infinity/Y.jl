@@ -26,10 +26,7 @@ function Y_infinity(
     Z = F_Z.E_12 * c_0 + F_Z.P_12 * I_K_2
 
     # Compute an enclosure of Z'
-    I_K_1_dξ = F_Z.K_1 * F_Z.I_N * Z
-    I_K_2_dξ = -F_Z.K_2 * F_Z.I_N * Z
-
-    dZ = F_Z.E_12_dξ * c_0 + F_Z.E_12 * I_K_1_dξ + F_Z.P_12_dξ * I_K_2 + F_Z.P_12 * I_K_2_dξ
+    dZ = F_Z.E_12_dξ * c_0 + F_Z.P_12_dξ * I_K_2
 
     # Convert from Z to Y
     V = SMatrix{2,2}(im, 1, -im, 1)
