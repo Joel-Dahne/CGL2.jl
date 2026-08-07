@@ -32,7 +32,6 @@ function C_R_Q_hat(
     # The requirements from Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
     # are checked in the computation of `C`, where the associated
     # constants are computed.
-    @assert -2real(c) + (2 / σ - d + 2) * ξ₁^-2 < 0
 
     return abs(γ₂) * C.E_hat * exp(-real(c) * ξ₁^2) * ξ₁^(2 / σ - d + 2) +
            C.T_hat * norms.Q_hat^(2σ + 1)

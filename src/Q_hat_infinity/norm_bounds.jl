@@ -40,10 +40,9 @@ function NormBounds_hat(
     # function.
 
     # The requirements for Lemma REF(lemma:Q-hat-dgamma-bound) that
-    # are related to Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds)
-    # are checked in the computation of `C`, where the associated
-    # constants are computed. The other conditions are checked in the
-    # norm_bound_Q_hat_dγ₂ function.
+    # are the same as for Lemma REF(lemma:Q-hat-fixed-point-bounds)
+    # are already checked above. The condition on the numerator is
+    # checked in the norm_bound_Q_hat_dγ₂ function.
 
     norms.Q_hat[] = norm_bound_Q_hat(γ₁, γ₂, κ, ϵ, ξ₁, Λ, C)
     norms.Q_hat_dγ₂[] = norm_bound_Q_hat_dγ₂(κ, ϵ, ξ₁, Λ, C, norms)
