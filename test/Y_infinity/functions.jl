@@ -119,7 +119,7 @@
         Ψ = [F_Y.E_12 F_Y.P_12; F_Y.E_12_dξ F_Y.P_12_dξ]
         F = eltype(Ψ)[0.1, 0.25]
 
-        v = [CGL2.K_1(ξ, λ, κ, ϵ, Λ) * F; -CGL2.K_1(ξ, λ, κ, ϵ, Λ) * F]
+        v = [CGL2.K_1(ξ, λ, κ, ϵ, Λ) * F; -CGL2.K_2(ξ, λ, κ, ϵ, Λ) * F]
 
         @test all(Arblib.overlaps.(Ψ * v, [[0, 0]; inv(V) * A * V \ F]))
     end

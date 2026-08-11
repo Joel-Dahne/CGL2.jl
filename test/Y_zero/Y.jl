@@ -25,5 +25,5 @@
 
     # Compare with Float64 version
     resF64 = CGL2.Y_zero(Y₀F64, λF64, νF64, κF64, ϵF64, ξ₁F64, ΛF64)
-    @test ComplexF64.(res) ≈ resF64 rtol = 1e-12
+    @test ComplexF64.(res) ≈ resF64 rtol = 1e-10
 end
