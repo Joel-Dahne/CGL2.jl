@@ -18,12 +18,12 @@
     res = CGL2.Y_zero(Y₀, λ, ν, κ, ϵ, ξ₁, Λ)
 
     # Test with different settings for Taylor expansion
-    res2 = CGL2.Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ, ξ₀ = Arb(1e-1), degree = 5)
+    res2 = CGL2.Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ, ξ₀ = Arb(1e-1), degree = 6)
     res3 = CGL2.Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ, ξ₀ = Arb(1e-3))
     @test all(Arblib.overlaps.(res, res2))
     @test all(Arblib.overlaps.(res, res3))
 
     # Compare with Float64 version
     resF64 = CGL2.Y_zero(Y₀F64, λF64, νF64, κF64, ϵF64, ξ₁F64, ΛF64)
-    @test ComplexF64.(res) ≈ resF64 rtol = 1e-10
+    @test ComplexF64.(res) ≈ resF64 rtol = 1e-12
 end
