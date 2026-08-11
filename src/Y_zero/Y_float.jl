@@ -8,6 +8,10 @@ are the derivatives.
 
 The solution is computed using [`ODEProblem`](@ref). The computations
 are always done in `ComplexF64`.
+
+Note that this, contrary to the CAPD version, uses the complex
+formulation of the ODE. This allows for testing that the two versions
+agree.
 """
 function Y_zero_float(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
     prob = ODEProblem{false}(
