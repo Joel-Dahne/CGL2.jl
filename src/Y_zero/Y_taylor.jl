@@ -153,7 +153,7 @@ function _Y_zero_taylor_remainder(
     end
 
     remainder_bound = (r * ξ₀)^(N + 1) / (1 - r * ξ₀)
-    remainder_derivative_bound = (r * ξ₀)^N * (N + 1 - N * r * ξ₀) / (1 - r * ξ₀)^2
+    remainder_derivative_bound = r * (r * ξ₀)^N * (N + 1 - N * r * ξ₀) / (1 - r * ξ₀)^2
 
     remainder = add_error(Arb(0), remainder_bound)
     remainder_derivative = add_error(Arb(0), remainder_derivative_bound)
