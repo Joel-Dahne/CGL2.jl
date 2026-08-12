@@ -7,8 +7,9 @@ function G_hat_approximate(
     return_convergence::Union{Val{false},Val{true}} = Val{false}(),
     verbose = false,
 ) where {T}
-    F((ν, γ₂), (γ₁, κ, ϵ, ξ₁, Λ)) = G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
-    x₀ = SVector(zero(γ₁), zero(γ₁)) # IMPROVE: Pick this in a smarter way
+    F((ν_real, ν_imag, γ₂_real, γ₂_imag), (γ₁, κ, ϵ, ξ₁, Λ)) =
+        G_hat(complex(ν_real, ν_imag), γ₁, complex(γ₂_real, γ₂_imag), κ, ϵ, ξ₁, Λ)
+    x₀ = SVector(zero(T), zero(T), zero(T), zero(T))
     prob = NonlinearProblem{false}(F, x₀, (γ₁, κ, ϵ, ξ₁, Λ))
     sol = try
         solve(
@@ -36,7 +37,7 @@ function G_hat_approximate(
     converged = NonlinearSolve.SciMLBase.successful_retcode(sol)
 
     ν, γ₂ = if converged
-        sol.u[1], sol.u[2]
+        complex(sol.u[1], sol.u[2]), complex(sol.u[3], sol.u[4])
     else
         zero(γ₁), zero(γ₁)
     end
@@ -59,13 +60,17 @@ function G_hat_solve(
     max_iterations = 10,
     verbose = false,
 )
-    G_hat_x = ((ν, γ₂),) -> G_hat(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
-    dG_hat_x = ((ν, γ₂),) -> G_hat_jacobian(ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
+    G_hat_x =
+        ((ν_real, ν_imag, γ₂_real, γ₂_imag),) ->
+            G_hat(Acb(ν_real, ν_imag), γ₁, Acb(γ₂_real, γ₂_imag), κ, ϵ, ξ₁, Λ)
+    dG_hat_x =
+        ((ν_real, ν_imag, γ₂_real, γ₂_imag),) ->
+            G_hat_jacobian(Acb(ν_real, ν_imag), γ₁, Acb(γ₂_real, γ₂_imag), κ, ϵ, ξ₁, Λ)
 
     root, _ = verify_root_from_approximation(
         G_hat_x,
         dG_hat_x,
-        SVector{2,Acb}(ν, γ₂);
+        SVector{4,Arb}(real(ν), imag(ν), real(γ₂), imag(γ₂));
         expansion_rate,
         max_iterations,
         verbose,
@@ -78,5 +83,5 @@ function G_hat_solve(
         root = newton_step(G_hat_x, dG_hat_x, root)
     end
 
-    return root
+    return SVector(Acb(root[1], root[2]), Acb(root[3], root[4]))
 end

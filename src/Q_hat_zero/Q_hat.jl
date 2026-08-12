@@ -24,8 +24,8 @@ end
 """
     Q_hat_zero_jacobian(ν, κ, ϵ, ξ₁, Λ::CGLParams; tol::Float64 = 1e-11)
 
-This function computes the Jacobian of [`Q_hat_zero`](@ref) w.r.t. the
-parameter `ν.
+This function computes the Jacobian of [`Q_hat_zero`](@ref) w.r.t.
+`real(ν)` and `imag(ν)`.
 """
 function Q_hat_zero_jacobian(
     ν::Union{Complex{T},Acb},
@@ -40,5 +40,12 @@ function Q_hat_zero_jacobian(
     else
         Q_hat_zero_jacobian_float(real(ν), imag(ν), κ, ϵ, ξ₁, Λ; tol)
     end
-    return SMatrix{2,1}(_complex(J[1, 1], J[2, 1]), _complex(J[3, 1], J[4, 1]))
+    return SMatrix{2,2}(
+        # Derivative w.r.t. real(ν)
+        _complex(J[1, 1], J[2, 1]),
+        _complex(J[3, 1], J[4, 1]),
+        # Derivative w.r.t. imag(ν)
+        _complex(J[1, 2], J[2, 2]),
+        _complex(J[3, 2], J[4, 2]),
+    )
 end

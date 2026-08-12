@@ -38,8 +38,8 @@ Q_hat_infinity(
 """
     Q_hat_infinity_jacobian(γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
-This function computes the Jacobian of [`Q_hat_infinity`](@ref) w.r.t. the
-parameter `γ₂`.
+This function computes the Jacobian of [`Q_hat_infinity`](@ref) w.r.t.
+`real(γ₂)` and `imag(γ₂)`.
 """
 function Q_hat_infinity_jacobian(
     γ₁::Acb,
@@ -56,16 +56,29 @@ function Q_hat_infinity_jacobian(
 
     # Enclosure of Q_hat and Q_hat_dγ₂
     I_E_hat = I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
-    I_E_hat_dγ₂ = I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
+    I_E_hat_dγ₂_real = I_E_hat_dγ₂_real_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
+    I_E_hat_dγ₂_imag = I_E_hat_dγ₂_imag_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
     I_P_hat = zero(Acb)
-    I_P_hat_dγ₂ = zero(Acb)
+    I_P_hat_dγ₂_real = zero(Acb)
+    I_P_hat_dγ₂_imag = zero(Acb)
 
     Q_hat = γ₁ * F.P_hat + γ₂ * F.E_hat + F.P_hat * I_E_hat + F.E_hat * I_P_hat
-    Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
+    Q_hat_dγ₂_real = F.E_hat + F.P_hat * I_E_hat_dγ₂_real + F.E_hat * I_P_hat_dγ₂_real
+    Q_hat_dγ₂_imag = im * F.E_hat + F.P_hat * I_E_hat_dγ₂_imag + F.E_hat * I_P_hat_dγ₂_imag
 
     # Enclosure of Q_hat_dξ_dγ₂
-    Q_hat_dξ_dγ₂ = F.E_hat_dξ + F.P_hat_dξ * I_E_hat_dγ₂ + F.E_hat_dξ * I_P_hat_dγ₂
+    Q_hat_dξ_dγ₂_real =
+        F.E_hat_dξ + F.P_hat_dξ * I_E_hat_dγ₂_real + F.E_hat_dξ * I_P_hat_dγ₂_real
+    Q_hat_dξ_dγ₂_imag =
+        im * F.E_hat_dξ + F.P_hat_dξ * I_E_hat_dγ₂_imag + F.E_hat_dξ * I_P_hat_dγ₂_imag
 
-    return SMatrix{2,1}(Q_hat_dγ₂, Q_hat_dξ_dγ₂)
+    return SMatrix{2,2}(
+        # Derivative w.r.t. real(γ₂)
+        Q_hat_dγ₂_real,
+        Q_hat_dξ_dγ₂_real,
+        # Derivative w.r.t. imag(γ₂)
+        Q_hat_dγ₂_imag,
+        Q_hat_dξ_dγ₂_imag,
+    )
 end

@@ -122,12 +122,12 @@ function I_E_hat_enclosure(
 end
 
 """
-    I_E_hat_dγ₂_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
+    I_E_hat_dγ₂_real_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
-Compute an enclosure of `I_E_hat_dγ₂` based on Lemma
-REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
+Compute an enclosure of the derivative of `I_E_hat` with respect to
+`real(γ₂)`, based on Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
 """
-function I_E_hat_dγ₂_enclosure(
+function I_E_hat_dγ₂_real_enclosure(
     γ₁::Acb,
     γ₂::Acb,
     κ::Arb,
@@ -142,7 +142,41 @@ function I_E_hat_dγ₂_enclosure(
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 
-    I_E_hat_dγ₂_bound = (2Λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2Λ.σ * norms.Q_hat_dγ₂
+    # TODO: This uses norms.Q_hat_dγ. Since the norms should be same
+    # for γ₂_real and γ₂_imag it is in principle fine to use the same
+    # value for them. Though we might want to separate them later on.
+    I_E_hat_dγ₂_real_bound =
+        (2Λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2Λ.σ * norms.Q_hat_dγ₂
 
-    return add_error(zero(Acb), I_E_hat_dγ₂_bound)
+    return add_error(zero(Acb), I_E_hat_dγ₂_real_bound)
+end
+
+"""
+    I_E_hat_dγ₂_imag_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
+
+Compute an enclosure of the derivative of `I_E_hat` with respect to
+`real(γ₂)`, based on Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
+"""
+function I_E_hat_dγ₂_imag_enclosure(
+    γ₁::Acb,
+    γ₂::Acb,
+    κ::Arb,
+    ϵ::Arb,
+    ξ₁::Arb,
+    Λ::CGLParams{Arb},
+    F::FunctionEnclosures_hat,
+    C::FunctionBounds_hat,
+    norms::NormBounds_hat,
+)
+    # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds)
+    # are checked in the computation of `C`, where the associated
+    # constants are computed.
+
+    # TODO: This uses norms.Q_hat_dγ. Since the norms should be same
+    # for γ₂_real and γ₂_imag it is in principle fine to use the same
+    # value for them. Though we might want to separate them later on.
+    I_E_hat_dγ₂_imag_bound =
+        (2Λ.σ + 1) * C.I_E_hat * ξ₁^-2 * norms.Q_hat^2Λ.σ * norms.Q_hat_dγ₂
+
+    return add_error(zero(Acb), I_E_hat_dγ₂_imag_bound)
 end
