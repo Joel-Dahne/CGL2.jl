@@ -19,10 +19,7 @@ function Q_hat_infinity(γ₁::Acb, γ₂::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ
 
     # Enclosure of Q_hat_dξ
     Q_hat_dξ =
-        γ₁ * F.P_hat_dξ +
-        γ₂ * F.E_hat_dξ +
-        F.P_hat_dξ * I_E_hat +
-        F.E_hat_dξ * I_P_hat
+        γ₁ * F.P_hat_dξ + γ₂ * F.E_hat_dξ + F.P_hat_dξ * I_E_hat + F.E_hat_dξ * I_P_hat
 
     return SVector(Q_hat, Q_hat_dξ)
 end
@@ -68,10 +65,7 @@ function Q_hat_infinity_jacobian(
     Q_hat_dγ₂ = F.E_hat + F.P_hat * I_E_hat_dγ₂ + F.E_hat * I_P_hat_dγ₂
 
     # Enclosure of Q_hat_dξ_dγ₂
-    Q_hat_dξ_dγ₂ =
-        F.E_hat_dξ +
-        F.P_hat_dξ * I_E_hat_dγ₂ +
-        F.E_hat_dξ * I_P_hat_dγ₂
+    Q_hat_dξ_dγ₂ = F.E_hat_dξ + F.P_hat_dξ * I_E_hat_dγ₂ + F.E_hat_dξ * I_P_hat_dγ₂
 
     return SMatrix{2,1}(Q_hat_dγ₂, Q_hat_dξ_dγ₂)
 end
