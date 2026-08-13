@@ -310,7 +310,7 @@ The next step is to take a contour around the approximate solution. For this we 
 """
 
 # ╔═╡ 2f6b6452-f2e1-4c07-9511-93f355ba9707
-r = Arb("0.015")
+r = Arb("0.016")
 
 # ╔═╡ 0d7d7d0a-ae40-41a4-a41d-074cb617a466
 md"""
