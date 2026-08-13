@@ -96,10 +96,13 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParam
 
     I_E_main = abs(γ)^2 * γ * integral_J_E_P(κ, ϵ, ξ₁, Λ)
 
-    C_R_Q = (C.P * CI.I_E + C.E * CI.I_P) * norms.Q^(2σ + 1) * ξ₁^-2
+    C_R_1 = C.P * C.J_E / 2 * norms.Q^(2σ + 1)
+    C_R_2 = C.E * CI.I_P * norms.Q^(2σ + 1)
+    A_max = max(C_R_1, C_R_2) * ξ₁^-2
     R_I_E_bound =
-        C.J_E * (3abs(γ)^2 * C.P^2 * C_R_Q + 3abs(γ) * C.P * C_R_Q^2 + C_R_Q^3) / (2 / σ) *
-        ξ₁^(-2 / σ)
+        C.J_E * (C_R_1 + C_R_2) / 4 *
+        (3abs(γ)^2 * C.P^2 + 3abs(γ) * C.P * A_max + A_max^2) *
+        ξ₁^-4
     R_I_E = add_error(zero(Acb), R_I_E_bound)
 
     return I_E_main + R_I_E
@@ -108,11 +111,10 @@ end
 """
     p_Q_0(γ, κ, ϵ, ξ₁, Λ)
 
-Compute the coefficient ``p_{Q,0}`` from Lemma REF(lemma:p_Q_0). It is
-the coefficient for the leading order term in the asymptotic expansion
-of `Q`.
+Compute the coefficient ``p_{Q,0}`` from Lemma REF(lemma:p_Q_0). Up to
+a factor `c^-a`, it is the coefficient for the leading order term in
+the asymptotic expansion of `Q`.
 """
 function p_Q_0(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
-    a, b, c = _abc(κ, ϵ, Λ)
-    return c^-a * (γ + I_E_infty_enclosure(γ, κ, ϵ, ξ₁, Λ))
+    return γ + I_E_infty_enclosure(γ, κ, ϵ, ξ₁, Λ)
 end

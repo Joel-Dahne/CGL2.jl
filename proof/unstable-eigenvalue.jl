@@ -177,7 +177,7 @@ Next we prove the existance of a forward self-similar solution with the same asy
 a, b, c = CGL2._abc(κ, ϵ, Λ)
 
 # ╔═╡ c2f067f3-4a78-4048-834d-186ec249350e
-γ₁ = p_Q_0 / (-c)^-a
+γ₁ = (-1)^a * CGL2.p_Q_0(γ, κ, ϵ, ξ₁, Λ)
 
 # ╔═╡ 40f63eb4-5ece-44e7-835a-b33f97e309bd
 @assert_proof isfinite(γ₁)
