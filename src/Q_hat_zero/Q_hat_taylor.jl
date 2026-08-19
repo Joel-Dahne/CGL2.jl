@@ -109,7 +109,7 @@ function Q_hat_zero_jacobian_taylor(
         degree,
     )
 
-    # Compute expansion of derivative w.r.t. ν_real
+    # Compute expansion of derivative w.r.t. ν_imag
     a_dν_imag, b_dν_imag = cgl_equation_real_dμ_taylor(
         SVector{2,NTuple{2,Arb}}((0, 0), (1, 0)),
         a,
