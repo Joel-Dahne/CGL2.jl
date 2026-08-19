@@ -12,11 +12,11 @@ using capd::autodiff::Node;
 // Generic version of the linearized CGL vector field as a first-order real system.
 // Integrates the Q_hat forward ODE and the linearized equation simultaneously.
 // State: in = [a, b, alpha, beta, Y_r_1, Y_r_2, Y_i_1, Y_i_2, Z_r_1, Z_r_2, Z_i_1, Z_i_2,
-//              lambda_real, lambda_imag, kappa, epsilon], where a + i*b = Q_hat,
+//              lambda_real, lambda_imag, kappa], where a + i*b = Q_hat,
 // alpha + i*beta = Q_hat', Y_r_j + i*Y_i_j and Z_r_j + i*Z_i_j are the real/imaginary
-// parts of Y_j and Z_j = Y_j'. Params: [omega, sigma, delta, d].
-// Outputs [Q_hat ODE, Y' = Z, Z' = M1*Y + M2*Z, 0, 0, 0, 0]
-// (lambda, kappa, epsilon are kept constant).
+// parts of Y_j and Z_j = Y_j'. Params: [omega, sigma, delta, d, epsilon].
+// Outputs [Q_hat ODE, Y' = Z, Z' = M1*Y + M2*Z, 0, 0, 0]
+// (lambda and kappa are kept constant).
 void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
 {
   // Parameters
@@ -24,6 +24,7 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   Node sigma = params[1];
   Node delta = params[2];
   Node d = params[3];
+  Node epsilon = params[4];
 
   // Values for forward solution
   Node a = in[0];
@@ -45,7 +46,6 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   Node lambda_real = in[12];
   Node lambda_imag = in[13];
   Node kappa = in[14];
-  Node epsilon = in[15];
 
   // Compute forward ODE
   // Note that this is the same as in Q_zero.cpp, except changing the
@@ -119,14 +119,16 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   out[12] = 0 * lambda_real;
   out[13] = 0 * lambda_imag;
   out[14] = 0 * kappa;
-  out[15] = 0 * epsilon;
 }
 
 // Specialization for d == 3, omega == 1, sigma == 1, delta == 0.
 // Integrates the Q_hat ODE and the linearized equation
-// simultaneously. No params required.
-void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node* /*params*/, int /*noParams*/)
+// simultaneously. Params: [epsilon].
+void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, Node params[], int /*noParams*/)
 {
+  // Parameters
+  Node epsilon = params[0];
+
   Node a = in[0];
   Node b = in[1];
   Node alpha = in[2];
@@ -144,7 +146,6 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
   Node lambda_real = in[12];
   Node lambda_imag = in[13];
   Node kappa = in[14];
-  Node epsilon = in[15];
 
   Node a2 = (a^2);
   Node b2 = (b^2);
@@ -214,7 +215,6 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
   out[12] = 0 * lambda_real;
   out[13] = 0 * lambda_imag;
   out[14] = 0 * kappa;
-  out[15] = 0 * epsilon;
 }
 
 // ===========================================================================
@@ -223,21 +223,23 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
 
 // Construct the most specialized IMap for the given parameters.
 IMap build_vector_field(int d, interval omega, interval sigma, interval delta, interval epsilon) {
-    int dim = 16;
+    int dim = 15;
     IMap vf;
 
     bool d3_opt = (d == 3) && (omega == 1) && (sigma == 1) && (delta == 0);
 
     if (d3_opt) {
 	// Specialized for the case considered in the paper
-        vf = IMap(vectorField_d3_optimized, dim, dim, 0);
+        vf = IMap(vectorField_d3_optimized, dim, dim, 1);
+        vf.setParameter(0, epsilon);
     } else {
 	// Generic version
-        vf = IMap(vectorField, dim, dim, 4);
+        vf = IMap(vectorField, dim, dim, 5);
         vf.setParameter(0, omega);
 	vf.setParameter(1, sigma);
 	vf.setParameter(2, delta);
 	vf.setParameter(3, interval(d));
+	vf.setParameter(4, epsilon);
     }
 
     return vf;
@@ -267,9 +269,9 @@ int Y_zero(
     /** Settings **/
     double tol
 ) {
-    // To get better enclosures for wide kappa and epsilon we treat
-    // them as variables in the ODE.
-    IVector Q_hat_Y_xi_0_with_parameters(16);
+    // To get better enclosures for wide lambda and kappa we treat them
+    // as variables in the ODE.
+    IVector Q_hat_Y_xi_0_with_parameters(15);
     for (int i = 0; i < 4; i++)
 	Q_hat_Y_xi_0_with_parameters[i] = Q_hat_xi_0[i];
     for (int i = 0; i < 8; i++)
@@ -277,7 +279,6 @@ int Y_zero(
     Q_hat_Y_xi_0_with_parameters[12] = lambda_real;
     Q_hat_Y_xi_0_with_parameters[13] = lambda_imag;
     Q_hat_Y_xi_0_with_parameters[14] = kappa;
-    Q_hat_Y_xi_0_with_parameters[15] = epsilon;
 
     // Choose optimized vector field based on parameters
     IMap vf = build_vector_field(d, omega, sigma, delta, epsilon);
