@@ -8,6 +8,7 @@ https://doi.org/10.1002/cpa.3006.
 A figure similar to Figure 3.1 can be produced with
 
 ```
+using OhMyThreads
 brs = tmap(1:8) do j
     CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 1)...)
 end
@@ -22,6 +23,7 @@ fig
 For Figure 3.6 you would get
 
 ```
+using OhMyThreads
 brs3 = tmap(1:5) do j
     CGL2.CGLBranch.branch_epsilon(CGL2.CGLBranch.sverak_initial(j, 3)...)
 end
