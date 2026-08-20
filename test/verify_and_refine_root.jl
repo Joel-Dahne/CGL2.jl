@@ -5,7 +5,7 @@
     root_true = SVector(Arb(0), Arb(π), 2Arb(π), Arb(π) / 2)
     root_enclosure = add_error.(root_true, Mag(1))
 
-    root = CGL.verify_and_refine_root(f, df, root_enclosure)
+    root = CGL2.verify_and_refine_root(f, df, root_enclosure)
 
     atol = eps(one(first(root)))
     rtol = 4atol
