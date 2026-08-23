@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v1.0.1
+# v1.0.3
 
 using Markdown
 using InteractiveUtils
@@ -108,7 +108,7 @@ The application of the interval Newton method is handled by `G_solve_fix_epsilon
 """
 
 # ╔═╡ baa627cb-3a2c-4a48-89ee-515ceaed7049
-μ, γ_real, γ_imag, κ =
+@time μ, γ_real, γ_imag, κ =
     CGL2.G_solve_fix_epsilon(μ₀, real(γ₀), imag(γ₀), κ₀, ϵ, ξ₁, Λ, verbose = true)
 
 # ╔═╡ 683c7c63-57df-4bb6-9a3d-96dfbcd85784
@@ -223,7 +223,7 @@ The application of the interval Newton method is handled by `G_solve_hat`. Note 
 """
 
 # ╔═╡ 75653ff9-94ca-4c7b-a0c5-363b1de657e0
-ν, γ₂ = CGL2.G_hat_solve(ν_approx, γ₁, γ₂_approx, κ, ϵ, ξ₁, Λ, verbose = true)
+@time ν, γ₂ = CGL2.G_hat_solve(ν_approx, γ₁, γ₂_approx, κ, ϵ, ξ₁, Λ, verbose = true)
 
 # ╔═╡ 3df5f78f-d780-4db7-bd39-a858e04f650a
 @assert_proof isfinite(ν) && isfinite(γ₂)
@@ -397,16 +397,16 @@ Compute ``H`` for each piece.
 """
 
 # ╔═╡ 340f6f00-629a-4c52-8f07-baf6568a2957
-H_square_bottom = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_bottom)
+@time H_square_bottom = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_bottom)
 
 # ╔═╡ 060bd72c-1e0f-47cf-bbf1-f03c6e8c3599
-H_square_right = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_right)
+@time H_square_right = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_right)
 
 # ╔═╡ da7f234b-b681-4956-ba49-7f2ac6b363c2
-H_square_top = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_top)
+@time H_square_top = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_top)
 
 # ╔═╡ 942b9ffc-f12a-4c3c-9002-ffb69c784fd1
-H_square_left = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_left)
+@time H_square_left = tmap(λ -> CGL2.H(λ, ν, γ₁, γ₂, κ, ϵ, ξ₁, Λ), λs_left)
 
 # ╔═╡ 193f2a06-c0d3-45f5-8a2f-ba65d5a41ab3
 to_rect(x::Arb, y::Arb) = Rect2d(lbound(x), lbound(y), 2radius(x), 2radius(y))
