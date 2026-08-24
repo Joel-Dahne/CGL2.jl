@@ -73,7 +73,7 @@ function eigenvalues_finite_difference(
     Cn = Diagonal(Cs)
     J_Nn = Diagonal(J_Ns)
 
-    L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)))
+    L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)) / 2κ)
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
