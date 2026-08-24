@@ -1,5 +1,5 @@
 @testset "Y_infinity_function_bounds" begin
-    λ = Acb(0.19, 2.76)
+    λ = Acb(0.11875, 1.725)
     γ₁ = Acb(0.19, 0.15)
     γ₂ = Acb(-116.03, 101.21)
     κ = Arb(0.80)
@@ -33,62 +33,62 @@
         ####
 
         @test abs(E_1(ξ, λ, κ, ϵ, Λ)) <=
-              C_Y.E_1 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(λ) / κ)
+              C_Y.E_1 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - 2real(λ))
         @test abs(E_2(ξ, λ, κ, ϵ, Λ)) <=
-              C_Y.E_2 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(λ) / κ)
+              C_Y.E_2 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - 2real(λ))
         @test abs(E_1(ξ, λ, κ, ϵ, Λ)) >=
-              0.95C_Y.E_1 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(λ) / κ)
+              0.95C_Y.E_1 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - 2real(λ))
         @test abs(E_2(ξ, λ, κ, ϵ, Λ)) >=
-              0.85C_Y.E_2 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - real(λ) / κ)
+              0.85C_Y.E_2 * exp(-real(c) * ξ^2) * ξ^(1 / σ - d - 2real(λ))
 
         ####
         ## P_1 and P_2
         ####
 
-        @test abs(P_1(ξ, λ, κ, ϵ, Λ)) <= C_Y.P_1 * ξ^(-1 / σ + real(λ) / κ)
-        @test abs(P_2(ξ, λ, κ, ϵ, Λ)) <= C_Y.P_2 * ξ^(-1 / σ + real(λ) / κ)
-        @test abs(P_1(ξ, λ, κ, ϵ, Λ)) >= 0.95C_Y.P_1 * ξ^(-1 / σ + real(λ) / κ)
-        @test abs(P_2(ξ, λ, κ, ϵ, Λ)) >= 0.90C_Y.P_2 * ξ^(-1 / σ + real(λ) / κ)
+        @test abs(P_1(ξ, λ, κ, ϵ, Λ)) <= C_Y.P_1 * ξ^(-1 / σ + 2real(λ))
+        @test abs(P_2(ξ, λ, κ, ϵ, Λ)) <= C_Y.P_2 * ξ^(-1 / σ + 2real(λ))
+        @test abs(P_1(ξ, λ, κ, ϵ, Λ)) >= 0.95C_Y.P_1 * ξ^(-1 / σ + 2real(λ))
+        @test abs(P_2(ξ, λ, κ, ϵ, Λ)) >= 0.90C_Y.P_2 * ξ^(-1 / σ + 2real(λ))
 
         ######
         ## J_E_1 and J_E_2
         ######
 
-        @test abs(J_E_1(ξ, λ, κ, ϵ, Λ)) <= C_Y.J_E_1 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test abs(J_E_2(ξ, λ, κ, ϵ, Λ)) <= C_Y.J_E_2 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test abs(J_E_1(ξ, λ, κ, ϵ, Λ)) >= 0.95C_Y.J_E_1 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test abs(J_E_2(ξ, λ, κ, ϵ, Λ)) >= 0.85C_Y.J_E_2 * ξ^(1 / σ - real(λ) / κ - 1)
+        @test abs(J_E_1(ξ, λ, κ, ϵ, Λ)) <= C_Y.J_E_1 * ξ^(1 / σ - 2real(λ) - 1)
+        @test abs(J_E_2(ξ, λ, κ, ϵ, Λ)) <= C_Y.J_E_2 * ξ^(1 / σ - 2real(λ) - 1)
+        @test abs(J_E_1(ξ, λ, κ, ϵ, Λ)) >= 0.95C_Y.J_E_1 * ξ^(1 / σ - 2real(λ) - 1)
+        @test abs(J_E_2(ξ, λ, κ, ϵ, Λ)) >= 0.85C_Y.J_E_2 * ξ^(1 / σ - 2real(λ) - 1)
 
         ######
         ## J_P_1 and J_P_2
         ######
 
         @test abs(J_P_1(ξ, λ, κ, ϵ, Λ)) <=
-              C_Y.J_P_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              C_Y.J_P_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test abs(J_P_2(ξ, λ, κ, ϵ, Λ)) <=
-              C_Y.J_P_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              C_Y.J_P_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test abs(J_P_1(ξ, λ, κ, ϵ, Λ)) >=
-              0.95C_Y.J_P_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              0.95C_Y.J_P_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test abs(J_P_2(ξ, λ, κ, ϵ, Λ)) >=
-              0.9C_Y.J_P_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              0.9C_Y.J_P_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
 
         ######
         ## K_1, K_2
         ######
 
         @test norm_inf(K_1(ξ, λ, κ, ϵ, Λ), 1) <=
-              C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test norm_inf(K_1(ξ, λ, κ, ϵ, Λ), 2) <=
-              C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test norm_inf(K_1(ξ, λ, κ, ϵ, Λ), 1) >=
-              0.95C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              0.95C_Y.K_1_1 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
         @test norm_inf(K_1(ξ, λ, κ, ϵ, Λ), 2) >=
-              0.9C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + real(λ) / κ - 1)
+              0.9C_Y.K_1_2 * exp(real(c) * ξ^2) * ξ^(- 1 / σ + d + 2real(λ) - 1)
 
-        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 1) <= C_Y.K_2_1 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 2) <= C_Y.K_2_2 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 1) >= 0.9C_Y.K_2_1 * ξ^(1 / σ - real(λ) / κ - 1)
-        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 2) >= 0.85C_Y.K_2_2 * ξ^(1 / σ - real(λ) / κ - 1)
+        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 1) <= C_Y.K_2_1 * ξ^(1 / σ - 2real(λ) - 1)
+        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 2) <= C_Y.K_2_2 * ξ^(1 / σ - 2real(λ) - 1)
+        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 1) >= 0.9C_Y.K_2_1 * ξ^(1 / σ - 2real(λ) - 1)
+        @test norm_inf(K_2(ξ, λ, κ, ϵ, Λ), 2) >= 0.85C_Y.K_2_2 * ξ^(1 / σ - 2real(λ) - 1)
 
         ####
         ## I_N

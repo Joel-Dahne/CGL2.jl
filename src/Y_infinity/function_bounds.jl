@@ -89,7 +89,7 @@ function FunctionBounds_Y(
     @assert iszero(δ)
 
     # These are requirements of Lemmas REF(lemma:I_K_1-I_K_2-bounds)
-    exponent = 2 / σ - d - 2real(λ) / κ - 4
+    exponent = 2 / σ - d - 4real(λ) - 4
     @assert real(c) > 0
     @assert exponent < 0
 
@@ -98,8 +98,8 @@ function FunctionBounds_Y(
 
     C = FunctionBounds_Y()
 
-    CU = UBounds(a - λ / 2κ, b, -c, ξ₁, include_da = true)
-    CU_conj = UBounds(conj(a) - λ / 2κ, b, -conj(c), ξ₁, include_da = true)
+    CU = UBounds(a - λ, b, -c, ξ₁, include_da = true)
+    CU_conj = UBounds(conj(a) - λ, b, -conj(c), ξ₁, include_da = true)
 
     # Lemma REF(lemma:P_i_E_i-bounds)
 
@@ -142,22 +142,22 @@ end
 
 function C_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU.U_bma_b * abs(c^(-b + a - λ / 2κ))
+    return CU.U_bma_b * abs(c^(-b + a - λ))
 end
 
 function C_E_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU_conj.U_bma_b * abs(conj(c)^(-b + conj(a) - λ / 2κ))
+    return CU_conj.U_bma_b * abs(conj(c)^(-b + conj(a) - λ))
 end
 
 function C_P_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU.U_a_b * abs((-c)^(-a + λ / 2κ))
+    return CU.U_a_b * abs((-c)^(-a + λ))
 end
 
 function C_P_2(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, CU_conj::UBounds)
     a, b, c = _abc(κ, ϵ, Λ)
-    return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + λ / 2κ))
+    return CU_conj.U_a_b * abs(conj(-c)^(-conj(a) + λ))
 end
 
 C_J_E_1(λ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}, C::FunctionBounds_Y) =

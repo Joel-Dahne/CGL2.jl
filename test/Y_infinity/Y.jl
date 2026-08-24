@@ -1,6 +1,6 @@
 @testset "Y_infinity" begin
     c_0 = SVector(Acb(1), Acb(2))
-    λ = Acb(0.19, 2.76)
+    λ = Acb(0.11875, 1.725)
     ν = Acb(2.11, 2.52)
     γ₁ = Acb(0.19, 0.15)
     γ₂ = Acb(-116.03, 101.21)
@@ -51,6 +51,8 @@
     # that it is substantially smaller than the largest norm of the
     # input.
     @test norm(
-        ComplexF64.(A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - λ * I) * Y),
+        ComplexF64.(
+            A * Y_dξ_dξ + (B_1 * ξ₁ + B_2 * ξ₁^-1) * Y_dξ + (C + J_N - 2κ * λ * I) * Y,
+        ),
     ) < 2e-6max(norm(Y), norm(Y_dξ), norm(Y_dξ_dξ))
 end

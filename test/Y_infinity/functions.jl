@@ -1,7 +1,7 @@
 @testset "functions" begin
     # The precise numerical values for the parameters is not important
     # for the tests. We take some arbitrary values.
-    λ = Acb(0.19, 2.76)
+    λ = Acb(0.11875, 1.725)
     γ₁ = Acb(0.19, 0.15)
     γ₂ = Acb(-116.03, 101.21)
     ξ = Arb(30)
@@ -33,13 +33,13 @@
             @test Arblib.contains_zero(
                 (ϵ + im) * Pj_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Pj_dξ +
-                (κ / σ + ω * im - λ) * Pj,
+                (κ / σ + ω * im - 2κ * λ) * Pj,
             )
         else
             @test Arblib.contains_zero(
                 (ϵ - im) * Pj_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Pj_dξ +
-                (κ / σ - ω * im - λ) * Pj,
+                (κ / σ - ω * im - 2κ * λ) * Pj,
             )
         end
 
@@ -63,13 +63,13 @@
             @test Arblib.contains_zero(
                 (ϵ + im) * Ej_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ + im) / ξ) * Ej_dξ +
-                (κ / σ + ω * im - λ) * Ej,
+                (κ / σ + ω * im - 2κ * λ) * Ej,
             )
         else
             @test Arblib.contains_zero(
                 (ϵ - im) * Ej_dξ_dξ +
                 (κ * ξ + (d - 1) * (ϵ - im) / ξ) * Ej_dξ +
-                (κ / σ - ω * im - λ) * Ej,
+                (κ / σ - ω * im - 2κ * λ) * Ej,
             )
         end
 
