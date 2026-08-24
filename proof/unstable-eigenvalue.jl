@@ -310,7 +310,7 @@ The next step is to take a contour around the approximate solution. For this we 
 """
 
 # ╔═╡ 2f6b6452-f2e1-4c07-9511-93f355ba9707
-r = Arb("0.016")
+r = Arb("0.01")
 
 # ╔═╡ 0d7d7d0a-ae40-41a4-a41d-074cb617a466
 md"""
@@ -338,7 +338,7 @@ We can then plot the square and the approximate eigenvalue.
 let
     fig = Figure(; fontsize)
     ax = Axis(fig[1, 1], xlabel = L"\mathrm{Re}(\lambda)", ylabel = L"\mathrm{Im}(\lambda)")
-    xlims!(ax, -0.005, 0.04)
+    xlims!(ax, -0.004, 0.027)
     corner_list = [corner_bl, corner_br, corner_tr, corner_tl, corner_bl]
     lines!(ax, real.(corner_list), imag.(corner_list), linewidth = 3)
     scatter!(ax, [real(λ_approx)], [imag(λ_approx)], color = :red, label = L"\lambda_0")
@@ -449,8 +449,8 @@ let
         xticks = [-2e-20, 0, 2e-20],
         yticks = [-2e-20, 0, 2e-20],
     )
-    xlims!(ax, -2e-20, 2e-20)
-    ylims!(ax, -2e-20, 2e-20)
+    xlims!(ax, -2.2e-20, 2.2e-20)
+    ylims!(ax, -2.2e-20, 2.2e-20)
     poly!(ax, to_rect.(H_square_top), strokewidth = 1, alpha = 0.5)
     poly!(ax, to_rect.(H_square_bottom), strokewidth = 1, alpha = 0.5)
     poly!(ax, to_rect.(H_square_left), strokewidth = 1, alpha = 0.5)
