@@ -47,6 +47,10 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   Node lambda_imag = in[13];
   Node kappa = in[14];
 
+  // The equation depends on lambda only through 2 * kappa * lambda
+  Node two_kappa_lambda_real = 2 * kappa * lambda_real;
+  Node two_kappa_lambda_imag = 2 * kappa * lambda_imag;
+
   // Compute forward ODE
   // Note that this is the same as in Q_zero.cpp, except changing the
   // signs for kappa and omega.
@@ -86,18 +90,18 @@ void vectorField(Node xi, Node in[], int /*dimIn*/, Node out[], int /*dimOut*/, 
   Node J_N_22 = -a2b2_sigmam1 * (delta * (a^2) - 2 * sigma * a * b + delta * (1 + 2 * sigma) * (b^2));
 
   // M1
-  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - \lambda I) in the paper
-  Node M1_11_real = (-epsilon * (kappa / sigma + J_N_11 - lambda_real) - J_N_21 - omega) / (1 + (epsilon^2));
-  Node M1_11_imag = epsilon * lambda_imag / (1 + (epsilon^2));
+  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - 2\kappa\lambda I) in the paper
+  Node M1_11_real = (-epsilon * (kappa / sigma + J_N_11 - two_kappa_lambda_real) - J_N_21 - omega) / (1 + (epsilon^2));
+  Node M1_11_imag = epsilon * two_kappa_lambda_imag / (1 + (epsilon^2));
 
-  Node M1_12_real = (-kappa / sigma - epsilon * (J_N_12 - omega) - J_N_22 + lambda_real) / (1 + (epsilon^2));
-  Node M1_12_imag = lambda_imag / (1 + (epsilon^2));
+  Node M1_12_real = (-kappa / sigma - epsilon * (J_N_12 - omega) - J_N_22 + two_kappa_lambda_real) / (1 + (epsilon^2));
+  Node M1_12_imag = two_kappa_lambda_imag / (1 + (epsilon^2));
 
-  Node M1_21_real = (kappa / sigma - epsilon * (J_N_21 + omega) + J_N_11 - lambda_real) / (1 + (epsilon^2));
-  Node M1_21_imag = -lambda_imag / (1 + (epsilon^2));
+  Node M1_21_real = (kappa / sigma - epsilon * (J_N_21 + omega) + J_N_11 - two_kappa_lambda_real) / (1 + (epsilon^2));
+  Node M1_21_imag = -two_kappa_lambda_imag / (1 + (epsilon^2));
 
-  Node M1_22_real = (-epsilon * (kappa / sigma + J_N_22 - lambda_real) + J_N_12 - omega) / (1 + (epsilon^2));
-  Node M1_22_imag = epsilon * lambda_imag / (1 + (epsilon^2));
+  Node M1_22_real = (-epsilon * (kappa / sigma + J_N_22 - two_kappa_lambda_real) + J_N_12 - omega) / (1 + (epsilon^2));
+  Node M1_22_imag = epsilon * two_kappa_lambda_imag / (1 + (epsilon^2));
 
   // M2
   // This corresponds to -A^{-1}(B_{1}\xi + B_{2}\xi^{-1}) in the paper
@@ -181,18 +185,21 @@ void vectorField_d3_optimized(Node xi, Node in[], int /*dimIn*/, Node out[], int
   Node J_N_21 = 3 * a2 + b2;
   Node J_N_22 = -J_N_11;
 
+  Node kappa_one_m_two_lambda_real = kappa * (1 - 2 * lambda_real);
+  Node two_kappa_lambda_imag = 2 * kappa * lambda_imag;
+
   // M1
-  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - \lambda I) in the paper
-  Node M1_11_real = (-epsilon * (kappa + J_N_11 - lambda_real) - J_N_21 - 1) / one_p_epsilon2;
-  Node M1_11_imag = (epsilon * lambda_imag) / one_p_epsilon2;
+  // This corresponds to -A^{-1}(C + J_{N}(X_{0}) - 2\kappa\lambda I) in the paper
+  Node M1_11_real = (-epsilon * (kappa_one_m_two_lambda_real + J_N_11) - J_N_21 - 1) / one_p_epsilon2;
+  Node M1_11_imag = (epsilon * two_kappa_lambda_imag) / one_p_epsilon2;
 
-  Node M1_12_real = (-kappa - epsilon * (J_N_12 - 1) - J_N_22 + lambda_real) / one_p_epsilon2;
-  Node M1_12_imag = lambda_imag / one_p_epsilon2;
+  Node M1_12_real = (-kappa_one_m_two_lambda_real - epsilon * (J_N_12 - 1) - J_N_22) / one_p_epsilon2;
+  Node M1_12_imag = two_kappa_lambda_imag / one_p_epsilon2;
 
-  Node M1_21_real = (kappa - epsilon * (J_N_21 + 1) + J_N_11 - lambda_real) / one_p_epsilon2;
+  Node M1_21_real = (kappa_one_m_two_lambda_real - epsilon * (J_N_21 + 1) + J_N_11) / one_p_epsilon2;
   Node M1_21_imag = -M1_12_imag;
 
-  Node M1_22_real = (-epsilon * (kappa + J_N_22 - lambda_real) + J_N_12 - 1) / one_p_epsilon2;
+  Node M1_22_real = (-epsilon * (kappa_one_m_two_lambda_real + J_N_22) + J_N_12 - 1) / one_p_epsilon2;
   Node M1_22_imag = M1_11_imag;
 
   // M2

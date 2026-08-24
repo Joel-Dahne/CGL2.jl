@@ -31,7 +31,7 @@ function cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
     end
 
     dY = Z
-    dZ = -A_inv * (C + J_N - λ * I) * Y
+    dZ = -A_inv * (C + J_N - 2κ * λ * I) * Y
     if iszero(ξ)
         @assert iszero(Z)
     else
@@ -118,11 +118,11 @@ function cgl_linearization_equation_taylor(
 
         # Explicit inverse of (n + 2) * ((n + 1) * A + B₂)
         inv_rhs = @SMatrix[ϵ 1; -1 ϵ] / ((n + 2) * (n + d) * (1 + ϵ^2))
-        # Explicit value for above inverse multiplied with n * B₁ + C - λ * I
+        # Explicit value for above inverse multiplied with n * B₁ + C - 2κ * λ * I
         M =
             @SMatrix[
-                (ϵ * (n * κ + κ / σ - λ) + ω) (n * κ + κ / σ - λ - ϵ * ω);
-                (-n * κ - κ / σ + λ + ϵ * ω) (ϵ * (n * κ + κ / σ - λ) + ω)
+                (ϵ * κ * (n + 1 / σ - 2λ) + ω) (κ * (n + 1 / σ - 2λ) - ϵ * ω);
+                (κ * (-n - 1 / σ + 2λ) + ϵ * ω) (ϵ * κ * (n + 1 / σ - 2λ) + ω)
             ] / ((n + 2) * (n + d) * (1 + ϵ^2))
 
         Y1[n+2], Y2[n+2] = -M * SVector(Y1[n], Y2[n]) - inv_rhs * SVector(v[1][n], v[2][n])

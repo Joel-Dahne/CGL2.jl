@@ -45,7 +45,7 @@ function _Y_zero_taylor_remainder_check_conditions(
     D =
         (1 + abs(ϵ)) / (1 + ϵ^2) * (
             abs(κ) / (N + d) +
-            (abs(ω) + abs(λ)) / ((N + 2) * (N + d)) +
+            (abs(ω) + 2abs(κ) * abs(λ)) / ((N + 2) * (N + d)) +
             6(1 + abs(δ)) * (
                 1 // 8 +
                 1 // 2N +
