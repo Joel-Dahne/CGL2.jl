@@ -64,7 +64,7 @@ fontsize = 22
 
 # ╔═╡ fbbaad41-c446-4c0c-8caa-8137713394b9
 md"""
-## Existence of a backward self-similar solution
+## Theorem 4.1: Existence of a backward self-similar solution
 
 The first step is to prove the existence of a backward self-similar solution, and also compute enclosures of the associated parameters.
 """
@@ -168,7 +168,7 @@ end
 
 # ╔═╡ 56193256-54c7-425d-a0dc-56227e009aba
 md"""
-## Existence of a forward self-similar solution
+## Theorem 4.2: Existence of a forward self-similar solution
 
 Next we prove the existance of a forward self-similar solution with the same asymptotic behavior as the above backward self-similar solution. The first step is to determine the parameter ``\gamma_1`` such that the forward solution has the right asymptotic behavior.
 """
@@ -266,7 +266,7 @@ end
 
 # ╔═╡ 3bf117b4-8f2b-4c88-a1f4-a9b599d74af4
 md"""
-## Existence of an unstable eigenvalue
+## Theorem 4.3: Existence of an unstable eigenvalue
 
 Finally, we prove the existence of an unstable eigenvalue for the linear operator associated with the above forward self-similar solution.
 """
