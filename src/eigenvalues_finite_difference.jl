@@ -29,27 +29,27 @@ function eigenvalues_finite_difference(
 
     h = step(ξs)
 
-    As = map(Qs, ξs) do Q, ξ
-        @SMatrix[ϵ -1; 1 ϵ]
-    end
+    A = @SMatrix[ϵ -1; 1 ϵ]
+    B₁ = @SMatrix[κ 0; 0 κ]
+    B₂ = (d - 1) * A
+    C = @SMatrix[κ/σ -ω; ω κ/σ]
 
-    Bs = map(Qs, ξs) do Q, ξ
-        @SMatrix[(ϵ*(d-1)/ξ+κ*ξ) -((d - 1) / ξ); ((d-1)/ξ) (ϵ*(d-1)/ξ+κ*ξ)]
-    end
+    An = Diagonal(fill(A, n))
+    B₁n = Diagonal(fill(B₁, n))
+    B₂n = Diagonal(fill(B₂, n))
+    Cn = Diagonal(fill(C, n))
 
-    Cs = map(Qs, ξs) do Q, ξ
-        @SMatrix[κ/σ -ω; ω κ/σ]
-    end
+    Xn = Diagonal([@SMatrix[ξ 0; 0 ξ] for ξ in ξs])
 
-    J_Ns = map(Qs, ξs) do Q, ξ
-        a, b, _, _ = Q
-        N₁_a = -(a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
-        N₁_b = -(a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
-        N₂_a = (a^2 + b^2)^(σ - 1) * ((1 + 2σ) * a^2 - 2δ * σ * a * b + b^2)
-        N₂_b = -(a^2 + b^2)^(σ - 1) * (δ * a^2 - 2σ * a * b + δ * (1 + 2σ) * b^2)
-
-        @SMatrix[N₁_a N₁_b; N₂_a N₂_b]
-    end
+    J_Nn =
+        map(Qs, ξs) do Q, ξ
+            a, b, _, _ = Q
+            N₁_a = -(a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
+            N₁_b = -(a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
+            N₂_a = (a^2 + b^2)^(σ - 1) * ((1 + 2σ) * a^2 - 2δ * σ * a * b + b^2)
+            N₂_b = -(a^2 + b^2)^(σ - 1) * (δ * a^2 - 2σ * a * b + δ * (1 + 2σ) * b^2)
+            @SMatrix[N₁_a N₁_b; N₂_a N₂_b]
+        end |> Diagonal
 
     D1 =
         1 / 2h * Tridiagonal(
@@ -68,12 +68,9 @@ function eigenvalues_finite_difference(
     D1[1, 1] = -SMatrix{2,2}(I) / 2h
     D2[1, 1] /= 2
 
-    An = Diagonal(As)
-    Bn = Diagonal(Bs)
-    Cn = Diagonal(Cs)
-    J_Nn = Diagonal(J_Ns)
-
-    L = SparseArrays.sparse(Matrix(BlockArrays.mortar(An * D2 + Bn * D1 + Cn + J_Nn)) / 2κ)
+    L = SparseArrays.sparse(
+        Matrix(BlockArrays.mortar(An * D2 + (B₁n * Xn + B₂n * inv(Xn)) * D1 + Cn + J_Nn)) / 2κ,
+    )
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
