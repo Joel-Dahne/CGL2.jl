@@ -296,7 +296,7 @@ The first step is to compute an approximate solution using a finite-difference m
 
 # ╔═╡ 71b8a3b1-3227-44b9-8f06-50c9192ac96f
 md"""
-Print a 16 digit approximation for inclusion in the paper.
+Print a 8 digit approximation for inclusion in the paper.
 """
 
 # ╔═╡ 7d38f474-0f8a-4bc4-8f33-fbb31c540703
@@ -349,7 +349,38 @@ end
 
 # ╔═╡ 03513e93-3fda-4e9a-b02d-1ed1552811f6
 md"""
-For printing the enclosure in the paper, the simplest approach is to construct an `Acb` enclosing the square. Due to rounding of the radius, this `Acb` will not be exactly the same as the square but will be slightly larger. For purposes of giving an enclosure this is however fine.
+To prove analyticity of $H(\lambda)$ on the square that the contour encloses we need to verify analyticity of $Y_{\infty,1}$, $Y_{\infty,2}$, $Y_{\infty,1}'$ and $Y_{\infty,2}'$. As discussed in the paper it suffices to verify the inequality
+
+$$C_{T_{12}}\xi_1^{-2} < 1.$$
+
+To this end we compute an enclosure of $C_{T_{12}}$.
+"""
+
+# ╔═╡ e74f260e-bd94-4d4f-80e7-dc2c9642c735
+contour_enclosure = add_error(Acb(λ_approx), r) # Acb interval enclosing contour
+
+# ╔═╡ 810dbfa8-88fc-499b-bbe3-23b93b74a7b4
+C_T_12 = CGL2.FunctionBounds_Y(contour_enclosure, γ₁, γ₂, κ, ϵ, ξ₁, Λ).T_12
+
+# ╔═╡ 1272ad13-8fd2-4dae-99c1-4ac355d322dd
+md"""
+It is now straightforward to verify the inequality.
+"""
+
+# ╔═╡ ec08f6de-c10d-4a16-86f4-0193b7a42236
+@assert_proof C_T_12 * ξ₁^-2 < 1
+
+# ╔═╡ cca47270-be35-4345-bbfe-e256147c35b4
+md"""
+For inclusion in the paper we also print an enclosure.
+"""
+
+# ╔═╡ 86ba0803-d570-43bd-b6cd-c2bfb5624adb
+CGL2.format_interval_precise(C_T_12 * ξ₁^-2)
+
+# ╔═╡ 82aa3d18-1e2c-4698-b9b2-f983440162af
+md"""
+We also print an enclosure of the contour for inclusion in the paper.
 """
 
 # ╔═╡ f951ad64-9b79-477e-83fb-28fa2bba6e2a
@@ -598,6 +629,13 @@ end
 # ╟─04b37248-22a5-4fb8-8d0c-a4dbf29a58e4
 # ╟─356dc846-b0fc-4743-997a-73d9b9bf7bcf
 # ╟─03513e93-3fda-4e9a-b02d-1ed1552811f6
+# ╠═e74f260e-bd94-4d4f-80e7-dc2c9642c735
+# ╠═810dbfa8-88fc-499b-bbe3-23b93b74a7b4
+# ╟─1272ad13-8fd2-4dae-99c1-4ac355d322dd
+# ╠═ec08f6de-c10d-4a16-86f4-0193b7a42236
+# ╟─cca47270-be35-4345-bbfe-e256147c35b4
+# ╠═86ba0803-d570-43bd-b6cd-c2bfb5624adb
+# ╟─82aa3d18-1e2c-4698-b9b2-f983440162af
 # ╠═f951ad64-9b79-477e-83fb-28fa2bba6e2a
 # ╟─93d9e75b-5861-4653-8786-439a35008d00
 # ╠═a17f3ef0-9476-4ebd-b52e-657d4fede475
