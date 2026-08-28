@@ -70,11 +70,11 @@ include("G_hat_solve.jl")
 
 include("eigenvalues_finite_difference.jl")
 
+include("Y_zero/equation.jl")
 include("Y_zero/Y.jl")
 include("Y_zero/Y_float.jl")
 include("Y_zero/Y_taylor.jl")
 include("Y_zero/Y_capd.jl")
-include("Y_zero/equation.jl")
 
 include("Y_infinity/functions.jl")
 include("Y_infinity/function_bounds.jl")
