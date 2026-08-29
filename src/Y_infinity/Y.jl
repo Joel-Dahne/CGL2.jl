@@ -1,9 +1,9 @@
 """
-    Y_infinity(c, λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
+    Y_infinity(c_0, λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ::CGLParams)
 
 Compute the solution to the ODE on the interval ``[ξ₁, ∞)``. Returns a
-vector with two complex values, where the first is the value at `ξ₁`
-and the second is the derivative.
+vector with four complex values, where the first two are the values at
+`ξ₁` and the last two are the derivatives.
 """
 function Y_infinity(
     c_0::SVector{2,Acb},

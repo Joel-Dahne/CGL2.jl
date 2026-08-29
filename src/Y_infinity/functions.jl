@@ -125,7 +125,7 @@ function J_E_2(ξ, λ, κ, ϵ, Λ::CGLParams)
     return B_W_2(λ, κ, ϵ, Λ) * E_2(ξ, λ, κ, ϵ, Λ) * exp(conj(c) * ξ^2) * ξ^(d - 1)
 end
 
-# The these functions are only used for testing
+# These functions are only used for testing
 
 function W_1(ξ, λ, κ, ϵ, Λ::CGLParams)
     a, b, c = _abc(κ, ϵ, Λ)
