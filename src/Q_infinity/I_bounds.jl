@@ -110,9 +110,8 @@ function IBounds(
     CI = IBounds()
 
     # These cover all requirements of Lemmas REF(lemma:I_P-I_E),
-    # REF(lemma:I_P-I_E-derivatives), REF(lemma:I-P-refined),
-    # REF(lemma:I-E-bounds), REF(lemma:I-P-dkappa-1) and
-    # REF(lemma:I-P-depsilon-1).
+    # REF(lemma:I-P-dgamma-dkappa-depsilon), REF(lemma:I-P-refined),
+    # REF(lemma:I-E-bounds) and REF(lemma:I-P-dkappa-depsilon-1).
     @assert ξ₁ > 1
     @assert (2σ + 1) * v - 2 / σ + d - 2 < 0
     @assert (2σ + 1) * v - 2 < 0
