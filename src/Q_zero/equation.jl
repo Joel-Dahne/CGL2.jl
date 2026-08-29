@@ -21,9 +21,19 @@ function cgl_equation_real(Q, κ, ϵ, ξ, Λ::CGLParams)
     @fastmath F1 = κ * ξ * β + κ / σ * b + ω * a - a2b2σ * a + δ * a2b2σ * b
     @fastmath F2 = -κ * ξ * α - κ / σ * a + ω * b - a2b2σ * b - δ * a2b2σ * a
 
-    if !isone(d) && !(iszero(ξ) && iszero(α) && iszero(β))
-        F1 -= (d - 1) / ξ * (α + ϵ * β)
-        F2 -= (d - 1) / ξ * (β - ϵ * α)
+    if !isone(d)
+        if iszero(ξ) && iszero(α) && iszero(β)
+            # Removable singularity at ξ = 0. Since α = β = 0 we have
+            # α / ξ → a'' and β / ξ → b'' as ξ → 0, so that the two
+            # terms below converge to (d - 1) * F1 and (d - 1) * F2
+            # respectively. Solving for F1 and F2 shows that this
+            # amounts to dividing them by d.
+            F1 /= d
+            F2 /= d
+        else
+            F1 -= (d - 1) / ξ * (α + ϵ * β)
+            F2 -= (d - 1) / ξ * (β - ϵ * α)
+        end
     end
 
     return SVector(α, β, (F1 - ϵ * F2) / (1 + ϵ^2), (ϵ * F1 + F2) / (1 + ϵ^2))
