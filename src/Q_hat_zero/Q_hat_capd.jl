@@ -48,7 +48,7 @@ function Q_hat_zero_capd(
     # Integrate system on [ξ₀, ξ₁] using CAPD.
     # We use the fact that the equation is identical to the one for Q,
     # except for the change in sign for κ and ω.
-    return Q_hat = _Q_zero_capd(Q_hat_ξ₀, -κ, ϵ, ξ₀, ξ₁, CGLParams(Λ, ω = -Λ.ω); tol)
+    return _Q_zero_capd(Q_hat_ξ₀, -κ, ϵ, ξ₀, ξ₁, CGLParams(Λ, ω = -Λ.ω); tol)
 end
 
 """
