@@ -28,8 +28,6 @@ begin
     using OhMyThreads
     using PlutoUI
 
-    import CairoMakie.Makie.GeometryBasics: Rect2f
-
     # Set the bits of precision used for the computations with Arblib
     setprecision(Arb, 128)
 
