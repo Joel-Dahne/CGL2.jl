@@ -33,7 +33,12 @@ function cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
     dY = Z
     dZ = -A_inv * (C + J_N - 2κ * λ * I) * Y
     if iszero(ξ)
+        # Removable singularity at ξ = 0. Since Z(0) = 0 we have
+        # Z(ξ) / ξ → dZ as ξ → 0, so the term (d - 1) * Z / ξ
+        # contributes (d - 1) * dZ, giving
+        # d * dZ = -A_inv * (C + J_N - 2κλ) * Y.
         @assert iszero(Z)
+        dZ /= d
     else
         dZ -= (A_inv * B₁ * ξ + (d - 1) * I / ξ) * Z
     end
