@@ -6,14 +6,14 @@ Ginzburg-Landau equation](TODO).
 
 The results of the paper are presented in two different
 [Pluto.jl](https://plutojl.org/) notebooks, found in the
-[`proofs`](proofs) directory. These notebooks are responsible for
+[`proof`](proof) directory. These notebooks are responsible for
 generating all the numbers and figures that appear in the paper. It is
 possible to view the results of notebooks without running any code by
-opening the corresponding html-files found in the [`proofs`](proofs)
+opening the corresponding html-files found in the [`proof`](proof)
 directory, they can be opened in any browser such as Firefox. The two
 notebooks are:
 
-- [unstable-eigenvalue.jl](proofs/unstable-eigenvalue.jl) - Contains
+- [unstable-eigenvalue.jl](proof/unstable-eigenvalue.jl) - Contains
   the proof of Theorems 4.1, 4.2 and 4.3, corresponding to the
   existence of a backward self-similar solution, an associated forward
   self-similar solution and an unstable eigenvalue.
@@ -56,7 +56,7 @@ Pluto.run()
 ```
 
 which should open a Pluto tab in your browser. Now you can open the
-notebooks inside the `proofs` directory through this and it should
+notebooks inside the `proof` directory through this and it should
 allow you to run the proof.
 
 ## Notes about implementation
@@ -110,7 +110,7 @@ These are implemented in the three files:
 - [`H.jl`](src/H.jl)
 
 For $G$ we need to compute enclosures of $Q_0$ and $Q_\infty$, for
-$\hat{G} enclosures of $\hat{Q}_0$ and $\hat{Q}_\infty$ and for $H$ of
+$\hat{G}$ enclosures of $\hat{Q}_0$ and $\hat{Q}_\infty$ and for $H$ of
 $Y_0$ and $Y_\infty$. Again, see Section 3 for more details. The
 implementations of these functions is what encompasses most of the
 code in this repository and is split over six directories:
@@ -202,9 +202,9 @@ The implementations in `Q_capd.jl`, `Q_hat_capd.jl` and `Y_capd.jl`
 make use of a rigorous integration implemented using the CAPD library.
 This is implemented in two files:
 
-- [`Q.cpp/`](CAPD/src/Q_zero.cpp) - Handles enclosures of both $Q_0$
+- [`Q_zero.cpp`](CAPD/src/Q_zero.cpp) - Handles enclosures of both $Q_0$
   and $\hat{Q}_0$.
-- [`Y.cpp/`](CAPD/src/Y_zero.cpp) - Handles enclosures of $Y_0$.
+- [`Y_zero.cpp`](CAPD/src/Y_zero.cpp) - Handles enclosures of $Y_0$.
 
 Apart from the above mentioned files and directories, there are a
 number of auxiliary files, most in the [`src/`](src) directory,
