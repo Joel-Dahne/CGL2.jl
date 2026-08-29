@@ -149,8 +149,7 @@ function Y_zero_capd(
         end
         Q_hat_ξ₀, Y_ξ₀
     else
-        SVector{4,Arb}(real(ν), imag(ν), 0, 0),
-        SVector{4,Acb}(interval(Y₀[1]), interval(Y₀[2]), 0, 0)
+        SVector{4,Arb}(real(ν), imag(ν), 0, 0), SVector{4,Acb}(Y₀[1], Y₀[2], 0, 0)
     end
 
     # Integrate system on [ξ₀, ξ₁] using capd.
