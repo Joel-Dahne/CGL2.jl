@@ -60,15 +60,15 @@ function G_hat_jacobian(
         imag(Q_hat_0_J[1, 2]),
         real(Q_hat_0_J[2, 2]),
         imag(Q_hat_0_J[2, 2]),
-        # Derivative w.r.t. real(γ₁)
-        real(Q_hat_inf_J[1, 1]),
-        imag(Q_hat_inf_J[1, 1]),
-        real(Q_hat_inf_J[2, 1]),
-        imag(Q_hat_inf_J[2, 1]),
-        # Derivative w.r.t. imag(γ₁)
-        real(Q_hat_inf_J[1, 2]),
-        imag(Q_hat_inf_J[1, 2]),
-        real(Q_hat_inf_J[2, 2]),
-        imag(Q_hat_inf_J[2, 2]),
+        # Derivative w.r.t. real(γ₂)
+        -real(Q_hat_inf_J[1, 1]),
+        -imag(Q_hat_inf_J[1, 1]),
+        -real(Q_hat_inf_J[2, 1]),
+        -imag(Q_hat_inf_J[2, 1]),
+        # Derivative w.r.t. imag(γ₂)
+        -real(Q_hat_inf_J[1, 2]),
+        -imag(Q_hat_inf_J[1, 2]),
+        -real(Q_hat_inf_J[2, 2]),
+        -imag(Q_hat_inf_J[2, 2]),
     )
 end

@@ -1,10 +1,10 @@
-@testset "G" begin
+@testset "G_hat" begin
     ν = Acb(2.1134119144964454, 2.5294091893480206)
     γ₁ = Acb(0.19239527572579992, 0.14584905671816073)
     γ₂ = Acb(-1121.5787719034975, -987.6373883459842)
     κ = Arb(0.8073018593981386)
     ϵ = Arb(0.15002213424487343)
-    ξ₁ = Arb(30)
+    ξ₁ = Arb(15) # A smaller value makes the tests more effective
     Λ = CGLParams{Arb}(3, 1.0, 1.0, 0.0)
 
     νF64 = ComplexF64(ν)
@@ -31,5 +31,5 @@
     )[1]
 
     @test G_hat_jacobian ≈ G_hat_jacobian_fdm rtol = 1e-9
-    @test all(isapprox.(G_hat_jacobian, G_hat_jacobian_fdm, rtol = 1e-7, atol = 1e-18))
+    @test all(isapprox.(G_hat_jacobian, G_hat_jacobian_fdm, rtol = 1e-8))
 end
