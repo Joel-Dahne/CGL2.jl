@@ -155,7 +155,7 @@ end
     I_E_hat_dγ₂_imag_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of the derivative of `I_E_hat` with respect to
-`real(γ₂)`, based on Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds).
+`imag(γ₂)`, based on Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds).
 """
 function I_E_hat_dγ₂_imag_enclosure(
     γ₁::Acb,
