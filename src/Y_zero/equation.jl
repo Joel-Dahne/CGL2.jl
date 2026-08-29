@@ -2,12 +2,12 @@
     cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ)
     cgl_linearization_equation(YZ, (λ, κ, ϵ, Q_hat, Λ), ξ)
 
-Evaluate the right hand side of the forward ODE when written as a four
-dimensional complex system. It is evaluated at the point `Y` and time
-`ξ`.
+Evaluate the right hand side of the linearized ODE when written as a
+four dimensional complex system. It is evaluated at the point `YZ` and
+time `ξ`.
 
 For `Λ.d != 1` there is a removable singularity at `ξ = 0`. To return
-a finite value we in this case required that `Y[3] = Y[4] = 0`.
+a finite value we in this case required that `YZ[3] = YZ[4] = 0`.
 """
 function cgl_linearization_equation(YZ, λ, κ, ϵ, ξ, Q_hat, Λ::CGLParams)
     (; d, ω, σ, δ) = Λ
