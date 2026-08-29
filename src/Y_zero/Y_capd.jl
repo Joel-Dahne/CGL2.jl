@@ -49,14 +49,14 @@ function _Y_zero_capd(
             for x in Q_hat_ξ₀
                 println(io, "[$(_inf(x)), $(_sup(x))]")
             end
-            println(io, "[$(inf(real(Y_ξ₀[1]))), $(sup(real(Y_ξ₀[1])))]")
-            println(io, "[$(inf(real(Y_ξ₀[2]))), $(sup(real(Y_ξ₀[2])))]")
-            println(io, "[$(inf(imag(Y_ξ₀[1]))), $(sup(imag(Y_ξ₀[1])))]")
-            println(io, "[$(inf(imag(Y_ξ₀[2]))), $(sup(imag(Y_ξ₀[2])))]")
-            println(io, "[$(inf(real(Y_ξ₀[3]))), $(sup(real(Y_ξ₀[3])))]")
-            println(io, "[$(inf(real(Y_ξ₀[4]))), $(sup(real(Y_ξ₀[4])))]")
-            println(io, "[$(inf(imag(Y_ξ₀[3]))), $(sup(imag(Y_ξ₀[3])))]")
-            println(io, "[$(inf(imag(Y_ξ₀[4]))), $(sup(imag(Y_ξ₀[4])))]")
+            println(io, "[$(_inf(real(Y_ξ₀[1]))), $(_sup(real(Y_ξ₀[1])))]")
+            println(io, "[$(_inf(real(Y_ξ₀[2]))), $(_sup(real(Y_ξ₀[2])))]")
+            println(io, "[$(_inf(imag(Y_ξ₀[1]))), $(_sup(imag(Y_ξ₀[1])))]")
+            println(io, "[$(_inf(imag(Y_ξ₀[2]))), $(_sup(imag(Y_ξ₀[2])))]")
+            println(io, "[$(_inf(real(Y_ξ₀[3]))), $(_sup(real(Y_ξ₀[3])))]")
+            println(io, "[$(_inf(real(Y_ξ₀[4]))), $(_sup(real(Y_ξ₀[4])))]")
+            println(io, "[$(_inf(imag(Y_ξ₀[3]))), $(_sup(imag(Y_ξ₀[3])))]")
+            println(io, "[$(_inf(imag(Y_ξ₀[4]))), $(_sup(imag(Y_ξ₀[4])))]")
             # Write parameters
             println(io, Λ.d)
             for x in [real(λ), imag(λ), κ, ϵ, Λ.ω, Λ.σ, Λ.δ]
