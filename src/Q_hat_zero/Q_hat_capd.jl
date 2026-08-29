@@ -74,9 +74,10 @@ function Q_hat_zero_jacobian_capd(
             @assert 0 < ξ₀ < ξ₁
             # Integrate system on [0, ξ₀] using Taylor expansion at zero
             Q_hat_ξ₀, J_ξ₀ = Q_hat_zero_jacobian_taylor(ν_real, ν_imag, κ, ϵ, ξ₀, Λ)
-            if !all(isfinite, Q_hat_ξ₀) && !all(isfinite, J_ξ₀)
+            if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, J_ξ₀))
                 iterations = 0
-                while !all(isfinite, Q_hat_ξ₀) && iterations < 5
+                while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, J_ξ₀)) &&
+                          iterations < 5
                     iterations += 1
                     ξ₀ /= 2
                     Q_hat_ξ₀, J_ξ₀ =
