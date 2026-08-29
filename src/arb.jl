@@ -177,7 +177,7 @@ function format_interval_precise(x::Arb; min_digits::Integer = 2)
     min_digits >= 1 || throw(ArgumentError("min_digits should be positive"))
 
     get_exact_string(y) =
-        let digits = Arblib.digits_prec(precision(x)), res = Arblib.string(x; digits)
+        let digits = Arblib.digits_prec(precision(x)), res = Arblib.string(y; digits)
             @assert Arblib.isexact(y)
             while startswith(res, "[")
                 digits *= 2
@@ -257,7 +257,7 @@ function format_interval_precise(x::Arb; min_digits::Integer = 2)
         upp_string_remaining = upp_string[(i+min_digits-1):end]
         low_string_remaining = low_string[(i+min_digits-1):end]
 
-        j = findfirst(!=(9), upp_string_remaining)
+        j = findfirst(!=('9'), upp_string_remaining)
 
         if isnothing(j)
             res_upp_end = upp_string_remaining[1:end]
