@@ -16,7 +16,7 @@ function Y_zero(
     ξ₁::Arb,
     Λ::CGLParams{Arb};
     tol::Float64 = 1e-11,
-) where {Arb}
+)
     return Y_zero_capd(Y₀, λ, ν, κ, ϵ, ξ₁, Λ; tol)
 end
 
