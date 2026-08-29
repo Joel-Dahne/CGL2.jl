@@ -1,5 +1,5 @@
 """
-    NormBounds_hat(...)
+    NormBounds_Y(...)
 
 Contains bounds for the norm of `Z`.
 
