@@ -1,14 +1,8 @@
 """
     FunctionEnclosures_Y(λ, γ₁, γ₂, κ, ϵ, ξ₁, Λ)
 
-Contains enclosures of the functions
-
-- [`E_12`](@ref)
-- [`E_12_dξ`](@ref)
-- [`P_12`](@ref)
-- [`P_12_dξ`](@ref)
-
-when evaluated at `ξ₁`.
+Contains enclosures of the diagonal matrices `E_12`, `E_12_dξ`,
+`P_12` and `P_12_dξ`, evaluated at `ξ₁`.
 
 Even though none of the functions depend on `γ₁` and `γ₂` we keep them
 as arguments to mirror [`FunctionBounds_Y`](@ref).

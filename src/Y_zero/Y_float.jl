@@ -44,7 +44,7 @@ end
 """
     Y_zero_float_curve(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ::CGLParams; tol::Float64 = 1e-11)
 
-Similar to [`Y_hat_zero_float`](@ref) but returns the whole
+Similar to [`Y_zero_float`](@ref) but returns the whole
 solution object given by the ODE solver, instead of just the value at
 the final point.
 """
