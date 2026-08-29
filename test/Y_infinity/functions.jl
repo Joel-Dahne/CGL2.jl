@@ -130,7 +130,7 @@
         # The precise value for a_hat and b_hat should not play any
         # role in the correctness, we just compute some approximation
         # here.
-        νF64 = 1.92 + 3.06
+        νF64 = 1.92 + 3.06im
         a_hat, b_hat, a_hat_dξ, b_hat_dξ =
             Arb.(CGL2.Q_hat_zero_float(real(νF64), imag(νF64), κF64, ϵF64, ξF64, ΛF64))
 
