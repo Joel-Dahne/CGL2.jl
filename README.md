@@ -92,7 +92,24 @@ Some good information to have:
   than numbers to make it easier to keep the code and the paper in
   sync. The labels are not directly seen in the PDF version of the
   paper, but can be accessed by downloading the LaTeX code for the
-  paper from ArXiv. **TODO:** Discuss labels for old vs new paper.
+  paper from ArXiv.
+- Since parts of the code are inherited from
+  [CGL.jl](https://github.com/Joel-Dahne/CGL.jl), not all of these
+  references are to this paper; some are to [the self-similar blowup
+  paper](https://arxiv.org/abs/2601.16285). The rule is that the
+  inherited code refers to the old paper and the new code refers to
+  this one. The files containing references to the old paper are:
+  - [`U.jl`](src/U.jl) and [`U_expansion.jl`](src/U_expansion.jl)
+  - [`Q_zero/Q_taylor.jl`](src/Q_zero/Q_taylor.jl)
+  - [`Q_infinity/function_bounds.jl`](src/Q_infinity/function_bounds.jl),
+    [`Q_infinity/I_bounds.jl`](src/Q_infinity/I_bounds.jl),
+    [`Q_infinity/I_P.jl`](src/Q_infinity/I_P.jl) and
+    [`Q_infinity/norm_bounds.jl`](src/Q_infinity/norm_bounds.jl)
+
+  Every other reference is to this paper. Note in particular that
+  [`Q_infinity/p_Q_0.jl`](src/Q_infinity/p_Q_0.jl) refers to this
+  paper, even though the rest of the `Q_infinity/` directory refers to
+  the old one.
 - Many of the functions have associated tests in [`test`](test) that
   serve to increase the confidence in the implementation. All of these
   tests can be run with `Pkg.test()` as discussed above.
@@ -117,86 +134,120 @@ code in this repository and is split over six directories:
 
 - [`Q_zero/`](src/Q_zero) - Related to Section 8 in the self-similar
   blowup paper. Consists of the 5 files:
-  - `equation.jl` - Implements the equation for the ODE as
-     well as the recursion for computing the coefficients of the
-     Taylor expansion.
-  - `Q_float.jl` - Contains the implementation of the non-rigorous
-     evaluation of $Q_0$.
-  - `Q_zero/Q_taylor.jl` - Contains the code for enclosing $Q_0$ using
-     the Taylor expansion at zero.
-  - `Q_zero/Q_capd.jl` - Contains the Julia code that is responsible
-     for calling the CAPD code, which then computes enclosures of
-     $Q_0$.
-  - `Q_zero/Q.jl` - Defines wrapper methods that call either the
-     `Q_float.jl` methods or `Q_capd.jl` methods depending on the type
-     of the input. This is the interface that is primarily used by the
-     other parts of the code.
+  - [`equation.jl`](src/Q_zero/equation.jl) - Implements the equation
+     for the ODE as well as the recursion for computing the coefficients
+     of the Taylor expansion.
+  - [`Q_float.jl`](src/Q_zero/Q_float.jl) - Contains the implementation
+     of the non-rigorous evaluation of $Q_0$.
+  - [`Q_taylor.jl`](src/Q_zero/Q_taylor.jl) - Contains the code for
+     enclosing $Q_0$ using the Taylor expansion at zero.
+  - [`Q_capd.jl`](src/Q_zero/Q_capd.jl) - Contains the Julia code that
+     is responsible for calling the CAPD code, which then computes
+     enclosures of $Q_0$.
+  - [`Q.jl`](src/Q_zero/Q.jl) - Defines wrapper methods that call either
+     the `Q_float.jl` methods or `Q_capd.jl` methods depending on the
+     type of the input. This is the interface that is primarily used by
+     the other parts of the code.
 - [`Q_infinity/`](src/Q_infinity) - Related to Section 7 in the
   self-similar blowup paper. Consists of the 9 files:
-  - `parameters.jl` - Contains code for computing $a$, $b$, $c$,
-    $B_W$, $B_{W,\kappa}$ and $B_{W,\epsilon}$.
-  - `functions.jl` - Contains code for evaluating $P(\xi)$, $E(\xi)$
-    and related functions. The functions follow the same naming scheme
-    as in the paper, with the derivatives denoted by a postfix, for
-    example, the function `P_dξ_dξ_dκ` is used to compute
-    $P_\kappa''$.
-  - `function_bounds.jl` - Responsible for computing the bounds that
-    occur in Lemma 7.3 in the paper.
-  - `I_bounds.jl` - The bounds from Sections 7.3.2 and 7.3.3 in the
-    paper are implemented here.
-  - `norm_bounds.jl` and `norm_bounds_constants.jl` - Contain the code
-    for computing initial bounds of the norms of $Q_\infty$ and its
-    derivatives.
-  - `I_P.jl` - This code computes enclosures, not only bounds, for
-    $I_P$, $I_{P,\gamma}$, $I_{P,\kappa}$, and $I_{P,\epsilon}$. It is
-    based on the approach discussed in Section 7.3.4.
-  - `Q.jl` - Puts all of the above code together to compute enclosures
-    for $Q$ and its Jacobian. It defines the functions `Q_infinity`,
-    `Q_infinity_jacobian_kappa` and `Q_infinity_jacobian_epsilon`.
+  - [`parameters.jl`](src/Q_infinity/parameters.jl) - Contains code for
+    computing $a$, $b$, $c$, $B_W$, $B_{W,\kappa}$ and $B_{W,\epsilon}$.
+  - [`functions.jl`](src/Q_infinity/functions.jl) - Contains code for
+    evaluating $P(\xi)$, $E(\xi)$ and related functions. The functions
+    follow the same naming scheme as in the paper, with the derivatives
+    denoted by a postfix, for example, the function `P_dξ_dξ_dκ` is used
+    to compute $P_\kappa''$.
+  - [`function_bounds.jl`](src/Q_infinity/function_bounds.jl) -
+    Responsible for computing the bounds that occur in Lemma 7.3 in the
+    paper.
+  - [`I_bounds.jl`](src/Q_infinity/I_bounds.jl) - The bounds from
+    Sections 7.3.2 and 7.3.3 in the paper are implemented here.
+  - [`norm_bounds.jl`](src/Q_infinity/norm_bounds.jl) and
+    [`norm_bounds_constants.jl`](src/Q_infinity/norm_bounds_constants.jl) -
+    Contain the code for computing initial bounds of the norms of
+    $Q_\infty$ and its derivatives.
+  - [`I_P.jl`](src/Q_infinity/I_P.jl) - This code computes enclosures,
+    not only bounds, for $I_P$, $I_{P,\gamma}$, $I_{P,\kappa}$, and
+    $I_{P,\epsilon}$. It is based on the approach discussed in Section
+    7.3.4.
+  - [`Q.jl`](src/Q_infinity/Q.jl) - Puts all of the above code together
+    to compute enclosures for $Q$ and its Jacobian. It defines the
+    functions `Q_infinity`, `Q_infinity_jacobian_kappa` and
+    `Q_infinity_jacobian_epsilon`.
+  - [`p_Q_0.jl`](src/Q_infinity/p_Q_0.jl) - Computes the coefficient
+    $p_{Q,0}$, which up to a factor $c^{-a}$ gives the leading order
+    term in the asymptotic expansion of $Q$ at infinity. It is based on
+    Appendix B in this paper and is, unlike the rest of this directory,
+    not inherited from CGL.jl.
 - [`Q_hat_zero/`](src/Q_hat_zero) - Related to Section 6 of the paper.
-  To a large part it reuses the implementation in `Q_zero/`. It
-  consists of the 4 files:
-  - `Q_hat_float.jl` - Contains the implementation of the non-rigorous
-     evaluation of $\hat{Q}_0$.
-  - `Q_hat_taylor.jl` - Contains the code for enclosing $\hat{Q}_0$ using
-     the Taylor expansion at zero.
-  - `Q_hat_capd.jl` - Contains the Julia code that is responsible for
-     calling the CAPD code, which then computes enclosures of
-     $\hat{Q}_0$.
-  - `Q_hat.jl` - Defines wrapper methods that call either the
-     `Q_hat_float.jl` methods or `Q_hat_capd.jl` methods depending on
-     the type of the input. This is the interface that is primarily
-     used by the other parts of the code.
-- [`Q_hat_infinity/`](src/Q_hat_infinity) - Related to Section 5 of
-  the paper. Consists of the 6 files:
-  - `functions.jl` - Contains code for evaluating $\hat{P}(\xi)$,
-    $\hat{E}(\xi)$ and related functions.
-  - `function_bounds.jl` - Responsible for computing the bounds that
-    occur in Lemma 5.1, 5.2 and 5.3 in the paper.
-  - `norm_bounds.jl` - Contain the code for computing initial bounds
-    of the norms of $\hat{Q}_\infty$ and $\hat{Q}_\infty'$.
-  - `Q_hat_bounds.jl` - Computes bounds related to the leading
-    asymptotic behavior of $\hat{Q}_\infty$ from Lemma 5.5.
-  - `I_E_hat.jl` - Computes enclosures, not only bounds, for
-    $I_\hat{E}$, and its derivatives with respect to the real and
-    imaginary parts of `\hat{\gamma}_2`. It is based on Lemma 5.6 and
-    5.7.
-  - `Q_hat.jl` - Puts all of the above code together to compute
-    enclosures for $\hat{Q}$ and its Jacobian.
-- [`Y_zero/`](src/Y_zero) - Related to Section 8 of the paper.
-  Consists of the 5 files:
-  - `equation.jl` - TODO
-  - `Y_float.jl` - TODO
-  - `Y_taylor.jl` - TODO
-  - `Y_capd.jl` - TODO
-  - `Y.jl` - TODO
+  To a large part it reuses the implementation in `Q_zero/`. It consists
+  of the 4 files:
+  - [`Q_hat_float.jl`](src/Q_hat_zero/Q_hat_float.jl) - Contains the
+     implementation of the non-rigorous evaluation of $\hat{Q}_0$.
+  - [`Q_hat_taylor.jl`](src/Q_hat_zero/Q_hat_taylor.jl) - Contains the
+     code for enclosing $\hat{Q}_0$ using the Taylor expansion at zero.
+  - [`Q_hat_capd.jl`](src/Q_hat_zero/Q_hat_capd.jl) - Contains the Julia
+     code that is responsible for calling the CAPD code, which then
+     computes enclosures of $\hat{Q}_0$.
+  - [`Q_hat.jl`](src/Q_hat_zero/Q_hat.jl) - Defines wrapper methods that
+     call either the `Q_hat_float.jl` methods or `Q_hat_capd.jl` methods
+     depending on the type of the input. This is the interface that is
+     primarily used by the other parts of the code.
+- [`Q_hat_infinity/`](src/Q_hat_infinity) - Related to Section 5 of the
+  paper. Consists of the 6 files:
+  - [`functions.jl`](src/Q_hat_infinity/functions.jl) - Contains code
+    for evaluating $\hat{P}(\xi)$, $\hat{E}(\xi)$ and related functions.
+  - [`function_bounds.jl`](src/Q_hat_infinity/function_bounds.jl) -
+    Responsible for computing the bounds that occur in Lemma 5.1, 5.2
+    and 5.3 in the paper.
+  - [`norm_bounds.jl`](src/Q_hat_infinity/norm_bounds.jl) - Contain the
+    code for computing initial bounds of the norms of $\hat{Q}_\infty$
+    and $\hat{Q}_\infty'$.
+  - [`Q_hat_bounds.jl`](src/Q_hat_infinity/Q_hat_bounds.jl) - Computes
+    bounds related to the leading asymptotic behavior of
+    $\hat{Q}_\infty$ from Lemma 5.5.
+  - [`I_E_hat.jl`](src/Q_hat_infinity/I_E_hat.jl) - Computes enclosures,
+    not only bounds, for $I_\hat{E}$, and its derivatives with respect
+    to the real and imaginary parts of `\hat{\gamma}_2`. It is based on
+    Lemma 5.6 and 5.7.
+  - [`Q_hat.jl`](src/Q_hat_infinity/Q_hat.jl) - Puts all of the above
+    code together to compute enclosures for $\hat{Q}$ and its Jacobian.
+- [`Y_zero/`](src/Y_zero) - Related to Section 8 of the paper. Consists
+  of the 5 files:
+  - [`equation.jl`](src/Y_zero/equation.jl) - Implements the linearized
+     equation, written as a four dimensional complex system, as well as
+     the recursion for computing the coefficients of the Taylor
+     expansion at zero.
+  - [`Y_float.jl`](src/Y_zero/Y_float.jl) - Contains the implementation
+     of the non-rigorous evaluation of $Y_0$.
+  - [`Y_taylor.jl`](src/Y_zero/Y_taylor.jl) - Contains the code for
+     enclosing $Y_0$ using the Taylor expansion at zero. The bound for
+     the tail of the expansion comes from Lemma 8.1 in the paper.
+  - [`Y_capd.jl`](src/Y_zero/Y_capd.jl) - Contains the Julia code that
+     is responsible for calling the CAPD code, which then computes
+     enclosures of $Y_0$.
+  - [`Y.jl`](src/Y_zero/Y.jl) - Defines wrapper methods that call either
+     the `Y_float.jl` methods or `Y_capd.jl` methods depending on the
+     type of the input. This is the interface that is primarily used by
+     the other parts of the code.
 - [`Y_infinity/`](src/Y_infinity) - Related to Section 7 of the paper.
   Consists of the 5 files:
-  - `functions.jl` - TODO
-  - `function_bounds.jl` - TODO
-  - `norm_bounds.jl` - TODO
-  - `I_K_2.jl` - TODO
-  - `Y.jl` - TODO
+  - [`functions.jl`](src/Y_infinity/functions.jl) - Contains code for
+    evaluating $P_1(\xi)$, $P_2(\xi)$, $E_1(\xi)$, $E_2(\xi)$ and
+    related functions. The functions follow the same naming scheme as in
+    the paper.
+  - [`function_bounds.jl`](src/Y_infinity/function_bounds.jl) -
+    Responsible for computing the bounds that occur in Lemmas 7.1, 7.2,
+    7.3, 7.5 and 7.6 in the paper.
+  - [`norm_bounds.jl`](src/Y_infinity/norm_bounds.jl) - Contains the
+    code for computing a bound of the norm of $Z$, based on Lemma 7.6
+    and Proposition 7.7 in the paper.
+  - [`I_K_2.jl`](src/Y_infinity/I_K_2.jl) - Computes an enclosure of
+    $I_{K_2}$ at $\xi_1$, using the bound from Lemma 7.5 in the paper.
+  - [`Y.jl`](src/Y_infinity/Y.jl) - Puts all of the above code together
+    to compute enclosures for $Y_\infty$ and its derivative. Note that
+    the computations are done for the diagonalized variable $Z$, from
+    which $Y_\infty = VZ$ is recovered at the end.
 
 The implementations in `Q_capd.jl`, `Q_hat_capd.jl` and `Y_capd.jl`
 make use of a rigorous integration implemented using the CAPD library.
@@ -210,34 +261,37 @@ Apart from the above mentioned files and directories, there are a
 number of auxiliary files, most in the [`src/`](src) directory,
 handling various tasks:
 
-- `assert_proof.jl`, `arb.jl`, `helper.jl`, `special-functions.jl` -
-  These files implement a variety of convenience functions, such as
-  formatting of output and progress logging, as well as some basic
-  mathematical functions such as the rising factorial.
-- `verify_and_refine_root.jl` - Implements the functions related to
-  the interval Newton method. See the individual functions
-  documentation for more details.
-- `U.jl`, `U_expansion.jl` - Implements evaluation and expansion of
-  the confluent hypergeometric function $U$. In particular this makes
-  use of the bounds from Lemmas 7.1 and 7.2 in the self-similar blowup
-  paper.
-- `CGLParams.jl` - Defines the type `CGLParams` that is used for
-  storing the parameters that are held fixed throughout the
+- [`assert_proof.jl`](src/assert_proof.jl), [`arb.jl`](src/arb.jl),
+  [`helper.jl`](src/helper.jl), [`det.jl`](src/det.jl) - These files
+  implement a variety of convenience functions, such as formatting of
+  output and progress logging, as well as some basic mathematical
+  functions such as the rising factorial.
+- [`verify_and_refine_root.jl`](src/verify_and_refine_root.jl) -
+  Implements the functions related to the interval Newton method. See
+  the individual functions documentation for more details.
+- [`U.jl`](src/U.jl), [`U_expansion.jl`](src/U_expansion.jl) -
+  Implements evaluation and expansion of the confluent hypergeometric
+  function $U$. In particular this makes use of the bounds from Lemmas
+  7.1 and 7.2 in the self-similar blowup paper.
+- [`CGLParams.jl`](src/CGLParams.jl) - Defines the type `CGLParams` that
+  is used for storing the parameters that are held fixed throughout the
   computations, that is $d$, $\omega$, $\sigma$ and $\delta$. It also
   contains code to generate the initial guesses for the NLS equation.
-- `refine_approximation.jl` - Contains the code for non-rigorous
-  refinement of initial approximations of zeros for the function $G$.
-- `G_solve.jl` - Functions for computing roots of $G$ with the help of
-  functions from `verify_and_refine_root.jl`.
-- `G_hat_solve.jl` - Functions for computing roots of $\hat{G}$ with
-  the help of functions from `verify_and_refine_root.jl`.
-- `eigenvalues_finite_difference.jl` - Implementation of a finite
-  difference method for the operator $L_{\hat{Q}}$ to compute initial
-  approximations of eigenvalues.
-- `src/CGLBranch.jl` - Contains the
+- [`refine_approximation.jl`](src/refine_approximation.jl) - Contains
+  the code for non-rigorous refinement of initial approximations of
+  zeros for the function $G$.
+- [`G_solve.jl`](src/G_solve.jl) - Functions for computing roots of $G$
+  with the help of functions from `verify_and_refine_root.jl`.
+- [`G_hat_solve.jl`](src/G_hat_solve.jl) - Functions for computing roots
+  of $\hat{G}$ with the help of functions from
+  `verify_and_refine_root.jl`.
+- [`eigenvalues_finite_difference.jl`](src/eigenvalues_finite_difference.jl) -
+  Implementation of a finite difference method for the operator
+  $L_{\hat{Q}}$ to compute initial approximations of eigenvalues.
+- [`CGLBranch.jl`](src/CGLBranch/CGLBranch.jl) - Contains the
   [BifurcationKit.jl](https://github.com/bifurcationkit/BifurcationKit.jl)
   code used for computing numerical approximations of the branches and
   is completely self-contained (it is implemented as a submodule). It
-  supports computing the branches using both $\epsilon$ and $\kappa$
-  as continuation parameters, as well as two different approaches for
+  supports computing the branches using both $\epsilon$ and $\kappa$ as
+  continuation parameters, as well as two different approaches for
   approximating $Q_\infty$.
