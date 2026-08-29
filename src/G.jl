@@ -140,7 +140,7 @@ function G_jacobian_epsilon(
         -imag(Q_inf_J[1, 2]),
         -real(Q_inf_J[2, 2]),
         -imag(Q_inf_J[2, 2]),
-        # Derivatives w.r.t κ
+        # Derivatives w.r.t ϵ
         real(Q_0_J[1, 2]) - real(Q_inf_J[1, 3]),
         imag(Q_0_J[1, 2]) - imag(Q_inf_J[1, 3]),
         real(Q_0_J[2, 2]) - real(Q_inf_J[2, 3]),
