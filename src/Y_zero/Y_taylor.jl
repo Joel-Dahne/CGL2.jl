@@ -1,5 +1,5 @@
 """
-    _Y_zero_taylor_remainder_check_conditions(M, N, C, r, a_hat, b_hat, Y1, Y2, κ, ϵ, Λ)
+    _Y_zero_taylor_remainder_check_conditions(M, N, C, r, a_hat, b_hat, Y1, Y2, λ, κ, ϵ, Λ)
 
 Check that `M`,`N`, `C` and `r` satisfy the conditions of Lemma
 REF(lemma:tail-bound-Y).

@@ -1,14 +1,13 @@
 """
     _Y_zero_capd(
+        Q_hat_ξ₀::SVector{4,Arb},
         Y_ξ₀::SVector{4,Acb},
+        λ::Acb,
         κ::Arb,
+        ϵ::Arb,
         ξ₀::Arb,
         ξ₁::Arb,
         Λ::CGLParams{Arb};
-        output_jacobian::Union{Val{false},Val{true}} = Val(false),
-        wrt_epsilon::Bool = false,
-        include_parameter_derivatives::Union{Val{false},Val{true}} = Val(true),
-        output_curve::Union{Val{false},Val{true}} = Val(true),
         tol::Float64 = 1e-11,
     )
 
