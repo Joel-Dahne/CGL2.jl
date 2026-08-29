@@ -29,7 +29,7 @@ function C_R_Q_hat(
     (; d, σ) = Λ
 
     # Requirement of Lemma REF(lemma:Q-hat-leading-term)
-    # The requirements from Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    # The requirements from Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 

@@ -8,7 +8,7 @@ the function
 J_E(η) * abs(P(η))^2 * P(η)
 ```
 
-The approach is based on Lemma REF(lemma:integral-J_E-P). The lemma
+The approach is based on Lemma REF(lemma:I_E_infty-integral). The lemma
 reduces it to the integral with the integrand given by a product of
 asymptotic series with remainder terms. To enclose the integral we
 compute the coefficients in the series and bounds for the remainder

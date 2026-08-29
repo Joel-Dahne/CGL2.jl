@@ -15,7 +15,7 @@
     J_P_hat = CGL2.J_P_hat
     J_E_hat = CGL2.J_E_hat
 
-    # Test bounds from Lemma REF(lemma:P_hat-E_hat-bounds)
+    # Test bounds from Lemma REF(lemma:P-hat-E-hat-bounds)
     for ξ in [1, 1.01, 1.1, 2, 4, 8, 16, 32, 64] .* ξ₁
         ####
         ## P_hat
@@ -44,7 +44,7 @@
         @test abs(J_E_hat(ξ, κ, ϵ, Λ)) >= 0.95C.J_E_hat * ξ^(1 / σ - 1)
     end
 
-    # Test bounds from Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    # Test bounds from Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
     for ξ in [1, 2, 4] .* ξ₁
         # We compute an approximation of the integral using Q_hat =
         # ξ^(-1 / σ)

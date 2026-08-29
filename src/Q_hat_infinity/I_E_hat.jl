@@ -8,7 +8,7 @@ the function
 J_E_hat(η) * abs(P_hat(η))^2 * P_hat(η)
 ```
 
-The approach is based on Lemma REF(lemma:integral-J_E_hat-P_hat). The
+The approach is based on Lemma REF(lemma:integral-J_E-hat-P-hat). The
 lemma reduces it to the integral with the integrand given by a product
 of asymptotic series with remainder terms. To enclose the integral we
 compute the coefficients in the series and bounds for the remainder
@@ -84,7 +84,7 @@ end
     I_E_hat_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of `I_E_hat` based on Lemma
-REF(lemma:I_E_hat-enclosure).
+REF(lemma:I_E-hat-enclosure).
 """
 function I_E_hat_enclosure(
     γ₁::Acb,
@@ -100,7 +100,7 @@ function I_E_hat_enclosure(
     a, b, c = _abc(κ, ϵ, Λ)
     (; d, σ) = Λ
 
-    # Requirements of Lemma REF(lemma:I_E_hat-enclosure)
+    # Requirements of Lemma REF(lemma:I_E-hat-enclosure)
     # The requirements from Lemma REF(lemma:Q-hat-leading-term) are
     # checked internally by the function C_R_Q_hat.
     @assert isone(σ)
@@ -125,7 +125,7 @@ end
     I_E_hat_dγ₂_real_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of the derivative of `I_E_hat` with respect to
-`real(γ₂)`, based on Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
+`real(γ₂)`, based on Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds).
 """
 function I_E_hat_dγ₂_real_enclosure(
     γ₁::Acb,
@@ -138,7 +138,7 @@ function I_E_hat_dγ₂_real_enclosure(
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
 )
-    # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds)
+    # Requirements of Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds)
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 
@@ -155,7 +155,7 @@ end
     I_E_hat_dγ₂_imag_enclosure(γ₁, γ₂, κ, ϵ, ξ₁, Λ, F, C, norms)
 
 Compute an enclosure of the derivative of `I_E_hat` with respect to
-`real(γ₂)`, based on Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds).
+`real(γ₂)`, based on Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds).
 """
 function I_E_hat_dγ₂_imag_enclosure(
     γ₁::Acb,
@@ -168,7 +168,7 @@ function I_E_hat_dγ₂_imag_enclosure(
     C::FunctionBounds_hat,
     norms::NormBounds_hat,
 )
-    # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-dgamma-bounds)
+    # Requirements of Lemma REF(lemma:I_E-hat-I_P-hat-dgamma-bounds)
     # are checked in the computation of `C`, where the associated
     # constants are computed.
 

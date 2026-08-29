@@ -6,8 +6,8 @@ that are needed in the enclosure of `Q_hat` at infinity.
 
 More precisely it contains the bounds from
 
-- Lemma REF(lemma:P_hat-E_hat-bounds)
-- Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+- Lemma REF(lemma:P-hat-E-hat-bounds)
+- Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
 - Lemma REF(lemma:fixed-point-bounds)
 
 It checks all the conditions on the parameters that these lemmas
@@ -16,12 +16,12 @@ error. When using this struct the bounds can therefore safely be
 assume to hold.
 """
 struct FunctionBounds_hat
-    # Lemma REF(lemma:P_hat-E_hat-bounds)
+    # Lemma REF(lemma:P-hat-E-hat-bounds)
     P_hat::Arb
     E_hat::Arb
     J_P_hat::Arb
     J_E_hat::Arb
-    # Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    # Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
     I_E_hat::Arb
     I_P_hat::Arb
     # Lemma REF(lemma:fixed-point-bounds)
@@ -42,17 +42,17 @@ function FunctionBounds_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb})
     (; d, σ) = Λ
     a, b, c = _abc(κ, ϵ, Λ)
 
-    # Requirement of Lemma REF(lemma:P_hat-E_hat-bounds)
+    # Requirement of Lemma REF(lemma:P-hat-E-hat-bounds)
     @assert ξ₁ > 1
 
-    # Requirements of Lemma REF(lemma:I_E_hat-I_P_hat-bounds)
+    # Requirements of Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
     @assert ξ₁ > 1
     @assert real(c) > 0
     @assert -2 / σ + d - 4 < 0
     @assert 2real(c) + (-2 / σ + d - 4) * ξ₁^-2 > 0
 
     # Requirements of Lemma REF(lemma:Q-hat-fixed-point-bounds) are
-    # the same as for Lemma REF(lemma:I_E_hat-I_P_hat-bounds) plus the
+    # the same as for Lemma REF(lemma:I_E-hat-I_P-hat-bounds) plus the
     # following one
     @assert 2 / σ - d < 0
 
