@@ -71,7 +71,7 @@ function FunctionBounds_Y(
     κ::Arb,
     ϵ::Arb,
     ξ₁::Arb,
-    Λ::CGLParams{Arb};
+    Λ::CGLParams{Arb},
 )
     (; d, σ, δ) = Λ
     a, b, c = _abc(κ, ϵ, Λ)
@@ -98,8 +98,8 @@ function FunctionBounds_Y(
 
     C = FunctionBounds_Y()
 
-    CU = UBounds(a - λ, b, -c, ξ₁, include_da = true)
-    CU_conj = UBounds(conj(a) - λ, b, -conj(c), ξ₁, include_da = true)
+    CU = UBounds(a - λ, b, -c, ξ₁)
+    CU_conj = UBounds(conj(a) - λ, b, -conj(c), ξ₁)
 
     # Lemma REF(lemma:P_i_E_i-bounds)
 
