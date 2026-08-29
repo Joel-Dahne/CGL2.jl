@@ -77,7 +77,7 @@ function Q_hat_zero_jacobian_capd(
             if !(all(isfinite, Q_hat_ξ₀) && all(isfinite, J_ξ₀))
                 iterations = 0
                 while !(all(isfinite, Q_hat_ξ₀) && all(isfinite, J_ξ₀)) &&
-                          iterations < 5
+                    iterations < 5
                     iterations += 1
                     ξ₀ /= 2
                     Q_hat_ξ₀, J_ξ₀ =
