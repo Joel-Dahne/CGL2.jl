@@ -61,7 +61,7 @@ allow you to run the proof.
 
 ## Notes about implementation
 
-The code in this repository is spread out over four directories:
+The code in this repository is spread out over three directories:
 
 1. `src/` - This directory contains the vast majority of the code.
    More information about it is given below.
