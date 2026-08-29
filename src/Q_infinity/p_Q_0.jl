@@ -88,6 +88,11 @@ function I_E_infty_enclosure(γ::Acb, κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParam
     a, b, c = _abc(κ, ϵ, Λ)
     (; σ) = Λ
 
+    # Requirement of Lemma REF(lemma:I_E_infty). The requirements of
+    # the bounds it makes use of are checked by FunctionBounds,
+    # IBounds and NormBounds.
+    @assert isone(σ)
+
     v = Arb(0) # v is zero in the entire section
     CU = UBounds(a, b, c, ξ₁)
     C = FunctionBounds(κ, ϵ, ξ₁, Λ, CU)
