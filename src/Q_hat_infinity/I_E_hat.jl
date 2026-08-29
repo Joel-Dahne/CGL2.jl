@@ -35,8 +35,8 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}
         rising(b - a, k) * rising(-a + 1, k) / (factorial(k) * (-c)^k)
     end
 
-    C_R_U = CGL2.C_R_U(n, a, b, -c * ξ₁^2)
-    C_R_U_bma = CGL2.C_R_U(n, b - a, b, c * ξ₁^2)
+    C_R_U_c_n = C_R_U(n, a, b, -c * ξ₁^2) * abs(c)^-n
+    C_R_U_bma_c_n = C_R_U(n, b - a, b, c * ξ₁^2) * abs(c)^-n
 
     for i_1 = 0:n
         for i_2 = 0:n
@@ -50,10 +50,10 @@ function integral_J_E_hat_P_hat(κ::Arb, ϵ::Arb, ξ₁::Arb, Λ::CGLParams{Arb}
                         # term. We only bound the absolute value of
                         # the integral.
                         coefficient = Arb(1)
-                        coefficient *= i_1 == n ? C_R_U_bma : abs(p_U_bma[i_1+1])
-                        coefficient *= i_2 == n ? C_R_U : abs(p_U[i_2+1])
-                        coefficient *= i_3 == n ? C_R_U : abs(p_U[i_3+1])
-                        coefficient *= i_4 == n ? C_R_U : abs(p_U[i_4+1])
+                        coefficient *= i_1 == n ? C_R_U_bma_c_n : abs(p_U_bma[i_1+1])
+                        coefficient *= i_2 == n ? C_R_U_c_n : abs(p_U[i_2+1])
+                        coefficient *= i_3 == n ? C_R_U_c_n : abs(p_U[i_3+1])
+                        coefficient *= i_4 == n ? C_R_U_c_n : abs(p_U[i_4+1])
 
                         term_bound = coefficient * ξ₁^exponent / abs(exponent)
 
