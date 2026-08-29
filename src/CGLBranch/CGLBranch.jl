@@ -167,6 +167,14 @@ function system_d3_σ1_δ0(u, (κ, ϵ, ω, Λ), ξ)
         if !iszero(ξ)
             F1 -= 2(α + ϵ * β) / ξ
             F2 -= 2(β - ϵ * α) / ξ
+        else
+            # Removable singularity at ξ = 0. Since α = β = 0 we have
+            # α / ξ → a'' and β / ξ → b'' as ξ → 0, so that the two
+            # terms above converge to 2 * F1 and 2 * F2 respectively.
+            # Solving for F1 and F2 shows that this amounts to
+            # dividing them by 3.
+            F1 /= 3
+            F2 /= 3
         end
 
         return SVector(α, β, (F1 - ϵ * F2) / (1 + ϵ^2), (ϵ * F1 + F2) / (1 + ϵ^2))
@@ -186,6 +194,14 @@ function system(u, (κ, ϵ, ω, Λ), ξ)
         if !iszero(ξ)
             F1 -= (d - 1) / ξ * (α + ϵ * β)
             F2 -= (d - 1) / ξ * (β - ϵ * α)
+        elseif !isone(d)
+            # Removable singularity at ξ = 0. Since α = β = 0 we have
+            # α / ξ → a'' and β / ξ → b'' as ξ → 0, so that the two
+            # terms above converge to (d - 1) * F1 and (d - 1) * F2
+            # respectively. Solving for F1 and F2 shows that this
+            # amounts to dividing them by d.
+            F1 /= d
+            F2 /= d
         end
 
         return SVector(α, β, (F1 - ϵ * F2) / (1 + ϵ^2), (ϵ * F1 + F2) / (1 + ϵ^2))
