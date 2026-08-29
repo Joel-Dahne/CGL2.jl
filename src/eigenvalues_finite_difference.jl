@@ -42,7 +42,7 @@ function eigenvalues_finite_difference(
     Xn = Diagonal([@SMatrix[ξ 0; 0 ξ] for ξ in ξs])
 
     J_Nn =
-        map(Qs, ξs) do Q, ξ
+        map(Qs) do Q
             a, b, _, _ = Q
             N₁_a = -(a^2 + b^2)^(σ - 1) * (δ * (1 + 2σ) * a^2 + 2σ * a * b + δ * b^2)
             N₁_b = -(a^2 + b^2)^(σ - 1) * (a^2 + 2δ * σ * a * b + (1 + 2σ) * b^2)
@@ -74,10 +74,10 @@ function eigenvalues_finite_difference(
 
     # Compute eigenvalues
     v0 = ones(size(L, 1)) # Fix v0 to give reproducible results
-    Λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
+    λs, vs = Arpack.eigs(L, which = :SM; nev, v0)
 
     if return_L
-        return L, Λs, vs
+        return L, λs, vs
     end
-    return Λs, vs
+    return λs, vs
 end
