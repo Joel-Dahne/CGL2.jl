@@ -30,7 +30,8 @@ The equation has a scaling symmetry for `scaling > 0`. This return the
 scaled parameters.
 
 The version taking only `μ`, `γ` and `κ` is useful for scaling back
-the output of [`G_solve`](@ref).
+the output of [`G_solve_fix_epsilon`](@ref) and
+[`G_solve_fix_kappa`](@ref).
 """
 function scale_params(μ, γ, κ, ϵ, ξ₁, Λ::CGLParams; scaling)
     μ_scaled, γ_scaled, κ_scaled = scale_params(μ, γ, κ, Λ; scaling)

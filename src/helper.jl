@@ -52,12 +52,10 @@ _complex(::Type{T}) where {T<:Real} = complex(T)
 _complex(::Type{Arb}) = Acb
 
 """
-    args_to_complex(μ, γ_real, γ_imag, κ_or_ϵ)
+    _args_to_complex(μ, γ_real, γ_imag, κ_or_ϵ)
 
 Helper function to covert from real to complex representation of `γ`.
 It returns `μ, γ, κ_or_ϵ` where `γ = γ_real + im * γ_imag`.
-
-See also [`args_to_real(μ, γ, κ_or_ϵ)`](@ref) for the inverse.
 """
 function _args_to_complex(μ::T, γ_real::T, γ_imag::T, κ_or_ϵ::T) where {T<:Real}
     return μ, _complex(γ_real, γ_imag), κ_or_ϵ
