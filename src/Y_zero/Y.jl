@@ -30,9 +30,9 @@ function Y_zero(
     Λ::CGLParams{Float64};
     tol::Float64 = 1e-11,
 )
-    Q_hat = CGL2.Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ)
+    Q_hat = Q_hat_zero_float_curve(real(ν), imag(ν), κ, ϵ, ξ₁, Λ; tol)
 
-    return Y_zero(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ)
+    return Y_zero(Y₀, λ, κ, ϵ, ξ₁, Q_hat, Λ; tol)
 end
 
 function Y_zero(
