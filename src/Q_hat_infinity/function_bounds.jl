@@ -8,7 +8,7 @@ More precisely it contains the bounds from
 
 - Lemma REF(lemma:P-hat-E-hat-bounds)
 - Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
-- Lemma REF(lemma:fixed-point-bounds)
+- Lemma REF(lemma:Q-hat-fixed-point-bounds)
 
 It checks all the conditions on the parameters that these lemmas
 assume. If any of these conditions are not satisfied it will throw an
@@ -24,7 +24,7 @@ struct FunctionBounds_hat
     # Lemma REF(lemma:I_E-hat-I_P-hat-bounds)
     I_E_hat::Arb
     I_P_hat::Arb
-    # Lemma REF(lemma:fixed-point-bounds)
+    # Lemma REF(lemma:Q-hat-fixed-point-bounds)
     T_hat::Arb
 
     FunctionBounds_hat() = new(
