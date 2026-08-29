@@ -46,21 +46,21 @@ cgl_linearization_equation(u, (λ, κ, ϵ, Q_hat, Λ), ξ) =
     cgl_linearization_equation(u, λ, κ, ϵ, ξ, Q_hat, Λ)
 
 """
-    _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, ξ₀, Λ; degree)
+    _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, Λ; degree)
 
 Compute a Taylor expansion of the term `J_N` in the equation for the
-linear equation. It is done by computing the Taylor expansions of the
-forward solution `Q_hat` and putting together `J_N` from this.
+linear equation. The expansion is centered at the point `ξ = 0`. It is
+done by computing the Taylor expansions of the forward solution
+`Q_hat` and putting together `J_N` from this.
 """
 function _cgl_linearization_equation_taylor_J_N_taylor(
     ν::Acb,
     κ::Arb,
     ϵ::Arb,
-    ξ₀::Arb,
     Λ::CGLParams{Arb};
     degree::Integer = 5,
 )
-    (; d, ω, σ, δ) = Λ
+    (; σ, δ) = Λ
 
     # Compute expansion for Q_hat.
     # We use the fact that the equation is identical to the one for Q,
@@ -69,7 +69,7 @@ function _cgl_linearization_equation_taylor_J_N_taylor(
         SVector{2,NTuple{2,Arb}}((real(ν), 0), (imag(ν), 0)),
         -κ,
         ϵ,
-        zero(ξ₀),
+        Arb(0),
         CGLParams(Λ, ω = -Λ.ω);
         degree,
     )
@@ -108,10 +108,15 @@ function cgl_linearization_equation_taylor(
 )
     (; d, ω, σ, δ) = Λ
 
+    # The recursion only computes the coefficients of even order, the
+    # odd order ones are all zero. This requires the first order
+    # coefficients to be zero.
+    @assert iszero(Y_0[1][2]) && iszero(Y_0[2][2])
+
     Y1 = AcbSeries(Y_0[1]; degree)
     Y2 = AcbSeries(Y_0[2]; degree)
 
-    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, Arb(0), Λ; degree)
+    J_N = _cgl_linearization_equation_taylor_J_N_taylor(ν, κ, ϵ, Λ; degree)
 
     for n = 0:2:(degree-2)
         v = J_N * SVector(AcbSeries(Y1, degree = n + 1), AcbSeries(Y2, degree = n + 1))
