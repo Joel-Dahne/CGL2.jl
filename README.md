@@ -6,17 +6,22 @@ Ginzburg-Landau equation](TODO).
 
 The results of the paper are presented in two different
 [Pluto.jl](https://plutojl.org/) notebooks, found in the
-[`proof`](proof) directory. These notebooks are responsible for
-generating all the numbers and figures that appear in the paper. It is
-possible to view the results of notebooks without running any code by
-opening the corresponding html-files found in the [`proof`](proof)
-directory, they can be opened in any browser such as Firefox. The two
-notebooks are:
+[`notebooks`](notebooks) directory. These notebooks are responsible
+for generating all the numbers and figures that appear in the paper.
+It is possible to view the results of notebooks without running any
+code by opening the corresponding html-files found in the
+[`notebooks`](notebooks) directory; they can be opened in any browser
+such as Firefox. The two notebooks are:
 
-- [unstable-eigenvalue.jl](proof/unstable-eigenvalue.jl) - Contains
-  the proof of Theorems 4.1, 4.2 and 4.3, corresponding to the
-  existence of a backward self-similar solution, an associated forward
-  self-similar solution and an unstable eigenvalue.
+- [unstable-eigenvalue.jl](notebooks/unstable-eigenvalue.jl) -
+  Contains the proof of Theorems 4.1, 4.2 and 4.3, corresponding to
+  the existence of a backward self-similar solution, an associated
+  forward self-similar solution and an unstable eigenvalue.
+- [branch.jl](notebooks/branch.jl) - Produces numerical
+  approximations of the eigenvalue with the largest real part along
+  the first branch of backward self-similar solutions. It is not part
+  of any proof; it only generates the figures showing the expected
+  behavior of the eigenvalue along the branch.
 
 ## Reproducing the proofs
 
@@ -56,8 +61,8 @@ Pluto.run()
 ```
 
 which should open a Pluto tab in your browser. Now you can open the
-notebooks inside the `proof` directory through this and it should
-allow you to run the proof.
+notebooks inside the `notebooks` directory through this and it
+should allow you to run the proof.
 
 ## Notes about implementation
 
@@ -68,8 +73,8 @@ The code in this repository is spread out over three directories:
 2. `CAPD/src/` - This directory contains the CAPD code, more
    information about it is found in
    [`CAPD/README.md`](CAPD/README.md).
-3. `proof/` - This directory contains the notebooks producing the
-   final proofs.
+3. `notebooks/` - This directory contains the notebooks producing
+   the final proofs and figures.
 
 The implementation is based on the code from
 [CGL.jl](https://github.com/Joel-Dahne/CGL.jl), the repository with
