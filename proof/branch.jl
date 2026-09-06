@@ -38,9 +38,9 @@ end
 md"""
 # Eigenvalue along the branch
 
-This notebook produces the numerical approximations of the eigenvalue with largest real part along the first branch of backward self-similar solutions.
+This notebook produces numerical approximations of the eigenvalue with the largest real part along the first branch of backward self-similar solutions.
 
-This notebook is not part of any proof, it only generates figures showing the expected behavior along the branch.
+This notebook is not part of any proof; it only generates figures showing the expected behavior along the branch.
 """
 
 # ╔═╡ 22b3dba2-7578-4cf8-ac1d-7df3f87705d5
@@ -79,7 +79,7 @@ indices = 90:10:1900
 
 # ╔═╡ 463c1a2e-dc8a-4f18-ade1-b1e105b0b5f2
 md"""
-Find the index that is closest to the $\epsilon$ used in the computer-assisted proof. Since the branch turns there are two points on it for every $\epsilon$. We are look for the one in the top part.
+Find the index whose ``\epsilon`` value is closest to the one used in the computer-assisted proof. Since the branch turns, there are two points on it for every ``\epsilon``. We are looking for the one in the top part.
 """
 
 # ╔═╡ 7c53470f-f1f3-4f2e-bc21-2e198afc6c57
@@ -98,7 +98,7 @@ end[2]
 
 # ╔═╡ bb3ef1b7-bb82-4fe3-ad80-8d58b82ab4a1
 md"""
-Compute parameters for the backward self-similar solution along branch.
+Compute parameters for the backward self-similar solution along the branch.
 """
 
 # ╔═╡ 109f3448-d71d-4690-88c7-7cc705e217f8
@@ -110,7 +110,7 @@ end
 
 # ╔═╡ 77325ef0-2839-4346-af9d-b9334a903689
 md"""
-Compute parameters for the forward self-similar solution along branch.
+Compute parameters for the forward self-similar solution along the branch.
 """
 
 # ╔═╡ a4d66ee2-b2b0-4883-8d4e-eaa6f93ecf6f
@@ -125,7 +125,7 @@ end
 
 # ╔═╡ 1ca879d0-9961-4d6e-a1d2-2979086e1fcc
 md"""
-Compute eigenvalues along branch.
+Compute eigenvalues along the branch.
 """
 
 # ╔═╡ 5088ce66-01cf-4507-999d-128515a09943
@@ -137,17 +137,17 @@ end
 
 # ╔═╡ 3abd8f47-7b3c-4e80-af15-51952088165f
 md"""
-Extract the eigenvalues with largest real part for each point along the branch.
+For each point along the branch, extract the eigenvalue ``\lambda`` with the largest real part. Since the eigenvalues come in complex conjugate pairs, we may restrict to those with non-negative imaginary part.
 """
 
 # ╔═╡ f2f3f28e-f41a-4370-a231-e0ac45cbef62
-unstable_λs = map(all_λs) do λs
-    maximum(real, filter(λ -> imag(λ) > 0, λs))
+max_real_λs = map(all_λs) do λs
+    maximum(real, filter(λ -> imag(λ) >= 0, λs))
 end
 
 # ╔═╡ cdefc68a-5e48-46e7-a2ae-ab661dff72d5
 md"""
-Plot the branch in $\epsilon$-$\kappa$ space. The part where the real part of the eigenvalue with largest real part is positive is drawn in red and where it is negative is drawn in blue. The part of the branch where we do not compute eigenvalues is dotted.
+Plot the branch in ``\epsilon``-``\kappa`` space. The segment where the real part of ``\lambda`` is positive is drawn in red, and the segment where it is negative in blue. The part of the branch where we do not compute eigenvalues is dotted. The black dot marks the point used in the computer-assisted proof.
 """
 
 # ╔═╡ 2469c5ed-0ac1-44dc-860f-f9c8a51a4da2
@@ -171,7 +171,7 @@ let
         ax,
         branch.param[indices],
         branch.κ[indices],
-        color = ifelse.(unstable_λs .> 0, :red, :blue),
+        color = ifelse.(max_real_λs .> 0, :red, :blue),
         linewidth = 3,
     )
 
@@ -183,15 +183,15 @@ end
 
 # ╔═╡ 1b543107-9f2a-43c7-98bd-84f29d8f17f0
 md"""
-Plot the real part of the eigenvalue with largest real part as a function of $\kappa$.
+Plot the real part of the eigenvalue with the largest real part as a function of ``\kappa``. The black dot marks the point used in the computer-assisted proof.
 """
 
 # ╔═╡ 3471e9ed-3a36-4d28-a43b-307a3f6f404c
 let
     fig = Figure(; fontsize)
     ax = Axis(fig[1, 1], xlabel = L"\kappa", ylabel = L"\mathrm{Re}(\lambda)")
-    lines!(ax, branch.κ[indices], unstable_λs, linewidth = 3)
-    scatter!(ax, branch.κ[indices[ϵ_index]], unstable_λs[ϵ_index], color = :black)
+    lines!(ax, branch.κ[indices], max_real_λs, linewidth = 3)
+    scatter!(ax, branch.κ[indices[ϵ_index]], max_real_λs[ϵ_index], color = :black)
     save_figures && save("figures/kappa-eigenvalue.pdf", fig)
     fig
 end

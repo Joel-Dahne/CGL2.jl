@@ -38,7 +38,7 @@ end
 md"""
 # Existence of an unstable eigenvalue
 
-This notebook contains the computer-assisted proof for the existence of an unstable eigenvalue of the linear operator $L_{\hat{Q}}$. The proof splits into three parts, corresponding to three separate theorems:
+This notebook contains the computer-assisted proof for the existence of an unstable eigenvalue of the linearized operator ``L_{\hat{Q}}``, obtained by linearizing around the forward self-similar solution ``\hat{Q}``. The proof splits into three parts, corresponding to three separate theorems:
 
 - Theorem 4.1: Existence of a backward self-similar solution
 - Theorem 4.2: Existence of a forward self-similar solution
@@ -62,7 +62,7 @@ fontsize = 25
 
 # ╔═╡ 028fd09c-055f-4fb1-9804-c7b3ea903245
 md"""
-Set the interval used for $\epsilon$. Note that the later code uses some hardcoded approximations, so just changing the value here will likely not work. The method is also relatively sensitive to changes in $\epsilon$, so even if the hardcoded approximations are adjust the full proof might not go through.
+Set the interval used for ``\epsilon``. Note that the code below uses some hardcoded approximations, so just changing the value here will likely not work. The method is also relatively sensitive to changes in ``\epsilon``, so even if the hardcoded approximations are adjusted, the full proof might not go through.
 """
 
 # ╔═╡ da71a660-d085-42c6-851a-e7d28f472574
@@ -70,7 +70,7 @@ Set the interval used for $\epsilon$. Note that the later code uses some hardcod
 
 # ╔═╡ 8dd23fe5-66f4-48b0-b3d1-f4126d724006
 md"""
-Point at which the solution at zero and the solution at infinity is matched.
+Point at which the solutions at zero and at infinity are matched.
 """
 
 # ╔═╡ 06b5e1d2-e5f2-4e1d-ad61-d086dc37dcd2
@@ -184,7 +184,7 @@ end
 md"""
 ## Theorem 4.2: Existence of a forward self-similar solution
 
-Next we prove the existance of a forward self-similar solution with the same asymptotic behavior as the above backward self-similar solution. The first step is to determine the parameter ``\gamma_1`` such that the forward solution has the right asymptotic behavior.
+Next we prove the existence of a forward self-similar solution with the same asymptotic behavior as the above backward self-similar solution. The first step is to determine the parameter ``\gamma_1`` such that the forward solution has the right asymptotic behavior.
 """
 
 # ╔═╡ b4049ea0-ee9f-409c-b2e3-2fdbabe1b8a9
@@ -363,11 +363,13 @@ end
 
 # ╔═╡ 03513e93-3fda-4e9a-b02d-1ed1552811f6
 md"""
-To prove analyticity of $H(\lambda)$ on the square that the contour encloses we need to verify analyticity of $Y_{\infty,1}$, $Y_{\infty,2}$, $Y_{\infty,1}'$ and $Y_{\infty,2}'$. As discussed in the paper it suffices to verify the inequality
+To prove analyticity of ``H(\lambda)`` on the square that the contour encloses we need to verify analyticity of ``Y_{\infty,1}``, ``Y_{\infty,2}``, ``Y_{\infty,1}'`` and ``Y_{\infty,2}'``. As discussed in the paper it suffices to verify the inequality
 
-$$C_{T_{12}}\xi_1^{-2} < 1.$$
+```math
+C_{T_{12}}\xi_1^{-2} < 1.
+```
 
-To this end we compute an enclosure of $C_{T_{12}}$.
+To this end we compute an enclosure of ``C_{T_{12}}``.
 """
 
 # ╔═╡ e74f260e-bd94-4d4f-80e7-dc2c9642c735
