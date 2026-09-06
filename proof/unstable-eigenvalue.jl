@@ -37,6 +37,12 @@ end
 # ╔═╡ 8e9f1365-8c0e-41cd-b094-663a3760c0d1
 md"""
 # Existence of an unstable eigenvalue
+
+This notebook contains the computer-assisted proof for the existence of an unstable eigenvalue of the linear operator $L_{\hat{Q}}$. The proof splits into three parts, corresponding to three separate theorems:
+
+- Theorem 4.1: Existence of a backward self-similar solution
+- Theorem 4.2: Existence of a forward self-similar solution
+- Theorem 4.3: Existence of an unstable eigenvalue
 """
 
 # ╔═╡ baa97573-bc3e-433b-88f1-a7c0a826d27a
@@ -49,13 +55,23 @@ Check this box to set the code to save the figures.
 """
 
 # ╔═╡ 92972793-3445-428e-9ffb-3d52dc62e050
-fontsize = 22
+fontsize = 25
 
 # ╔═╡ ad65706c-75ec-4ddb-9d1b-571fbe4998d1
 Λ = CGLParams{Arb}(3, 1, 1, 0)
 
+# ╔═╡ 028fd09c-055f-4fb1-9804-c7b3ea903245
+md"""
+Set the interval used for $\epsilon$. Note that the later code uses some hardcoded approximations, so just changing the value here will likely not work. The method is also relatively sensitive to changes in $\epsilon$, so even if the hardcoded approximations are adjust the full proof might not go through.
+"""
+
 # ╔═╡ da71a660-d085-42c6-851a-e7d28f472574
-ϵ = Arb("0.1681")
+ϵ = Arb("[0.1681 +/- 1e-20]")
+
+# ╔═╡ 8dd23fe5-66f4-48b0-b3d1-f4126d724006
+md"""
+Point at which the solution at zero and the solution at infinity is matched.
+"""
 
 # ╔═╡ 06b5e1d2-e5f2-4e1d-ad61-d086dc37dcd2
 ξ₁ = Arb(16)
@@ -568,7 +584,9 @@ end
 # ╟─abc2a340-ab72-4340-838c-bfff029ddd77
 # ╠═92972793-3445-428e-9ffb-3d52dc62e050
 # ╠═ad65706c-75ec-4ddb-9d1b-571fbe4998d1
+# ╟─028fd09c-055f-4fb1-9804-c7b3ea903245
 # ╠═da71a660-d085-42c6-851a-e7d28f472574
+# ╟─8dd23fe5-66f4-48b0-b3d1-f4126d724006
 # ╠═06b5e1d2-e5f2-4e1d-ad61-d086dc37dcd2
 # ╟─fbbaad41-c446-4c0c-8caa-8137713394b9
 # ╟─6a2cd7c8-2760-42a2-a7d1-5dc89550cdd5
