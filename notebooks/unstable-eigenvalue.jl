@@ -66,7 +66,7 @@ Set the interval used for ``\epsilon``. Note that the code below uses some hardc
 """
 
 # ╔═╡ da71a660-d085-42c6-851a-e7d28f472574
-ϵ = Arb("[0.1681 +/- 1e-20]")
+ϵ = Arb("[0.1681 +/- 1e-15]")
 
 # ╔═╡ 8dd23fe5-66f4-48b0-b3d1-f4126d724006
 md"""
