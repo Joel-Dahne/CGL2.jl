@@ -1,6 +1,6 @@
 name = "CGL2"
 uuid = "0e9dd3b1-9aac-4165-954d-8319b87fc115"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Joel Dahne <joel@dahne.eu>"]
 
 [workspace]
