@@ -2,7 +2,7 @@
 
 This repository contains the code for the computer-assisted parts of
 the proofs for the paper [Non-uniqueness for the complex
-Ginzburg-Landau equation](TODO).
+Ginzburg-Landau equation](https://doi.org/10.48550/arXiv.2609.08985).
 
 The results of the paper are presented in two different
 [Pluto.jl](https://plutojl.org/) notebooks, found in the
